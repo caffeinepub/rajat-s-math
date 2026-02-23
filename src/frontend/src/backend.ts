@@ -107,6 +107,7 @@ export interface MathProblem {
     question: string;
     difficulty: bigint;
     correctAnswer: bigint;
+    solution: string;
 }
 export interface http_header {
     value: string;
@@ -193,9 +194,11 @@ export interface backendInterface {
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getUserSubmissions(user: Principal): Promise<Array<Submission>>;
+    hasPaidWithUPI(user: Principal): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
     purchaseCourse(): Promise<void>;
+    recordUPIPaymentSuccessful(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
@@ -372,6 +375,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async hasPaidWithUPI(arg0: Principal): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.hasPaidWithUPI(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.hasPaidWithUPI(arg0);
+            return result;
+        }
+    }
     async isCallerAdmin(): Promise<boolean> {
         if (this.processError) {
             try {
@@ -411,6 +428,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.purchaseCourse();
+            return result;
+        }
+    }
+    async recordUPIPaymentSuccessful(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.recordUPIPaymentSuccessful();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.recordUPIPaymentSuccessful();
             return result;
         }
     }
@@ -528,19 +559,22 @@ function from_candid_record_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint
     question: string;
     difficulty: bigint;
     correctAnswer: bigint;
+    solution: string;
 }): {
     id: bigint;
     topic: Topic;
     question: string;
     difficulty: bigint;
     correctAnswer: bigint;
+    solution: string;
 } {
     return {
         id: value.id,
         topic: from_candid_Topic_n10(_uploadFile, _downloadFile, value.topic),
         question: value.question,
         difficulty: value.difficulty,
-        correctAnswer: value.correctAnswer
+        correctAnswer: value.correctAnswer,
+        solution: value.solution
     };
 }
 function from_candid_variant_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -617,19 +651,22 @@ function to_candid_record_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
     question: string;
     difficulty: bigint;
     correctAnswer: bigint;
+    solution: string;
 }): {
     id: bigint;
     topic: _Topic;
     question: string;
     difficulty: bigint;
     correctAnswer: bigint;
+    solution: string;
 } {
     return {
         id: value.id,
         topic: to_candid_Topic_n3(_uploadFile, _downloadFile, value.topic),
         question: value.question,
         difficulty: value.difficulty,
-        correctAnswer: value.correctAnswer
+        correctAnswer: value.correctAnswer,
+        solution: value.solution
     };
 }
 function to_candid_variant_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Topic): {

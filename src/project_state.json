@@ -1,11 +1,22 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "An app for JEE students focused on thinking-based mathematics and creative math skills by Rajat's equation",
-  "architectural_notes": [],
+  "projectStateVersion": 25,
+  "summary": "A comprehensive math enthusiast platform and edtech website offering thinking-based mathematics and creative problem-solving using Rajat's equation, designed for learners at all levels. Platform focuses on marketing and enrollment with services display, persuasive payment section, and professional edtech design without interactive problem-solving features.",
+  "architectural_notes": [
+    "Payment system should integrate with UPI (9424135055@ptyes) and track payment records without public price display",
+    "Services offered: IOQM prep, NMTC prep, thinking-based math for any standard, bridge course for JEE, JEE full course for mathematics, 'How to think in math' for struggling students",
+    "Contact integration: WhatsApp (9424135055), YouTube channel (UCR9lkyJ3JIhlSx3_e06DTEw)",
+    "LinkedIn profile integration: https://www.linkedin.com/in/rajat-kumar-jain-460090233/",
+    "Platform repositioned as general math enthusiast edtech site, not JEE-specific",
+    "Services renamed: 'Bridge Course for JEE' → 'Mathematical Foundations Course', 'JEE Full Course' → 'Comprehensive Mathematics Program'",
+    "Platform repositioned as edtech marketing and enrollment website (not interactive learning tool)",
+    "ProblemGenerator and ProgressTracker components removed from UI",
+    "CourseOffering component hidden from visible interface",
+    "New persuasive payment section replaces CourseOffering for enrollment"
+  ],
   "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- App icon with mathematical symbols and warm earth-tone colors suitable for PWA, square format (app-icon-192.dim_192x192.png)\n- Larger app icon with mathematical symbols and warm earth-tone colors for high-DPI displays, square format (app-icon-512.dim_512x512.png)",
+  "isFixRequest": true,
+  "imageRequirements": "## Required Images\n- Professional Rajat's Equation logo featuring a mathematical square root symbol (√) elegantly integrated into the letter 'R', with 'THE' in serif typography above and 'RAJAT'S EQUATION' in clean serif typography below, using dark navy blue color on light cream background (rajats-equation-logo.dim_250x200.png)",
   "existing_features": [
     {
       "id": "feature-create-a-landing-page-that-introduces-the-app-s-purpose-thinking-based-mathematics-and-creative-math-skills-development-using-rajat-s-equation",
@@ -174,6 +185,206 @@
         "REQ-27"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-problemgenerator-component-to-display-the-complete-step-by-step-solution-to-students-after-they-submit-their-answer-or-when-they-request-to-view-the-solution",
+      "title": "Update the ProblemGenerator component to display the complete step-by-step solution to students after they submit their answer or when they request to view the solution",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-courseoffering-component-to-remove-all-price-displays-2499-or-1500-and-replace-the-purchase-button-with-a-upi-payment-link-using-the-upi-id-9424135055-ptyes-formatted-as-upi-pay-pa-9424135055-ptyes-pn-rajat-27s-20equation",
+      "title": "Update the CourseOffering component to remove all price displays (₹2499 or ₹1500) and replace the purchase button with a UPI payment link using the UPI ID 9424135055@ptyes, formatted as upi://pay?pa=9424135055@ptyes&pn=Rajat%27s%20Equation",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-services-component-in-the-frontend-that-displays-all-offered-services-as-a-list-ioqm-prep-nmtc-prep-thinking-based-math-for-any-standard-bridge-course-for-jee-mathematics-jee-full-course-for-mathematics-and-how-to-think-in-math-for-students-facing-difficulty-in-mathematics",
+      "title": "Create a Services component in the frontend that displays all offered services as a list: 'IOQM Prep', 'NMTC Prep', 'Thinking-Based Math for Any Standard', 'Bridge Course for JEE (Mathematics)', 'JEE Full Course for Mathematics', and 'How to Think in Math - for students facing difficulty in mathematics'",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-whatsapp-contact-link-in-the-footer-or-courseoffering-component-that-redirects-to-whatsapp-chat-with-phone-number-9424135055-using-the-format-https-wa-me-919424135055",
+      "title": "Add a WhatsApp contact link in the Footer or CourseOffering component that redirects to WhatsApp chat with phone number 9424135055, using the format https://wa.me/919424135055",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-youtube-channel-link-in-the-footer-or-hero-component-that-redirects-to-https-www-youtube-com-channel-ucr9lkyj3jihlsx3-e06dtew-with-an-external-link-icon-or-button-labeled-youtube-channel-or-watch-on-youtube",
+      "title": "Add a YouTube channel link in the Footer or Hero component that redirects to https://www.youtube.com/channel/UCR9lkyJ3JIhlSx3_e06DTEw with an external link icon or button labeled 'YouTube Channel' or 'Watch on YouTube'",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-brand-name-throughout-the-application-from-jee-math-mastery-or-rajat-s-math-to-rajat-s-equation-to-match-the-uploaded-logo-including-the-hero-component-footer-component-pwa-manifest-and-page-title",
+      "title": "Update the brand name throughout the application from 'JEE Math Mastery' or 'Rajat's Math' to 'Rajat's Equation' to match the uploaded logo, including the Hero component, Footer component, PWA manifest, and page title",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-visual-styling-and-typography-throughout-the-application-to-match-the-uploaded-logo-s-aesthetic-use-a-clean-mathematical-style-with-the-square-root-symbol-integrated-into-the-r-as-shown-in-the-logo-maintain-serif-typography-for-the-text-and-ensure-the-dark-navy-blue-color-from-the-logo-is-incorporated-into-the-design-system",
+      "title": "Update the visual styling and typography throughout the application to match the uploaded logo's aesthetic: use a clean, mathematical style with the square root symbol (√) integrated into the 'R' as shown in the logo, maintain serif typography for 'THE' text, and ensure the dark navy blue color from the logo is incorporated into the design system",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-services-component-in-app-tsx-after-the-courseoffering-component-and-before-the-problemgenerator-making-the-services-list-visible-to-all-users",
+      "title": "Display the Services component in App.tsx after the CourseOffering component and before the ProblemGenerator, making the services list visible to all users",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-hero-component-to-remove-all-jee-specific-messaging-and-replace-it-with-welcoming-content-for-general-math-enthusiasts-emphasizing-mathematical-thinking-problem-solving-and-rajat-s-equation-for-all-learners-regardless-of-exam-focus",
+      "title": "Update the Hero component to remove all JEE-specific messaging and replace it with welcoming content for general math enthusiasts, emphasizing mathematical thinking, problem-solving, and Rajat's equation for all learners regardless of exam focus",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-problemgenerator-component-to-remove-jee-specific-difficulty-level-descriptions-jee-main-level-jee-advanced-level-and-replace-them-with-general-mathematical-difficulty-descriptions-suitable-for-all-math-enthusiasts",
+      "title": "Update the ProblemGenerator component to remove JEE-specific difficulty level descriptions ('JEE Main level', 'JEE Advanced level') and replace them with general mathematical difficulty descriptions suitable for all math enthusiasts",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-progresstracker-component-to-remove-jee-specific-language-and-reframe-progress-tracking-for-general-mathematical-learning-removing-any-references-to-jee-syllabus-jee-topics-or-exam-preparation",
+      "title": "Update the ProgressTracker component to remove JEE-specific language and reframe progress tracking for general mathematical learning, removing any references to 'JEE syllabus', 'JEE topics', or exam preparation",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-services-component-to-rename-bridge-course-for-jee-mathematics-to-mathematical-foundations-course-and-jee-full-course-for-mathematics-to-comprehensive-mathematics-program-keeping-all-other-services-unchanged",
+      "title": "Update the Services component to rename 'Bridge Course for JEE (Mathematics)' to 'Mathematical Foundations Course' and 'JEE Full Course for Mathematics' to 'Comprehensive Mathematics Program', keeping all other services unchanged",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-courseoffering-component-to-remove-all-jee-specific-language-from-the-course-title-description-and-benefits-reframing-it-as-a-comprehensive-mathematics-program-for-all-enthusiasts-while-maintaining-the-existing-upi-payment-integration",
+      "title": "Update the CourseOffering component to remove all JEE-specific language from the course title, description, and benefits, reframing it as a comprehensive mathematics program for all enthusiasts while maintaining the existing UPI payment integration",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-linkedin-social-media-link-in-the-footer-component-pointing-to-https-www-linkedin-com-in-rajat-kumar-jain-460090233-with-consistent-styling-matching-the-existing-whatsapp-and-youtube-links",
+      "title": "Add a LinkedIn social media link in the Footer component pointing to https://www.linkedin.com/in/rajat-kumar-jain-460090233/ with consistent styling matching the existing WhatsApp and YouTube links",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-index-html-page-title-from-rajat-s-equation-master-jee-mathematics-to-rajat-s-equation-master-mathematical-thinking-or-similar-general-mathematics-title-without-jee-reference",
+      "title": "Update frontend/index.html page title from 'Rajat's Equation - Master JEE Mathematics' to 'Rajat's Equation - Master Mathematical Thinking' or similar general mathematics title without JEE reference",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-public-manifest-json-pwa-app-name-and-description-from-jee-focused-to-general-mathematics-platform-changing-rajat-s-equation-jee-mathematics-to-rajat-s-equation-mathematics-platform-or-similar-general-positioning",
+      "title": "Update frontend/public/manifest.json PWA app name and description from JEE-focused to general mathematics platform, changing 'Rajat's Equation - JEE Mathematics' to 'Rajat's Equation - Mathematics Platform' or similar general positioning",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-problemgenerator-component-from-the-app-tsx-rendering-tree-and-delete-the-frontend-src-components-problemgenerator-tsx-file-entirely",
+      "title": "Remove the ProblemGenerator component from the App.tsx rendering tree and delete the frontend/src/components/ProblemGenerator.tsx file entirely",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-progresstracker-component-from-the-app-tsx-rendering-tree-and-delete-the-frontend-src-components-progresstracker-tsx-file-entirely",
+      "title": "Remove the ProgressTracker component from the App.tsx rendering tree and delete the frontend/src/components/ProgressTracker.tsx file entirely",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-hide-the-courseoffering-component-from-the-visible-ui-in-app-tsx-by-removing-it-from-the-render-tree-while-keeping-the-courseoffering-tsx-file-and-backend-payment-tracking-system-intact",
+      "title": "Hide the CourseOffering component from the visible UI in App.tsx by removing it from the render tree, while keeping the CourseOffering.tsx file and backend payment tracking system intact",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-new-enrollmentcta-component-in-frontend-src-components-with-persuasive-messaging-designed-to-convince-parents-and-students-to-purchase-including-compelling-benefits-testimonial-style-content-and-a-prominent-call-to-action-button-that-links-to-upi-pay-pa-9424135055-ptyes-pn-rajat-27s-20equation",
+      "title": "Create a new EnrollmentCTA component in frontend/src/components/ with persuasive messaging designed to convince parents and students to purchase, including compelling benefits, testimonial-style content, and a prominent call-to-action button that links to upi://pay?pa=9424135055@ptyes&pn=Rajat%27s%20Equation",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-render-the-new-enrollmentcta-component-in-app-tsx-after-the-services-component-making-it-the-primary-conversion-point-on-the-page",
+      "title": "Render the new EnrollmentCTA component in App.tsx after the Services component, making it the primary conversion point on the page",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-transform-the-entire-platform-ui-ux-into-a-professional-edtech-marketing-website-with-a-polished-modern-aesthetic-using-a-cohesive-design-system-that-conveys-trust-professionalism-and-educational-excellence-updating-hero-services-footer-and-the-new-enrollmentcta-components-with-improved-typography-hierarchy-spacing-visual-elements-and-professional-color-treatments-while-maintaining-the-existing-dark-navy-blue-brand-color-and-warm-earth-tone-palette",
+      "title": "Transform the entire platform UI/UX into a professional edtech marketing website with a polished, modern aesthetic using a cohesive design system that conveys trust, professionalism, and educational excellence, updating Hero, Services, Footer, and the new EnrollmentCTA components with improved typography hierarchy, spacing, visual elements, and professional color treatments while maintaining the existing dark navy blue brand color and warm earth tone palette",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-all-react-query-hooks-related-to-problem-generation-answer-validation-and-progress-tracking-from-frontend-src-hooks-usequeries-ts-including-usegetproblem-usevalidateanswer-usegetprogress-and-usegetusersubmissions-while-keeping-course-related-hooks-usegetcoursedetails-usepurchasecourse-and-user-profile-hooks-usegetuserprofile-usecreateuserprofile-intact",
+      "title": "Remove all React Query hooks related to problem generation, answer validation, and progress tracking from frontend/src/hooks/useQueries.ts, including useGetProblem, useValidateAnswer, useGetProgress, and useGetUserSubmissions, while keeping course-related hooks (useGetCourseDetails, usePurchaseCourse) and user profile hooks (useGetUserProfile, useCreateUserProfile) intact",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-the-rajat-s-equation-logo-image-from-the-uploaded-file-rajat-s-eqn-logo-1-jpeg-and-save-it-to-frontend-public-assets-generated-as-a-static-asset-with-appropriate-dimensions-for-hero-section-display-approximately-200-250px-wide-for-desktop-responsive-scaling-for-mobile",
+      "title": "Generate the Rajat's Equation logo image from the uploaded file (rajat's eqn logo -1.jpeg) and save it to frontend/public/assets/generated/ as a static asset with appropriate dimensions for Hero section display (approximately 200-250px wide for desktop, responsive scaling for mobile)",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-hero-component-frontend-src-components-hero-tsx-to-display-the-generated-rajat-s-equation-logo-image-at-the-top-of-the-hero-section-positioned-prominently-above-or-alongside-the-headline-with-proper-sizing-200-250px-wide-on-desktop-and-responsive-behavior-for-mobile-devices",
+      "title": "Update the Hero component (frontend/src/components/Hero.tsx) to display the generated Rajat's Equation logo image at the top of the Hero section, positioned prominently above or alongside the headline, with proper sizing (200-250px wide on desktop) and responsive behavior for mobile devices",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -252,6 +463,140 @@
     {
       "id": "AR-17",
       "summary": "Make the application downloadable and installable for Windows operating system",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Add pre-generated problems with complete solutions visible to students in the problem generator interface",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Create a comprehensive set of pre-generated JEE mathematics problems in the backend, covering all existing topics (calculus, algebra, coordinate geometry, trigonometry, vectors, probability) across all three difficulty levels (easy, medium, hard), with each problem including a complete step-by-step solution",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Update the backend generateProblem function to return pre-generated problems from the problem bank instead of dynamically generating them, ensuring the returned problem includes the complete solution text",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Add payment integration with UPI (9424135055@ptyes) for course purchases and track payment records in the backend without displaying price publicly",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Display the full list of services offered: IOQM prep, NMTC prep, thinking-based math for any standard, bridge course for JEE (mathematics), JEE full course for mathematics, and 'How to think in math' for students facing difficulty",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Add WhatsApp contact integration linking to phone number 9424135055",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Add YouTube channel link redirecting to https://www.youtube.com/channel/UCR9lkyJ3JIhlSx3_e06DTEw",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Update brand language and styling to match the provided logo design",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Remove price display from the CourseOffering component while maintaining payment tracking functionality",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Add a payment records system in the backend that tracks which users have completed payment via UPI without storing or displaying the payment amount, including fields for user principal, payment timestamp, payment method (UPI), and payment confirmation status",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Remove all JEE-specific messaging throughout the application while keeping Rajat's Equation branding intact",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Reframe all content (hero text, problem descriptions, difficulty levels, progress tracking) for general math enthusiasts rather than JEE students specifically",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Rename services from JEE-focused to broader math enthusiast positioning: 'Bridge Course for JEE (Mathematics)' to 'Mathematical Foundations Course' and 'JEE Full Course for Mathematics' to 'Comprehensive Mathematics Program'",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Add LinkedIn profile link (https://www.linkedin.com/in/rajat-kumar-jain-460090233/) to the Footer component alongside WhatsApp and YouTube links",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Enhance overall edtech platform design with more welcoming inclusive language for all math learners improved professionalism and polish while preserving all existing features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Update backend course data structure and initialization in main.mo to reflect general mathematics positioning, changing course title from JEE-specific to 'Comprehensive Mathematics Program' or similar, and updating course description to emphasize mathematical thinking for all learners",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Remove ProblemGenerator component from the UI entirely",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Remove ProgressTracker component from the UI entirely",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Hide CourseOffering component from the visible interface while maintaining backend payment tracking",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Create a new persuasive payment section with compelling messaging aimed at convincing parents and students to purchase, featuring a prominent payment button that links to UPI (9424135055@ptyes)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Transform the entire platform UI/UX into a professional, modern edtech marketing and enrollment website with polished aesthetics, welcoming design, and engaging visual elements",
       "reqIds": [],
       "status": "pending"
     }

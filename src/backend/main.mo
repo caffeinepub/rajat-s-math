@@ -3,10 +3,10 @@ import Nat "mo:core/Nat";
 import Text "mo:core/Text";
 import Array "mo:core/Array";
 import Runtime "mo:core/Runtime";
-import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
 import Time "mo:core/Time";
 import Float "mo:core/Float";
+import Principal "mo:core/Principal";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
@@ -14,7 +14,6 @@ import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
 
 
-// Migrate state on upgrade
 
 actor {
   // Types
@@ -24,6 +23,7 @@ actor {
     correctAnswer : Int;
     difficulty : Nat; // 1: JEE Main Easy, 2: JEE Main Challenging, 3: JEE Advanced
     topic : Topic;
+    solution : Text; // Full step-by-step solution
   };
 
   public type ValidationResult = {
@@ -44,7 +44,6 @@ actor {
   public type UserProfile = {
     name : Text;
     hasPurchasedCourse : Bool;
-    // Additional user metadata if needed
   };
 
   public type Topic = {
@@ -70,15 +69,21 @@ actor {
     isPaid : Bool;
   };
 
-  type OldCourse = {};
+  public type UPIPayment = {
+    user : Principal;
+    timestamp : Time.Time;
+    method : Text; // Only "UPI" for this system
+    confirmed : Bool;
+  };
 
   // Persistent State
   let problems = Map.empty<Nat, MathProblem>();
   let submissions = Map.empty<Principal, Map.Map<Nat, Submission>>();
   let userProfiles = Map.empty<Principal, UserProfile>();
+  let upiPayments = Map.empty<Principal, UPIPayment>();
   let course = {
-    title = "JEE Mathematics Mastery Course";
-    description = "Comprehensive course for JEE Main and Advanced mathematics preparation.";
+    title = "Comprehensive Mathematics Program";
+    description = "A complete mathematics course designed for all learners, emphasizing mathematical thinking and problem-solving skills for academic, professional, and daily life success.";
     priceRupees = 2499;
     isPaid = true;
   };
@@ -212,7 +217,6 @@ actor {
     };
 
     let userSubmissionsArray = userSubs.values().toArray();
-    // Filter submissions for this specific topic
     let topicSubmissions = userSubmissionsArray.filter(
       func(submission : Submission) : Bool {
         switch (problems.get(submission.problemId)) {
@@ -298,15 +302,59 @@ actor {
     };
   };
 
-  public func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+  public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can check session status");
+    };
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create checkout sessions");
+    };
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
     OutCall.transform(input);
+  };
+
+  // ---- UPI Payment Record System ----
+  public shared ({ caller }) func recordUPIPaymentSuccessful() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can record payments");
+    };
+
+    let payment : UPIPayment = {
+      user = caller;
+      timestamp = Time.now();
+      method = "UPI";
+      confirmed = true;
+    };
+
+    upiPayments.add(caller, payment);
+
+    switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("User profile not found") };
+      case (?profile) {
+        if (profile.hasPurchasedCourse) {
+          Runtime.trap("Course already purchased");
+        };
+        let updatedProfile = { profile with hasPurchasedCourse = true };
+        userProfiles.add(caller, updatedProfile);
+      };
+    };
+  };
+
+  public query ({ caller }) func hasPaidWithUPI(user : Principal) : async Bool {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only check your own payment status");
+    };
+
+    switch (upiPayments.get(user)) {
+      case (null) { false };
+      case (?payment) { payment.confirmed };
+    };
   };
 };

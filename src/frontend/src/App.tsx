@@ -1,7 +1,6 @@
 import { Hero } from './components/Hero';
-import { CourseOffering } from './components/CourseOffering';
-import { ProblemGenerator } from './components/ProblemGenerator';
-import { ProgressTracker } from './components/ProgressTracker';
+import { Services } from './components/Services';
+import { EnrollmentCTA } from './components/EnrollmentCTA';
 import { Footer } from './components/Footer';
 import { LoginButton } from './components/LoginButton';
 import { ProfileSetup } from './components/ProfileSetup';
@@ -43,11 +42,8 @@ function App() {
         ) : (
           <>
             <Hero />
-            <CourseOffering />
-            <main className="container mx-auto px-4 py-12 space-y-16">
-              <ProblemGenerator />
-              {isAuthenticated && <ProgressTracker />}
-            </main>
+            <Services />
+            <EnrollmentCTA />
             <Footer />
           </>
         )}

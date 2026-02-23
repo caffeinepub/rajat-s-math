@@ -22,6 +22,7 @@ export const MathProblem = IDL.Record({
   'question' : IDL.Text,
   'difficulty' : IDL.Nat,
   'correctAnswer' : IDL.Int,
+  'solution' : IDL.Text,
 });
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
@@ -120,9 +121,11 @@ export const idlService = IDL.Service({
       [IDL.Vec(Submission)],
       ['query'],
     ),
+  'hasPaidWithUPI' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
   'purchaseCourse' : IDL.Func([], [], []),
+  'recordUPIPaymentSuccessful' : IDL.Func([], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
   'transform' : IDL.Func(
@@ -150,6 +153,7 @@ export const idlFactory = ({ IDL }) => {
     'question' : IDL.Text,
     'difficulty' : IDL.Nat,
     'correctAnswer' : IDL.Int,
+    'solution' : IDL.Text,
   });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
@@ -245,9 +249,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(Submission)],
         ['query'],
       ),
+    'hasPaidWithUPI' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
     'purchaseCourse' : IDL.Func([], [], []),
+    'recordUPIPaymentSuccessful' : IDL.Func([], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
     'transform' : IDL.Func(

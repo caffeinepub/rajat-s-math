@@ -1,12 +1,12 @@
 {
-  "name": "JEE Math Mastery",
-  "short_name": "Rajat's Math",
-  "description": "Master JEE Mathematics through deep thinking with Rajat's equation framework",
+  "name": "Rajat's Equation - Mathematics Platform",
+  "short_name": "Rajat's Equation",
+  "description": "Master mathematical thinking and problem-solving skills with comprehensive learning for all enthusiasts",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5ebe0",
-  "theme_color": "#c1694f",
-  "orientation": "any",
+  "background_color": "#faf9f7",
+  "theme_color": "#1a1f4d",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/assets/generated/app-icon-192.dim_192x192.png",
@@ -22,5 +22,5 @@
     }
   ],
   "categories": ["education", "productivity"],
-  "lang": "en-US"
+  "screenshots": []
 }

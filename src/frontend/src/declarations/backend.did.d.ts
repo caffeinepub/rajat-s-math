@@ -22,6 +22,7 @@ export interface MathProblem {
   'question' : string,
   'difficulty' : bigint,
   'correctAnswer' : bigint,
+  'solution' : string,
 }
 export interface ProgressStats {
   'topic' : Topic,
@@ -99,9 +100,11 @@ export interface _SERVICE {
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserSubmissions' : ActorMethod<[Principal], Array<Submission>>,
+  'hasPaidWithUPI' : ActorMethod<[Principal], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
   'purchaseCourse' : ActorMethod<[], undefined>,
+  'recordUPIPaymentSuccessful' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,

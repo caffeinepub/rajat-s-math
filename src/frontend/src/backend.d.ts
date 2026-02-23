@@ -25,6 +25,7 @@ export interface MathProblem {
     question: string;
     difficulty: bigint;
     correctAnswer: bigint;
+    solution: string;
 }
 export interface http_header {
     value: string;
@@ -110,9 +111,11 @@ export interface backendInterface {
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getUserSubmissions(user: Principal): Promise<Array<Submission>>;
+    hasPaidWithUPI(user: Principal): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     isStripeConfigured(): Promise<boolean>;
     purchaseCourse(): Promise<void>;
+    recordUPIPaymentSuccessful(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
