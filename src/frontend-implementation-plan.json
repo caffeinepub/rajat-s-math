@@ -1,0 +1,98 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Make JEE Math Mastery downloadable as PWA for Windows",
+  "requirements": [
+    {
+      "id": "REQ-24",
+      "summary": "Create PWA manifest file with app metadata, icons, and theme colors matching the warm earth-tone design system",
+      "acceptanceCriteria": [
+        "manifest.json file exists in frontend/public with all required PWA fields",
+        "App name in manifest matches 'Rajat's Math' or 'JEE Math Mastery'",
+        "Icons array includes 192x192 and 512x512 PNG files",
+        "Display mode is set to 'standalone' for desktop app experience",
+        "Theme colors use terracotta and sage green from the existing color system"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/manifest.json",
+          "operation": "create",
+          "description": "Create PWA manifest file with app name 'JEE Math Mastery', description, start_url set to '/', display mode 'standalone', background_color and theme_color using terracotta primary color from the design system, and icons array referencing frontend/public/assets/generated/app-icon-192.dim_192x192.png and frontend/public/assets/generated/app-icon-512.dim_512x512.png with appropriate sizes and types"
+        },
+        {
+          "path": "frontend/public/assets/generated/app-icon-192.dim_192x192.png",
+          "operation": "create",
+          "description": "Wire the generated PWA icon (192x192) from the workspace path frontend/public/assets/generated/app-icon-192.dim_192x192.png as a static asset for the manifest"
+        },
+        {
+          "path": "frontend/public/assets/generated/app-icon-512.dim_512x512.png",
+          "operation": "create",
+          "description": "Wire the generated PWA icon (512x512) from the workspace path frontend/public/assets/generated/app-icon-512.dim_512x512.png as a static asset for the manifest"
+        }
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "summary": "Register service worker for offline functionality and PWA installability",
+      "acceptanceCriteria": [
+        "Service worker registration code is added to main.tsx",
+        "Service worker file (service-worker.js or sw.js) is created in frontend/public",
+        "Service worker caches essential static assets (HTML, CSS, JS, icons)",
+        "Application remains functional when offline with cached content",
+        "Browser shows install prompt when PWA requirements are met"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/service-worker.js",
+          "operation": "create",
+          "description": "Create service worker file that implements install event to cache static assets (index.html, main CSS/JS bundles, manifest.json, PWA icons), fetch event with cache-first strategy for static assets and network-first for API calls, and activate event to clean up old caches"
+        },
+        {
+          "path": "frontend/src/main.tsx",
+          "operation": "modify",
+          "description": "Add service worker registration code after the React root render call that checks for 'serviceWorker' in navigator, registers /service-worker.js, and handles registration success/failure with console logging"
+        }
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "summary": "Add PWA meta tags and manifest link to HTML entry point",
+      "acceptanceCriteria": [
+        "Meta tag for theme-color is added with terracotta primary color",
+        "Link tag references the manifest.json file",
+        "Apple-specific meta tags are included for cross-platform compatibility",
+        "Viewport meta tag remains unchanged to preserve mobile responsiveness"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/index.html",
+          "operation": "modify",
+          "description": "Add PWA meta tags in the <head> section: theme-color meta tag with terracotta color value, apple-mobile-web-app-capable set to 'yes', apple-mobile-web-app-status-bar-style set to 'default', apple-mobile-web-app-title set to 'JEE Math Mastery', and link tag with rel='manifest' pointing to /manifest.json"
+        }
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "summary": "Add install button to Hero component that triggers PWA installation prompt",
+      "acceptanceCriteria": [
+        "Install button appears in the Hero section when installation is available",
+        "Button captures and triggers the beforeinstallprompt event",
+        "Button is hidden after successful installation or if already installed",
+        "Button styling matches the existing warm earth-tone design system",
+        "Button includes appropriate icon (download or install icon) and clear text"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useInstallPrompt.ts",
+          "operation": "create",
+          "description": "Create custom hook that manages PWA install prompt state by listening for beforeinstallprompt event, storing the prompt event, providing installApp function to trigger prompt.prompt() and handle user choice, tracking installation status, and returning { canInstall, installApp, isInstalled } for component consumption"
+        },
+        {
+          "path": "frontend/src/components/Hero.tsx",
+          "operation": "modify",
+          "description": "Import useInstallPrompt hook and add Install App button next to existing CTA buttons that only renders when canInstall is true and isInstalled is false, uses Download icon from lucide-react, applies warm earth-tone button styling matching existing design system, calls installApp on click, and hides after successful installation"
+        }
+      ]
+    }
+  ]
+}

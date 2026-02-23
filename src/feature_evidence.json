@@ -1,0 +1,90 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-add-a-progressive-web-app-pwa-manifest-file-frontend-public-manifest-json-that-enables-the-application-to-be-installed-as-a-desktop-app-on-windows-including-app-name-description-icons-at-multiple-sizes-192x192-512x512-start-url-display-mode-set-to-standalone-and-theme-colors-matching-the-warm-earth-tone-design-system",
+      "featureTitle": "Add a Progressive Web App (PWA) manifest file (frontend/public/manifest.json) that enables the application to be installed as a desktop app on Windows, including app name, description, icons at multiple sizes (192x192, 512x512), start URL, display mode set to 'standalone', and theme colors matching the warm earth-tone design system",
+      "files": [
+        "frontend/public/manifest.json"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-24"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-register-a-service-worker-in-frontend-src-main-tsx-that-enables-offline-functionality-and-allows-the-pwa-to-be-installable-on-windows-with-caching-strategy-for-static-assets-and-basic-offline-fallback",
+      "featureTitle": "Register a service worker in frontend/src/main.tsx that enables offline functionality and allows the PWA to be installable on Windows, with caching strategy for static assets and basic offline fallback",
+      "files": [
+        "frontend/public/service-worker.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-25"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-frontend-index-html-to-include-pwa-meta-tags-theme-color-apple-mobile-web-app-capable-apple-mobile-web-app-status-bar-style-and-link-to-the-manifest-file-ensuring-windows-browsers-recognize-the-app-as-installable",
+      "featureTitle": "Update frontend/index.html to include PWA meta tags (theme-color, apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style) and link to the manifest file, ensuring Windows browsers recognize the app as installable",
+      "files": [
+        "frontend/index.html"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-26"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-install-app-button-or-prompt-in-the-hero-component-that-detects-when-the-pwa-install-prompt-is-available-and-allows-windows-users-to-install-the-application-with-a-single-click-using-the-beforeinstallprompt-event",
+      "featureTitle": "Add an 'Install App' button or prompt in the Hero component that detects when the PWA install prompt is available and allows Windows users to install the application with a single click, using the beforeinstallprompt event",
+      "files": [
+        "frontend/src/components/Hero.tsx",
+        "frontend/src/hooks/useInstallPrompt.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-27"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

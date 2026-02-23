@@ -1,0 +1,109 @@
+{
+  "kind": "build_request",
+  "title": "Make application downloadable for Windows",
+  "projectName": "JEE Math Mastery",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-24",
+      "text": "Add a Progressive Web App (PWA) manifest file (frontend/public/manifest.json) that enables the application to be installed as a desktop app on Windows, including app name, description, icons at multiple sizes (192x192, 512x512), start URL, display mode set to 'standalone', and theme colors matching the warm earth-tone design system",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "can you make this application downloadable for windows"
+        ]
+      },
+      "acceptanceCriteria": [
+        "manifest.json file exists in frontend/public with all required PWA fields",
+        "App name in manifest matches 'Rajat's Math' or 'JEE Math Mastery'",
+        "Icons array includes 192x192 and 512x512 PNG files",
+        "Display mode is set to 'standalone' for desktop app experience",
+        "Theme colors use terracotta and sage green from the existing color system"
+      ]
+    },
+    {
+      "id": "REQ-25",
+      "text": "Register a service worker in frontend/src/main.tsx that enables offline functionality and allows the PWA to be installable on Windows, with caching strategy for static assets and basic offline fallback",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "can you make this application downloadable for windows"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Service worker registration code is added to main.tsx",
+        "Service worker file (service-worker.js or sw.js) is created in frontend/public",
+        "Service worker caches essential static assets (HTML, CSS, JS, icons)",
+        "Application remains functional when offline with cached content",
+        "Browser shows install prompt when PWA requirements are met"
+      ]
+    },
+    {
+      "id": "REQ-26",
+      "text": "Update frontend/index.html to include PWA meta tags (theme-color, apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style) and link to the manifest file, ensuring Windows browsers recognize the app as installable",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "can you make this application downloadable for windows"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Meta tag for theme-color is added with terracotta primary color",
+        "Link tag references the manifest.json file",
+        "Apple-specific meta tags are included for cross-platform compatibility",
+        "Viewport meta tag remains unchanged to preserve mobile responsiveness"
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "text": "Add an 'Install App' button or prompt in the Hero component that detects when the PWA install prompt is available and allows Windows users to install the application with a single click, using the beforeinstallprompt event",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-last"
+        ],
+        "quotes": [
+          "can you make this application downloadable for windows"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Install button appears in the Hero section when installation is available",
+        "Button captures and triggers the beforeinstallprompt event",
+        "Button is hidden after successful installation or if already installed",
+        "Button styling matches the existing warm earth-tone design system",
+        "Button includes appropriate icon (download or install icon) and clear text"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify backend/main.mo or backend/migration.mo",
+    "Do not edit immutable frontend paths: useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, main.tsx structure (only add service worker registration), components/ui",
+    "Maintain existing React, Tailwind, and React Query architecture",
+    "Preserve all existing features and functionality",
+    "Use only static PWA approach compatible with Internet Computer hosting"
+  ],
+  "nonGoals": [
+    "Creating a native Windows executable (EXE) or installer package",
+    "Implementing Electron or other native desktop frameworks",
+    "Adding Windows-specific native APIs or file system access",
+    "Supporting Windows Store distribution",
+    "Implementing auto-update mechanisms for desktop builds",
+    "Creating platform-specific builds for macOS or Linux"
+  ],
+  "imageRequirements": {
+    "required": [
+      "App icon with mathematical symbols and warm earth-tone colors suitable for PWA, square format (app-icon-192.dim_192x192.png)",
+      "Larger app icon with mathematical symbols and warm earth-tone colors for high-DPI displays, square format (app-icon-512.dim_512x512.png)"
+    ],
+    "edits": []
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 15,
+  "summary": "An app for JEE students focused on thinking-based mathematics and creative math skills by Rajat's equation",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- App icon with mathematical symbols and warm earth-tone colors suitable for PWA, square format (app-icon-192.dim_192x192.png)\n- Larger app icon with mathematical symbols and warm earth-tone colors for high-DPI displays, square format (app-icon-512.dim_512x512.png)",
+  "existing_features": [
+    {
+      "id": "feature-create-a-landing-page-that-introduces-the-app-s-purpose-thinking-based-mathematics-and-creative-math-skills-development-using-rajat-s-equation",
+      "title": "Create a landing page that introduces the app's purpose: thinking-based mathematics and creative math skills development using Rajat's equation",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-math-problem-generator-that-creates-thinking-based-mathematical-challenges",
+      "title": "Implement a math problem generator that creates thinking-based mathematical challenges",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-interactive-problem-solving-interface-where-users-can-work-through-math-problems-step-by-step",
+      "title": "Create an interactive problem-solving interface where users can work through math problems step-by-step",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-user-progress-tracking-system-that-stores-solved-problems-and-skill-development-metrics",
+      "title": "Create a user progress tracking system that stores solved problems and skill development metrics",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-a-creative-engaging-visual-theme-that-makes-mathematics-feel-approachable-and-inspiring-using-warm-earth-tones-terracotta-sage-green-cream-with-geometric-patterns-and-clean-typography-that-balances-academic-rigor-with-creative-exploration",
+      "title": "Design a creative, engaging visual theme that makes mathematics feel approachable and inspiring, using warm earth tones (terracotta, sage green, cream) with geometric patterns and clean typography that balances academic rigor with creative exploration",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-problemgenerator-component-to-include-an-answer-input-field-where-students-can-type-their-complete-answer-and-a-submit-button-to-check-their-work",
+      "title": "Update the ProblemGenerator component to include an answer input field where students can type their complete answer and a submit button to check their work",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-validation-results-to-students-showing-whether-their-answer-is-correct-or-incorrect-with-constructive-feedback-and-the-option-to-try-again",
+      "title": "Display validation results to students showing whether their answer is correct or incorrect, with constructive feedback and the option to try again",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-hero-component-to-reflect-that-this-app-is-specifically-designed-for-jee-joint-entrance-examination-students-emphasizing-jee-mathematics-preparation-alongside-thinking-based-mathematics-and-creative-problem-solving-using-rajat-s-equation",
+      "title": "Update the Hero component to reflect that this app is specifically designed for JEE (Joint Entrance Examination) students, emphasizing JEE mathematics preparation alongside thinking-based mathematics and creative problem-solving using Rajat's equation",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expand-the-problem-generator-to-include-jee-specific-mathematics-topics-including-calculus-limits-derivatives-integrals-algebra-complex-numbers-quadratic-equations-sequences-and-series-coordinate-geometry-trigonometry-vectors-and-probability-while-maintaining-the-existing-difficulty-levels-easy-medium-hard",
+      "title": "Expand the problem generator to include JEE-specific mathematics topics including calculus (limits, derivatives, integrals), algebra (complex numbers, quadratic equations, sequences and series), coordinate geometry, trigonometry, vectors, and probability, while maintaining the existing difficulty levels (easy, medium, hard)",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-progress-tracking-system-to-categorize-solved-problems-by-jee-relevant-topics-calculus-algebra-coordinate-geometry-trigonometry-vectors-probability-instead-of-or-in-addition-to-generic-categories-showing-students-their-strengths-and-areas-needing-improvement-across-the-jee-syllabus",
+      "title": "Update the progress tracking system to categorize solved problems by JEE-relevant topics (calculus, algebra, coordinate geometry, trigonometry, vectors, probability) instead of or in addition to generic categories, showing students their strengths and areas needing improvement across the JEE syllabus",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-jee-appropriate-difficulty-calibration-where-easy-problems-match-jee-main-level-questions-medium-problems-match-competitive-jee-main-questions-and-hard-problems-match-jee-advanced-level-complexity",
+      "title": "Add JEE-appropriate difficulty calibration where 'easy' problems match JEE Main level questions, 'medium' problems match competitive JEE Main questions, and 'hard' problems match JEE Advanced level complexity",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rebuild-the-entire-application-with-all-existing-features-intact-including-the-jee-focused-landing-page-problem-generator-with-jee-specific-topics-calculus-algebra-coordinate-geometry-trigonometry-vectors-probability-answer-validation-system-and-progress-tracking-by-topic-and-difficulty",
+      "title": "Rebuild the entire application with all existing features intact, including the JEE-focused landing page, problem generator with JEE-specific topics (calculus, algebra, coordinate geometry, trigonometry, vectors, probability), answer validation system, and progress tracking by topic and difficulty",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-courseoffering-component-in-the-frontend-that-displays-the-full-course-details-including-title-description-benefits-and-price-1500-with-a-prominent-purchase-button",
+      "title": "Create a CourseOffering component in the frontend that displays the full course details including title, description, benefits, and price (₹1500), with a prominent purchase button",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-course-purchase-flow-in-the-frontend-where-clicking-the-purchase-button-calls-the-backend-purchasecourse-function-and-displays-success-error-feedback-to-the-user",
+      "title": "Implement course purchase flow in the frontend where clicking the purchase button calls the backend purchaseCourse function and displays success/error feedback to the user",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-react-query-hooks-for-course-operations-including-usegetcoursedetails-to-fetch-course-information-and-usepurchasecourse-mutation-to-handle-purchase-actions",
+      "title": "Add React Query hooks for course operations including useGetCourseDetails to fetch course information and usePurchaseCourse mutation to handle purchase actions",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-courseoffering-component-in-the-app-tsx-after-the-hero-section-making-it-visible-to-all-users-before-they-start-solving-problems",
+      "title": "Display the CourseOffering component in the App.tsx after the Hero section, making it visible to all users before they start solving problems",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-user-profile-to-track-course-purchase-status-and-display-a-badge-or-indicator-in-the-ui-when-a-user-has-purchased-the-full-course",
+      "title": "Update the user profile to track course purchase status and display a badge or indicator in the UI when a user has purchased the full course",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-progressive-web-app-pwa-manifest-file-frontend-public-manifest-json-that-enables-the-application-to-be-installed-as-a-desktop-app-on-windows-including-app-name-description-icons-at-multiple-sizes-192x192-512x512-start-url-display-mode-set-to-standalone-and-theme-colors-matching-the-warm-earth-tone-design-system",
+      "title": "Add a Progressive Web App (PWA) manifest file (frontend/public/manifest.json) that enables the application to be installed as a desktop app on Windows, including app name, description, icons at multiple sizes (192x192, 512x512), start URL, display mode set to 'standalone', and theme colors matching the warm earth-tone design system",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-register-a-service-worker-in-frontend-src-main-tsx-that-enables-offline-functionality-and-allows-the-pwa-to-be-installable-on-windows-with-caching-strategy-for-static-assets-and-basic-offline-fallback",
+      "title": "Register a service worker in frontend/src/main.tsx that enables offline functionality and allows the PWA to be installable on Windows, with caching strategy for static assets and basic offline fallback",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-index-html-to-include-pwa-meta-tags-theme-color-apple-mobile-web-app-capable-apple-mobile-web-app-status-bar-style-and-link-to-the-manifest-file-ensuring-windows-browsers-recognize-the-app-as-installable",
+      "title": "Update frontend/index.html to include PWA meta tags (theme-color, apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style) and link to the manifest file, ensuring Windows browsers recognize the app as installable",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-install-app-button-or-prompt-in-the-hero-component-that-detects-when-the-pwa-install-prompt-is-available-and-allows-windows-users-to-install-the-application-with-a-single-click-using-the-beforeinstallprompt-event",
+      "title": "Add an 'Install App' button or prompt in the Hero component that detects when the PWA install prompt is available and allows Windows users to install the application with a single click, using the beforeinstallprompt event",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create mathematics app focused on thinking-based and creative math skills using Rajat's equation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Implement Rajat's equation as a core mathematical concept or formula used throughout the app's problem sets",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Implement an answer checking system where students can write and submit their answers for validation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Create a backend Motoko function that validates student-submitted answers for math problems, accepting the problem ID, student answer, and returning validation results with correctness status and feedback",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Store submitted answers and validation results in the user progress tracking system, including timestamp, correctness, and number of attempts per problem",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Adapt the app specifically for JEE (Joint Entrance Examination) students with relevant problem types and difficulty levels",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Deploy the rebuilt application to the Internet Computer and ensure the deployment URL is accessible",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add a course purchase feature where users can buy the full course for 1500 rupees",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Create a Course type in the backend with fields for title, description, price (in rupees), and purchase status tracking",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add backend functions to handle course purchase operations: getCourseDetails() to fetch course information and purchaseCourse() to record a purchase for the authenticated user",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Make the application downloadable and installable for Windows operating system",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Rajat's Math",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
