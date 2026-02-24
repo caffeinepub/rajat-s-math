@@ -1,86 +1,73 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
-import Nat "mo:core/Nat";
-import Principal "mo:core/Principal";
 import Time "mo:core/Time";
+import Principal "mo:core/Principal";
 
 module {
-  type OldMathProblem = {
-    id : Nat;
-    question : Text;
-    correctAnswer : Int;
-    difficulty : Nat;
-    topic : {
-      #calculus;
-      #algebra;
-      #coordinateGeometry;
-      #trigonometry;
-      #vectors;
-      #probability;
-    };
-    solution : Text;
-  };
-
-  type OldSubmission = {
-    user : Principal;
-    problemId : Nat;
-    answer : Int;
-    timestamp : Time.Time;
-    isCorrect : Bool;
-    attempts : Nat;
-  };
-
-  type OldUserProfile = {
-    name : Text;
-    hasPurchasedCourse : Bool;
-  };
-
-  type OldBookingRecord = {
-    name : Text;
-    phone : Text;
-    service : Text;
-    date : Text;
-    time : Text;
-    paymentId : Text;
-    paymentStatus : Text;
+  type NewActor = {
+    discountCodes : Map.Map<Text, ExtendedDiscountCode>;
+    attendance : List.List<AttendanceRecord>;
+    visitorActivities : List.List<VisitorActivity>;
   };
 
   type OldActor = {
-    problems : Map.Map<Nat, OldMathProblem>;
-    submissions : Map.Map<Principal, Map.Map<Nat, OldSubmission>>;
-    userProfiles : Map.Map<Principal, OldUserProfile>;
-    bookingRecords : List.List<OldBookingRecord>;
+    discountCodes : Map.Map<Text, DiscountCode>;
   };
 
-  type NewBookingRecord = {
-    name : Text;
-    phone : Text;
-    service : Text;
-    date : Text;
-    time : Text;
-    paymentId : Text;
-    paymentStatus : Text;
-    status : { #pending; #awaitingPayment; #completed };
-    paymentConfirmedAt : ?Time.Time;
+  type DiscountCode = {
+    code : Text;
+    discountPercent : Nat;
+    isUsed : Bool;
+    usedBy : ?Principal;
+    createdAt : Time.Time;
   };
 
-  type NewActor = {
-    problems : Map.Map<Nat, OldMathProblem>;
-    submissions : Map.Map<Principal, Map.Map<Nat, OldSubmission>>;
-    userProfiles : Map.Map<Principal, OldUserProfile>;
-    bookingRecords : List.List<NewBookingRecord>;
+  type ExtendedDiscountCode = {
+    code : Text;
+    discountPercent : Nat;
+    isActive : Bool;
+    isUsed : Bool;
+    usedBy : ?Principal;
+    createdAt : Time.Time;
+  };
+
+  type AttendanceRecord = {
+    student : Principal;
+    bookingId : Text;
+    course : Text;
+    sessionDate : Time.Time;
+    isPresent : Bool;
+    markedAt : Time.Time;
+  };
+
+  type VisitorActivity = {
+    principal : Principal;
+    timestamp : Time.Time;
+    eventType : EventType;
+    courseId : ?Text;
+  };
+
+  type EventType = {
+    #login;
+    #courseView;
+  };
+
+  func discountCodeToExtended(dc : DiscountCode) : ExtendedDiscountCode {
+    {
+      dc with
+      isActive = true;
+    };
   };
 
   public func run(old : OldActor) : NewActor {
-    let newBookingRecords = old.bookingRecords.map<OldBookingRecord, NewBookingRecord>(
-      func(oldRecord) {
-        {
-          oldRecord with
-          status = #pending : { #pending; #awaitingPayment; #completed };
-          paymentConfirmedAt = null;
-        };
-      }
-    );
-    { old with bookingRecords = newBookingRecords };
+    {
+      discountCodes = old.discountCodes.map<Text, DiscountCode, ExtendedDiscountCode>(
+        func(_, dc) {
+          discountCodeToExtended(dc);
+        }
+      );
+      attendance = List.empty<AttendanceRecord>();
+      visitorActivities = List.empty<VisitorActivity>();
+    };
   };
 };

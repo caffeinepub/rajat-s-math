@@ -1,124 +1,163 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Tutoring Session Booking with Admin Mark-as-Paid and Public Completed View",
+  "title": "Add Attendance Tracking, Discount Code Generator, and Unpurchased Visitor Tracking",
   "requirements": [
     {
       "id": "REQ-3",
-      "summary": "Update booking submission flow to save bookings with #awaitingPayment status after UPI payment step",
+      "summary": "Add Attendance section to Admin Dashboard for marking student attendance with date range filtering and attendance rate display",
       "acceptanceCriteria": [
-        "Newly submitted bookings that have gone through UPI payment step are saved with status #awaitingPayment",
-        "Bookings not yet through the payment step remain #pending",
-        "The confirmation screen (BookingConfirmation.tsx) reflects 'Awaiting Payment Confirmation' messaging"
+        "Admin can select a student and a date range",
+        "Sessions in the range are listed with present/absent toggle controls",
+        "Summary shows total classes, attended count, and attendance rate percentage",
+        "Changes are saved to the backend"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/BookingFlowManager.tsx",
-          "operation": "modify",
-          "description": "Update the booking submission logic to pass status: 'awaitingPayment' when creating a new booking record after the UPI payment step is completed. Ensure the booking record includes the paymentConfirmedAt field (optional). Review the current multi-step flow and ensure the status is set correctly based on the step progression."
+          "path": "frontend/src/components/AttendanceManager.tsx",
+          "operation": "create",
+          "description": "Create admin attendance management component allowing admin to select a student from enrolled bookings, choose a date range, list sessions with present/absent toggle controls, and display attendance summary (total classes, attended, rate). Use backend capabilities getAttendanceRecords, getAttendanceSummary, and markAttendance. Include date pickers, student selector dropdown, session list with checkboxes, and summary statistics panel."
         },
         {
-          "path": "frontend/src/hooks/useBooking.ts",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update the addBookingRecord mutation to accept and pass the status field to the backend. Ensure the TypeScript interface for BookingRecord includes the status field with variants 'pending', 'awaitingPayment', 'completed' and the optional paymentConfirmedAt timestamp."
+          "description": "Add React Query hooks for attendance operations: useGetAttendanceRecords (accepts student, course, startDate, endDate), useGetAttendanceSummary (same params), and useMarkAttendance mutation. These hooks call the corresponding backend capabilities and handle query invalidation on successful mutations."
         },
         {
-          "path": "frontend/src/types/booking.ts",
+          "path": "frontend/src/components/AdminDashboard.tsx",
           "operation": "modify",
-          "description": "Add the status field to the BookingRecord interface with type string literals 'pending' | 'awaitingPayment' | 'completed'. Add the optional paymentConfirmedAt field of type bigint or number to match the backend Time type."
-        },
-        {
-          "path": "frontend/src/components/BookingConfirmation.tsx",
-          "operation": "modify",
-          "description": "Update the confirmation message to display 'Awaiting Payment Confirmation' or similar messaging that indicates the booking is pending admin payment verification. Keep the existing UPI payment note visible."
+          "description": "Add a new 'Attendance' tab to the admin dashboard tabs array. Wire the AttendanceManager component to render when the Attendance tab is selected. Ensure the tab is visible and accessible alongside existing tabs (Course Materials, Class Sessions, Support Messages)."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Create an admin dashboard page to manage bookings with Mark as Paid functionality",
+      "summary": "Add Attendance tab to Student Portal showing authenticated student's attendance records with date-range filter and attendance rate",
       "acceptanceCriteria": [
-        "Admin dashboard is only visible/accessible to the authenticated admin principal",
-        "Bookings are grouped by status: Pending, Awaiting Payment, Completed",
-        "Each 'Awaiting Payment' booking has a 'Mark as Paid' button",
-        "Clicking 'Mark as Paid' calls the backend and updates the UI without full page reload",
-        "Booking details (name, phone, service, date, time, status) are displayed per row",
-        "Non-admin users cannot access the admin dashboard"
+        "Attendance tab is visible only to the logged-in student for their own records",
+        "Date-range filter controls are provided",
+        "Displays total sessions, attended sessions, and attendance rate"
       ],
       "file_operations": [
+        {
+          "path": "frontend/src/components/StudentAttendanceView.tsx",
+          "operation": "create",
+          "description": "Create student-facing attendance view component that displays the authenticated user's own attendance records. Include date range filter controls (start and end date pickers), fetch records using backend capability getAttendanceRecords with the caller's principal, and display a summary showing total sessions, attended count, and attendance rate percentage. Show a list or table of individual sessions with dates and present/absent status."
+        },
+        {
+          "path": "frontend/src/components/StudentPortal.tsx",
+          "operation": "modify",
+          "description": "Add a new 'Attendance' tab to the tabbed interface in the Student Portal. Wire the StudentAttendanceView component to render when the Attendance tab is selected. Ensure the tab is accessible after the student has looked up their booking via access code and is authenticated."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add Discount Codes section to Admin Dashboard for generating, viewing, and managing single-use percentage-based discount codes",
+      "acceptanceCriteria": [
+        "Admin can input a percentage and generate a new code",
+        "Generated code is displayed and copyable",
+        "Table/list shows all codes with percentage, status, and used-by info",
+        "Deactivate button disables an active code"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DiscountCodeManager.tsx",
+          "operation": "create",
+          "description": "Create admin discount code management component with a form to input discount percentage (0-100) and generate a new code via a backend capability (not yet defined in backend-interface, assume it exists or will be added). Display the generated code in a copyable text field. Show a table of all codes fetched via getActiveDiscountCodes, displaying code string, percentage, isActive/isUsed status, and usedBy principal. Provide a deactivate button for each active code that calls setDiscountCodeActiveState with isActive=false."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks for discount code operations: useGetActiveDiscountCodes query to fetch all codes, useGenerateDiscountCode mutation (assuming backend provides a generateDiscountCode function), and useSetDiscountCodeActiveState mutation. Handle query invalidation on successful mutations to refresh the code list."
+        },
         {
           "path": "frontend/src/components/AdminDashboard.tsx",
-          "operation": "create",
-          "description": "Create an admin-only dashboard component that fetches all booking records using the existing useBookingRecords hook. Group bookings by their status field into three sections: Pending, Awaiting Payment, and Completed. For each booking in the Awaiting Payment section, render a 'Mark as Paid' button. Display booking details (name, phone, service, date, time, status) in a table or card layout. Use navy/gold brand tokens and Tailwind styling consistent with the existing app. Include a loading state while fetching bookings and an empty state for each group when no bookings exist."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a new mutation hook useMarkAsPaid that calls actor.markAsPaid(bookingId) and invalidates the bookingRecords query cache on success. Ensure proper error handling and return the mutation result status."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add a new query hook useIsCallerAdmin that calls actor.isCallerAdmin() to check if the current user is an admin. This hook will be used to conditionally render the admin dashboard link and guard the admin dashboard component. Cache the result with a staleTime to avoid excessive backend calls."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add conditional rendering logic to show the AdminDashboard component when the current route is '/admin' and the user is authenticated as an admin (using the useIsCallerAdmin hook). Ensure the admin dashboard is not accessible to non-admin users by showing an access denied message or redirecting them. Keep the existing Hero/Services/EnrollmentCTA/Footer layout for non-admin routes."
+          "description": "Add a new 'Discount Codes' tab to the admin dashboard tabs array. Wire the DiscountCodeManager component to render when the Discount Codes tab is selected. Ensure the tab is visible and accessible alongside existing tabs."
         }
       ]
     },
     {
-      "id": "REQ-5",
-      "summary": "Create a public-facing Completed Sessions page displaying all completed bookings",
+      "id": "REQ-8",
+      "summary": "Integrate discount code input into booking/checkout flow allowing users to apply percentage discounts before payment",
       "acceptanceCriteria": [
-        "Page is publicly accessible without authentication",
-        "Displays all bookings with #completed status fetched from backend",
-        "Each card shows: student/parent name, service, date, and 'Completed ✓' badge",
-        "Shows an empty state message when no completed bookings exist",
-        "Page is styled with navy/gold/cream brand tokens matching the rest of the app"
+        "Discount code input field is present in the checkout flow",
+        "Valid code shows the discounted price; invalid code shows an error message",
+        "Discounted amount is reflected in the booking confirmation and saved record"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/CompletedSessions.tsx",
-          "operation": "create",
-          "description": "Create a public component that fetches completed bookings using a new useCompletedBookings query hook (which calls actor.getCompletedBookings). Display each completed session as a card showing the student/parent name, service type, session date, and a 'Completed ✓' badge. Style the cards using navy/gold/cream brand tokens and Tailwind classes consistent with the existing Services.tsx component. Include a heading, loading state, and an empty state message ('No completed sessions yet' or similar) when the array is empty. This component should be accessible to unauthenticated users."
+          "path": "frontend/src/components/UpiPaymentStep.tsx",
+          "operation": "modify",
+          "description": "Add a discount code input field above the booking summary. Include an 'Apply' button that calls the backend capability validateAndApplyDiscountCode with the entered code. On success, display the discount percentage and update the displayed final amount by applying the discount. On error, show an inline error message (e.g., 'Invalid or already used code'). Store the discount percentage and discounted amount in component state and pass it to the confirmation step."
         },
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a new query hook useCompletedBookings that calls actor.getCompletedBookings() and returns an array of BookingRecord objects with status 'completed'. This query should not require authentication (enabled regardless of identity state). Cache the result with a reasonable staleTime and set refetchOnMount to true to ensure fresh data on page load."
+          "description": "Add a useValidateDiscountCode mutation hook that calls the backend capability validateAndApplyDiscountCode, returning the discount percentage on success or an error on failure. This hook is used in UpiPaymentStep to validate codes before applying them."
         },
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/src/components/BookingConfirmation.tsx",
           "operation": "modify",
-          "description": "Add conditional rendering logic to show the CompletedSessions component when the current route is '/completed-sessions'. This route should be publicly accessible without requiring authentication. Keep the existing layout structure and ensure the route does not conflict with the admin dashboard or other existing pages."
+          "description": "Update the booking confirmation display to show the discount percentage applied (if any) and the final discounted amount. Ensure the booking record saved via the backend includes the discountApplied field populated with the validated discount percentage."
+        },
+        {
+          "path": "frontend/src/components/BookingFlowManager.tsx",
+          "operation": "modify",
+          "description": "Ensure the discount code and discounted amount are passed through the booking flow steps. When saving the booking record, include the discountApplied field with the discount percentage obtained from the UPI payment step. Verify that the finalAmount reflects the discounted price."
         }
       ]
     },
     {
-      "id": "REQ-6",
-      "summary": "Add navigation links for Completed Sessions (public) and Admin Dashboard (admin-only)",
+      "id": "REQ-10",
+      "summary": "Trigger backend visitor activity logging from frontend for login and course-view events for authenticated users",
       "acceptanceCriteria": [
-        "A visible link to the Completed Sessions page is present for all users",
-        "An Admin link appears in the navigation only when the admin is logged in",
-        "Navigation links are styled consistently with existing UI"
+        "Login activity is logged once per session on authentication",
+        "Course view is logged each time an unpurchased course is viewed by an authenticated user",
+        "Logging calls are silent (no user-facing feedback)"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Footer.tsx",
-          "operation": "modify",
-          "description": "Add a navigation link to the Completed Sessions page (route '/completed-sessions') in the footer. This link should be visible to all users (authenticated and unauthenticated). Style it consistently with the existing footer social media buttons or as a text link. Ensure the link triggers a route change to display the CompletedSessions component."
-        },
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Add a conditionally rendered 'Admin' navigation button that is only visible when the user is authenticated and the useIsCallerAdmin hook returns true. This button should navigate to the '/admin' route to display the AdminDashboard component. Style it consistently with the existing CTA buttons using navy/gold brand tokens. Position it appropriately in the hero section (e.g., near the existing auth-gated buttons)."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Implement basic client-side routing logic to handle '/admin' and '/completed-sessions' routes. Use a simple hash-based or path-based routing mechanism (e.g., window.location.hash or window.location.pathname) to conditionally render AdminDashboard, CompletedSessions, or the default home layout (Hero/Services/EnrollmentCTA/Footer). Ensure route changes update the displayed component without a full page reload. Add click handlers to navigation links that update the route state."
+          "description": "Add a useEffect hook that triggers once per session when the user authenticates successfully. Call the backend capability trackVisitorActivity with eventType='login' and courseId=null. Use a sessionStorage flag to ensure this is logged only once per browser session, not on every re-render."
+        },
+        {
+          "path": "frontend/src/components/CourseOffering.tsx",
+          "operation": "modify",
+          "description": "Add logic to detect when an authenticated user views a course they have not purchased. Use the hasPurchasedCourse field from the user profile or check via backend capability hasPaidWithUPI. If the user is authenticated and has not purchased, call trackVisitorActivity with eventType='courseView' and the courseId (use a consistent identifier for the course, e.g., course title or slug). Log silently without user-facing feedback."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a useTrackVisitorActivity mutation hook that calls the backend capability trackVisitorActivity with eventType and courseId parameters. This hook is invoked silently from App.tsx on login and from CourseOffering.tsx on course view. No query invalidation or user feedback is required."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Add Unpurchased Visitor Tracking section to Admin Dashboard showing logged-in users without purchases, their login history, and viewed courses",
+      "acceptanceCriteria": [
+        "Section is visible only to admins",
+        "Table lists each tracked user with their login history and viewed courses",
+        "Data is fetched from the backend and displayed in a readable format"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/VisitorTrackingView.tsx",
+          "operation": "create",
+          "description": "Create admin-only component that fetches and displays visitor activity data for unpurchased users. Call backend capability getVisitorActivitiesByUser for each tracked user (or a summary endpoint if available). Display a table with columns: user principal (or name if available via getUserProfile), login timestamps (list all login events), and viewed courses (list all courseView events with course IDs). Use a card or accordion layout for readability if the data is extensive."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a useGetVisitorActivities query hook that fetches visitor activity data from the backend. If the backend provides a summary endpoint listing all unpurchased visitors, use that; otherwise, fetch a list of tracked user principals and call getVisitorActivitiesByUser for each. Return structured data suitable for rendering in VisitorTrackingView."
+        },
+        {
+          "path": "frontend/src/components/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Add a new 'Visitor Tracking' tab to the admin dashboard tabs array. Wire the VisitorTrackingView component to render when the Visitor Tracking tab is selected. Ensure the tab is visible and accessible only to admins, alongside existing tabs."
         }
       ]
     }

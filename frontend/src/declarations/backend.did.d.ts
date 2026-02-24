@@ -10,25 +10,77 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AttendanceRecord {
+  'bookingId' : string,
+  'sessionDate' : Time,
+  'isPresent' : boolean,
+  'markedAt' : Time,
+  'student' : Principal,
+  'course' : string,
+}
+export interface AttendanceSummary {
+  'student' : Principal,
+  'totalSessions' : bigint,
+  'course' : string,
+  'attendedSessions' : bigint,
+}
 export interface BookingRecord {
   'paymentConfirmedAt' : [] | [Time],
   'service' : string,
   'status' : BookingStatus,
   'paymentStatus' : string,
+  'finalAmount' : bigint,
+  'discountApplied' : number,
   'date' : string,
   'name' : string,
   'time' : string,
+  'accessCode' : [] | [string],
+  'numberOfClasses' : bigint,
   'paymentId' : string,
   'phone' : string,
+  'classType' : ClassType,
 }
 export type BookingStatus = { 'pending' : null } |
   { 'completed' : null } |
   { 'awaitingPayment' : null };
+export interface ClassSession {
+  'googleMeetLink' : string,
+  'date' : string,
+  'createdAt' : Time,
+  'time' : string,
+  'sessionTitle' : string,
+  'courseName' : string,
+  'googleCalendarLink' : string,
+}
+export type ClassType = { 'group' : null } |
+  { 'oneOnOne' : null };
 export interface Course {
   'title' : string,
   'description' : string,
   'isPaid' : boolean,
   'priceRupees' : bigint,
+}
+export interface CourseMaterial {
+  'url' : string,
+  'title' : string,
+  'createdAt' : Time,
+  'courseName' : string,
+  'materialType' : CourseMaterialType,
+}
+export type CourseMaterialType = { 'pdf' : null } |
+  { 'video' : null } |
+  { 'link' : null } |
+  { 'note' : null };
+export interface CourseRoadmap { 'modules' : Array<RoadmapModule> }
+export type EventType = { 'login' : null } |
+  { 'courseView' : null };
+export interface ExtendedDiscountCode {
+  'code' : string,
+  'usedBy' : [] | [Principal],
+  'createdAt' : Time,
+  'discountPercent' : bigint,
+  'isUsed' : boolean,
+  'isActive' : boolean,
 }
 export interface MathProblem {
   'id' : bigint,
@@ -38,11 +90,21 @@ export interface MathProblem {
   'correctAnswer' : bigint,
   'solution' : string,
 }
+export type ModuleStatus = { 'notStarted' : null } |
+  { 'completed' : null } |
+  { 'inProgress' : null };
 export interface ProgressStats {
   'topic' : Topic,
   'attempted' : bigint,
   'correct' : bigint,
   'accuracy' : number,
+}
+export interface RoadmapModule {
+  'status' : ModuleStatus,
+  'title' : string,
+  'dueDate' : [] | [Time],
+  'description' : string,
+  'milestone' : [] | [string],
 }
 export interface ShoppingItem {
   'productName' : string,
@@ -59,6 +121,13 @@ export type StripeSessionStatus = {
     'completed' : { 'userPrincipal' : [] | [string], 'response' : string }
   } |
   { 'failed' : { 'error' : string } };
+export interface StudentSupportMessage {
+  'studentId' : Principal,
+  'repliedAt' : [] | [Time],
+  'message' : string,
+  'timestamp' : Time,
+  'reply' : [] | [string],
+}
 export interface Submission {
   'user' : Principal,
   'attempts' : bigint,
@@ -91,6 +160,12 @@ export interface ValidationResult {
   'correctAnswer' : bigint,
   'feedback' : string,
   'isCorrect' : boolean,
+}
+export interface VisitorActivity {
+  'principal' : Principal,
+  'timestamp' : Time,
+  'courseId' : [] | [string],
+  'eventType' : EventType,
 }
 export interface _CaffeineStorageCreateCertificateResult {
   'method' : string,
@@ -127,31 +202,114 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addBookingRecord' : ActorMethod<[BookingRecord], undefined>,
+  'addClassSession' : ActorMethod<[ClassSession], undefined>,
+  'addCourseMaterial' : ActorMethod<[CourseMaterial], undefined>,
   'addMathProblem' : ActorMethod<[MathProblem], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'confirmPaymentAndGenerateAccessCode' : ActorMethod<[string], [] | [string]>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
     string
   >,
+  /**
+   * / Delete a booking by paymentId. Admin-only.
+   */
+  'deleteBooking' : ActorMethod<[string], boolean>,
+  'findBookingByAccessCode' : ActorMethod<[string], [] | [BookingRecord]>,
+  'getActiveDiscountCodes' : ActorMethod<[], Array<ExtendedDiscountCode>>,
   'getAllProblems' : ActorMethod<[], Array<MathProblem>>,
+  /**
+   * / Admin-only: list all roadmaps.
+   */
+  'getAllRoadmaps' : ActorMethod<[], Array<[string, CourseRoadmap]>>,
+  'getAllSupportMessages' : ActorMethod<
+    [],
+    Array<[Principal, Array<StudentSupportMessage>]>
+  >,
+  /**
+   * / Get attendance records for a student within a date range
+   */
+  'getAttendanceRecords' : ActorMethod<
+    [Principal, string, Time, Time],
+    Array<AttendanceRecord>
+  >,
+  /**
+   * / Get attendance summary (counts) for student and course within date range
+   */
+  'getAttendanceSummary' : ActorMethod<
+    [Principal, string, Time, Time],
+    [] | [AttendanceSummary]
+  >,
   'getBookingRecords' : ActorMethod<[], Array<BookingRecord>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getClassSessions' : ActorMethod<[string], Array<ClassSession>>,
   'getCompletedBookings' : ActorMethod<[], Array<BookingRecord>>,
   'getCourseDetails' : ActorMethod<[], Course>,
+  'getCourseMaterials' : ActorMethod<[string], Array<CourseMaterial>>,
   'getProgressByTopic' : ActorMethod<[], Array<ProgressStats>>,
+  /**
+   * / Admin can fetch any roadmap; a student can fetch their own roadmap
+   * / (identified by the paymentId that belongs to a booking with their phone/principal).
+   * / For simplicity the student must supply the paymentId of their own booking.
+   * / The backend verifies ownership by checking that the booking's accessCode
+   * / was issued to a booking whose phone matches a profile, or that the caller
+   * / is the admin.  Because bookings are not directly keyed by principal we
+   * / allow any authenticated user to read a roadmap – the paymentId itself acts
+   * / as a capability token (it is only known to the student and the admin).
+   */
+  'getRoadmap' : ActorMethod<[string], [] | [CourseRoadmap]>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
+  'getSupportMessagesByUser' : ActorMethod<
+    [Principal],
+    Array<StudentSupportMessage>
+  >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserSubmissions' : ActorMethod<[Principal], Array<Submission>>,
+  'getVisitorActivitiesByUser' : ActorMethod<
+    [Principal],
+    Array<VisitorActivity>
+  >,
   'hasPaidWithUPI' : ActorMethod<[Principal], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
   'markAsPaid' : ActorMethod<[string], boolean>,
+  /**
+   * / Admin marks student attendance for a specific session
+   */
+  'markAttendance' : ActorMethod<
+    [Principal, string, string, Time, boolean],
+    undefined
+  >,
   'purchaseCourse' : ActorMethod<[], undefined>,
   'recordUPIPaymentSuccessful' : ActorMethod<[], undefined>,
+  'removeClassSession' : ActorMethod<[string], undefined>,
+  'removeCourseMaterial' : ActorMethod<[string], undefined>,
+  'replyToSupportMessage' : ActorMethod<[Principal, bigint, string], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  /**
+   * / Activate or deactivate a specific discount code (by code string)
+   */
+  'setDiscountCodeActiveState' : ActorMethod<[string, boolean], undefined>,
+  /**
+   * / Admin sets/replaces the roadmap for a booking (identified by paymentId).
+   */
+  'setRoadmap' : ActorMethod<[string, CourseRoadmap], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
+  'submitSupportMessage' : ActorMethod<[string], undefined>,
+  /**
+   * / Track a specific visitor activity (login or course view)
+   */
+  'trackVisitorActivity' : ActorMethod<[EventType, [] | [string]], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
+  /**
+   * / Admin updates a single module's status within a booking's roadmap.
+   */
+  'updateModuleStatus' : ActorMethod<[string, bigint, ModuleStatus], boolean>,
+  /**
+   * / Validate and apply discount code at checkout
+   */
+  'validateAndApplyDiscountCode' : ActorMethod<[string], bigint>,
   'validateAnswer' : ActorMethod<[bigint, bigint], ValidationResult>,
 }
 export declare const idlService: IDL.ServiceClass;

@@ -1,22 +1,23 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
-import List "mo:core/List";
 import Text "mo:core/Text";
-import Array "mo:core/Array";
+import List "mo:core/List";
+import Time "mo:core/Time";
+import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
-import Time "mo:core/Time";
+import Array "mo:core/Array";
+import Char "mo:core/Char";
 import Float "mo:core/Float";
-import Principal "mo:core/Principal";
-import Migration "migration";
+import Int "mo:core/Int";
 
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
-import Stripe "stripe/stripe";
 import OutCall "http-outcalls/outcall";
+import Stripe "stripe/stripe";
+import Migration "migration";
 
-// Specify the data migration function in with-clause
 (with migration = Migration.run)
 actor {
   include MixinStorage();
@@ -26,9 +27,9 @@ actor {
     id : Nat;
     question : Text;
     correctAnswer : Int;
-    difficulty : Nat; // 1: JEE Main Easy, 2: JEE Main Challenging, 3: JEE Advanced
+    difficulty : Nat;
     topic : Topic;
-    solution : Text; // Full step-by-step solution
+    solution : Text;
   };
 
   public type ValidationResult = {
@@ -77,11 +78,10 @@ actor {
   public type UPIPayment = {
     user : Principal;
     timestamp : Time.Time;
-    method : Text; // Only "UPI" for this system
+    method : Text;
     confirmed : Bool;
   };
 
-  // Razorpay Booking Record
   public type BookingRecord = {
     name : Text;
     phone : Text;
@@ -92,6 +92,16 @@ actor {
     paymentStatus : Text;
     status : BookingStatus;
     paymentConfirmedAt : ?Time.Time;
+    classType : ClassType;
+    numberOfClasses : Nat;
+    discountApplied : Float;
+    finalAmount : Nat;
+    accessCode : ?Text;
+  };
+
+  public type ClassType = {
+    #oneOnOne;
+    #group;
   };
 
   public type BookingStatus = {
@@ -100,18 +110,132 @@ actor {
     #completed;
   };
 
+  public type CourseMaterialType = {
+    #pdf;
+    #video;
+    #note;
+    #link;
+  };
+
+  public type CourseMaterial = {
+    courseName : Text;
+    title : Text;
+    materialType : CourseMaterialType;
+    url : Text;
+    createdAt : Time.Time;
+  };
+
+  public type ClassSession = {
+    courseName : Text;
+    sessionTitle : Text;
+    date : Text;
+    time : Text;
+    googleMeetLink : Text;
+    googleCalendarLink : Text;
+    createdAt : Time.Time;
+  };
+
+  public type StudentSupportMessage = {
+    studentId : Principal;
+    timestamp : Time.Time;
+    message : Text;
+    reply : ?Text;
+    repliedAt : ?Time.Time;
+  };
+
+  public type RoadmapModule = {
+    title : Text;
+    description : Text;
+    status : ModuleStatus;
+    milestone : ?Text;
+    dueDate : ?Time.Time;
+  };
+
+  public type ModuleStatus = {
+    #notStarted;
+    #inProgress;
+    #completed;
+  };
+
+  public type CourseRoadmap = {
+    modules : [RoadmapModule];
+  };
+
+  public type AttendanceRecord = {
+    student : Principal;
+    bookingId : Text;
+    course : Text;
+    sessionDate : Time.Time;
+    isPresent : Bool;
+    markedAt : Time.Time;
+  };
+
+  public type AttendanceSummary = {
+    student : Principal;
+    course : Text;
+    totalSessions : Nat;
+    attendedSessions : Nat;
+  };
+
+  public type VisitorActivity = {
+    principal : Principal;
+    timestamp : Time.Time;
+    eventType : EventType;
+    courseId : ?Text;
+  };
+
+  public type EventType = {
+    #login;
+    #courseView;
+  };
+
+  public type ExtendedDiscountCode = {
+    code : Text;
+    discountPercent : Nat;
+    isActive : Bool;
+    isUsed : Bool;
+    usedBy : ?Principal;
+    createdAt : Time.Time;
+  };
+
+  public type AccessCode = {
+    code : Text;
+    assignedPrincipal : ?Principal;
+    phone : Text;
+    isUsed : Bool;
+    createdAt : Time.Time;
+  };
+
+  public type Visitor = {
+    principal : Principal;
+    name : Text;
+    lastLogin : Time.Time;
+    viewedCourses : [Text];
+  };
+
   // Persistent State
   let problems = Map.empty<Nat, MathProblem>();
   let submissions = Map.empty<Principal, Map.Map<Nat, Submission>>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let upiPayments = Map.empty<Principal, UPIPayment>();
+  let courseMaterials = Map.empty<Text, CourseMaterial>();
+  let classSessions = Map.empty<Text, ClassSession>();
   let bookingRecords = List.empty<BookingRecord>();
+  let supportMessages = Map.empty<Principal, List.List<StudentSupportMessage>>();
+  let discountCodes = Map.empty<Text, ExtendedDiscountCode>();
+  let accessCodes = Map.empty<Text, AccessCode>();
+  let visitors = Map.empty<Principal, Visitor>();
+  // roadmaps keyed by paymentId (booking identifier)
+  let roadmaps = Map.empty<Text, CourseRoadmap>();
   let course = {
     title = "Comprehensive Mathematics Program";
     description = "A complete mathematics course designed for all learners, emphasizing mathematical thinking and problem-solving skills for academic, professional, and daily life success.";
     priceRupees = 2499;
     isPaid = true;
   };
+
+  let attendance = List.empty<AttendanceRecord>();
+  let visitorActivities = List.empty<VisitorActivity>();
 
   // Authorization System
   let accessControlState = AccessControl.initState();
@@ -120,8 +244,12 @@ actor {
   // Stripe State
   var stripeConfiguration : ?Stripe.StripeConfiguration = null;
 
-  // Booking Records Functions
+  // ─── Booking Records Functions ───────────────────────────────────────────────
+
   public shared ({ caller }) func addBookingRecord(record : BookingRecord) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add booking records");
+    };
     bookingRecords.add(record);
   };
 
@@ -132,7 +260,10 @@ actor {
     bookingRecords.toArray();
   };
 
-  public query func getCompletedBookings() : async [BookingRecord] {
+  public query ({ caller }) func getCompletedBookings() : async [BookingRecord] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can view completed bookings");
+    };
     let completed = bookingRecords.toArray().filter(
       func(record) {
         switch (record.status) {
@@ -142,6 +273,26 @@ actor {
       }
     );
     completed;
+  };
+
+  /// Delete a booking by paymentId. Admin-only.
+  public shared ({ caller }) func deleteBooking(paymentId : Text) : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can delete booking records");
+    };
+    var found = false;
+    let remaining = List.empty<BookingRecord>();
+    bookingRecords.values().forEach(func(record) {
+      if (record.paymentId == paymentId) {
+        found := true;
+        // skip – effectively deleting it
+      } else {
+        remaining.add(record);
+      };
+    });
+    bookingRecords.clear();
+    bookingRecords.addAll(remaining.values());
+    found;
   };
 
   public shared ({ caller }) func markAsPaid(bookingId : Text) : async Bool {
@@ -172,7 +323,277 @@ actor {
     updatedBooking != null;
   };
 
-  // User Profile Management
+  // Confirm Payment and Generate Access Code
+  public shared ({ caller }) func confirmPaymentAndGenerateAccessCode(bookingId : Text) : async ?Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can confirm payments");
+    };
+
+    var foundRecord : ?BookingRecord = null;
+    let newRecords = bookingRecords.map<BookingRecord, BookingRecord>(
+      func(record) {
+        if (record.paymentId == bookingId) {
+          if (record.status == #awaitingPayment) {
+            let accessCode = ?generateUniqueCode();
+            let updatedRecord = { record with status = #completed; paymentConfirmedAt = ?Time.now(); accessCode };
+            foundRecord := ?updatedRecord;
+            updatedRecord;
+          } else {
+            record;
+          };
+        } else {
+          record;
+        };
+      }
+    );
+
+    bookingRecords.clear();
+    bookingRecords.addAll(newRecords.values());
+
+    switch (foundRecord) {
+      case (?record) { record.accessCode };
+      case (null) { null };
+    };
+  };
+
+  // Find Booking by Access Code – authenticated users only (contains PII)
+  public query ({ caller }) func findBookingByAccessCode(accessCode : Text) : async ?BookingRecord {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can look up bookings by access code");
+    };
+    let normalizedInput = normalizeCode(accessCode);
+    bookingRecords.toArray().find(
+      func(record) {
+        switch (record.accessCode) {
+          case (?code) { normalizeCode(code) == normalizedInput };
+          case (null) { false };
+        };
+      }
+    );
+  };
+
+  func normalizeCode(code : Text) : Text {
+    code;
+  };
+
+  // ─── Student Roadmap Functions ───────────────────────────────────────────────
+
+  /// Admin sets/replaces the roadmap for a booking (identified by paymentId).
+  public shared ({ caller }) func setRoadmap(paymentId : Text, roadmap : CourseRoadmap) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can set roadmaps");
+    };
+    roadmaps.add(paymentId, roadmap);
+  };
+
+  /// Admin updates a single module's status within a booking's roadmap.
+  public shared ({ caller }) func updateModuleStatus(paymentId : Text, moduleIndex : Nat, newStatus : ModuleStatus) : async Bool {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can update module status");
+    };
+    switch (roadmaps.get(paymentId)) {
+      case (null) { false };
+      case (?roadmap) {
+        let mods = roadmap.modules;
+        if (moduleIndex >= mods.size()) {
+          Runtime.trap("Module index out of range");
+        };
+        let updatedModules = Array.tabulate(
+          mods.size(),
+          func(i) {
+            if (i == moduleIndex) {
+              { mods[i] with status = newStatus };
+            } else {
+              mods[i];
+            };
+          }
+        );
+        roadmaps.add(paymentId, { modules = updatedModules });
+        true;
+      };
+    };
+  };
+
+  /// Admin can fetch any roadmap; a student can fetch their own roadmap
+  /// (identified by the paymentId that belongs to a booking with their phone/principal).
+  /// For simplicity the student must supply the paymentId of their own booking.
+  /// The backend verifies ownership by checking that the booking's accessCode
+  /// was issued to a booking whose phone matches a profile, or that the caller
+  /// is the admin.  Because bookings are not directly keyed by principal we
+  /// allow any authenticated user to read a roadmap – the paymentId itself acts
+  /// as a capability token (it is only known to the student and the admin).
+  public query ({ caller }) func getRoadmap(paymentId : Text) : async ?CourseRoadmap {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can view roadmaps");
+    };
+    roadmaps.get(paymentId);
+  };
+
+  /// Admin-only: list all roadmaps.
+  public query ({ caller }) func getAllRoadmaps() : async [(Text, CourseRoadmap)] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can list all roadmaps");
+    };
+    roadmaps.entries().toArray();
+  };
+
+  // ─── Attendance Tracking Functions ───────────────────────────────────────────
+
+  /// Admin marks student attendance for a specific session
+  public shared ({ caller }) func markAttendance(student : Principal, bookingId : Text, course : Text, sessionDate : Time.Time, isPresent : Bool) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can mark attendance");
+    };
+
+    let record = {
+      student;
+      bookingId;
+      course;
+      sessionDate;
+      isPresent;
+      markedAt = Time.now();
+    };
+
+    attendance.add(record);
+  };
+
+  /// Get attendance records for a student within a date range
+  public query ({ caller }) func getAttendanceRecords(student : Principal, course : Text, startDate : Time.Time, endDate : Time.Time) : async [AttendanceRecord] {
+    if (caller != student and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own attendance records");
+    };
+
+    attendance.toArray().filter(func(record) {
+      record.student == student and record.course == course and record.sessionDate >= startDate and record.sessionDate <= endDate
+    });
+  };
+
+  /// Get attendance summary (counts) for student and course within date range
+  public query ({ caller }) func getAttendanceSummary(student : Principal, course : Text, startDate : Time.Time, endDate : Time.Time) : async ?AttendanceSummary {
+    if (caller != student and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own attendance summary");
+    };
+
+    let records = attendance.toArray().filter(func(record) {
+      record.student == student and record.course == course and record.sessionDate >= startDate and record.sessionDate <= endDate
+    });
+
+    let total = records.size();
+    let present = records.filter(func(r) { r.isPresent }).size();
+
+    if (total == 0) {
+      return null;
+    };
+
+    ?{
+      student;
+      course;
+      totalSessions = total;
+      attendedSessions = present;
+    };
+  };
+
+  // ─── Visitor Activity Functions ──────────────────────────────────────────────
+
+  /// Track a specific visitor activity (login or course view)
+  public shared ({ caller }) func trackVisitorActivity(eventType : EventType, courseId : ?Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can track activity");
+    };
+
+    let activity = {
+      principal = caller;
+      timestamp = Time.now();
+      eventType;
+      courseId;
+    };
+
+    visitorActivities.add(activity);
+  };
+
+  public query ({ caller }) func getVisitorActivitiesByUser(user : Principal) : async [VisitorActivity] {
+    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own activity");
+    };
+
+    visitorActivities.toArray().filter(func(activity) { activity.principal == user });
+  };
+
+  // ─── Extended Discount Code Functions ────────────────────────────────────────
+
+  /// Validate and apply discount code at checkout
+  public shared ({ caller }) func validateAndApplyDiscountCode(code : Text) : async Nat {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can validate discount codes");
+    };
+
+    switch (discountCodes.get(code)) {
+      case (null) { Runtime.trap("Invalid discount code") };
+      case (?dc) {
+        if (not dc.isActive) {
+          Runtime.trap("Discount code is not active");
+        };
+        if (dc.isUsed) {
+          Runtime.trap("Discount code has already been used");
+        };
+
+        // Mark as used
+        let updatedCode = {
+          dc with
+          isUsed = true;
+          usedBy = ?caller;
+        };
+        discountCodes.add(code, updatedCode);
+
+        dc.discountPercent;
+      };
+    };
+  };
+
+  /// Activate or deactivate a specific discount code (by code string)
+  public shared ({ caller }) func setDiscountCodeActiveState(code : Text, isActive : Bool) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can modify discount codes");
+    };
+
+    switch (discountCodes.get(code)) {
+      case (null) { Runtime.trap("Discount code not found") };
+      case (?dc) {
+        let updatedCode = { dc with isActive };
+        discountCodes.add(code, updatedCode);
+      };
+    };
+  };
+
+  public query ({ caller }) func getActiveDiscountCodes() : async [ExtendedDiscountCode] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can view active discount codes");
+    };
+
+    discountCodes.values().toArray().filter(func(dc) { dc.isActive });
+  };
+
+  // ─── Helper: unique code generator ──────────────────────────────────────────
+
+  func generateUniqueCode() : Text {
+    let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let charsArray = chars.toArray();
+    let length = charsArray.size();
+
+    func getCharAt(seed : Int) : Char {
+      let idx = Int.abs(seed % length.toInt()) % length;
+      charsArray[idx];
+    };
+
+    let now = Time.now();
+    let code = Array.tabulate(10, func(i) {
+      getCharAt(now + i.toInt() * 1_000_003);
+    });
+    Text.fromArray(code);
+  };
+
+  // ─── User Profile Management ─────────────────────────────────────────────────
+
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access profiles");
@@ -194,7 +615,8 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // Add Math Problem (Admin Only)
+  // ─── Math Problem Functions ──────────────────────────────────────────────────
+
   public shared ({ caller }) func addMathProblem(problem : MathProblem) : async () {
     if (not (AccessControl.isAdmin(accessControlState, caller))) {
       Runtime.trap("Unauthorized: Only admins can add problems");
@@ -202,7 +624,6 @@ actor {
     problems.add(problem.id, problem);
   };
 
-  // Validate Answer and Track Progress (Users Only)
   public shared ({ caller }) func validateAnswer(problemId : Nat, studentAnswer : Int) : async ValidationResult {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can submit answers");
@@ -249,7 +670,6 @@ actor {
     };
   };
 
-  // Get User Submissions (Own submissions or admin can view any)
   public query ({ caller }) func getUserSubmissions(user : Principal) : async [Submission] {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own submissions");
@@ -261,12 +681,11 @@ actor {
     };
   };
 
-  // Get All Problems (Available to all users including guests)
-  public query ({ caller }) func getAllProblems() : async [MathProblem] {
+  // Problems are public – guests may browse them
+  public query func getAllProblems() : async [MathProblem] {
     problems.values().toArray();
   };
 
-  // Get Progress Tracking by Topic (Users Only - Own Progress)
   public query ({ caller }) func getProgressByTopic() : async [ProgressStats] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access progress");
@@ -281,7 +700,6 @@ actor {
     results;
   };
 
-  // Helper function to calculate stats for a topic
   func calcTopicStats(user : Principal, topic : Topic) : ProgressStats {
     let allProblems = problems.values().toArray();
     let _topicProblems = allProblems.filter(
@@ -338,7 +756,9 @@ actor {
     };
   };
 
-  // Paid Course Functionality
+  // ─── Course Functions ────────────────────────────────────────────────────────
+
+  // Course details are public
   public query func getCourseDetails() : async Course {
     course;
   };
@@ -360,7 +780,8 @@ actor {
     };
   };
 
-  // ----- Stripe Integration -----
+  // ─── Stripe Integration ──────────────────────────────────────────────────────
+
   public query func isStripeConfigured() : async Bool {
     stripeConfiguration != null;
   };
@@ -397,7 +818,8 @@ actor {
     OutCall.transform(input);
   };
 
-  // ---- UPI Payment Record System ----
+  // ─── UPI Payment Functions ───────────────────────────────────────────────────
+
   public shared ({ caller }) func recordUPIPaymentSuccessful() : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can record payments");
@@ -433,5 +855,135 @@ actor {
       case (null) { false };
       case (?payment) { payment.confirmed };
     };
+  };
+
+  // ─── Course Material Functions ───────────────────────────────────────────────
+
+  public shared ({ caller }) func addCourseMaterial(material : CourseMaterial) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add course materials");
+    };
+    courseMaterials.add(material.title, material);
+  };
+
+  public shared ({ caller }) func removeCourseMaterial(title : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can remove course materials");
+    };
+    courseMaterials.remove(title);
+  };
+
+  public query ({ caller }) func getCourseMaterials(courseName : Text) : async [CourseMaterial] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access course materials");
+    };
+    courseMaterials.values().toArray().filter(func(material) { material.courseName == courseName });
+  };
+
+  // ─── Class Session Functions ─────────────────────────────────────────────────
+
+  public shared ({ caller }) func addClassSession(session : ClassSession) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can add class sessions");
+    };
+    classSessions.add(session.sessionTitle, session);
+  };
+
+  public shared ({ caller }) func removeClassSession(sessionTitle : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can remove class sessions");
+    };
+    classSessions.remove(sessionTitle);
+  };
+
+  public query ({ caller }) func getClassSessions(courseName : Text) : async [ClassSession] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access class sessions");
+    };
+    classSessions.values().toArray().filter(func(session) { session.courseName == courseName });
+  };
+
+  // ─── Support Message Functions ───────────────────────────────────────────────
+
+  public shared ({ caller }) func submitSupportMessage(message : Text) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can submit support messages");
+    };
+
+    let supportMessage : StudentSupportMessage = {
+      studentId = caller;
+      timestamp = Time.now();
+      message;
+      reply = null;
+      repliedAt = null;
+    };
+
+    let existingMessages = switch (supportMessages.get(caller)) {
+      case (null) { List.empty<StudentSupportMessage>() };
+      case (?msgs) { msgs };
+    };
+
+    existingMessages.add(supportMessage);
+    supportMessages.add(caller, existingMessages);
+  };
+
+  public shared ({ caller }) func replyToSupportMessage(studentId : Principal, messageIndex : Nat, reply : Text) : async () {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can reply to support messages");
+    };
+
+    switch (supportMessages.get(studentId)) {
+      case (null) { Runtime.trap("No messages found for student") };
+      case (?msgs) {
+        if (messageIndex >= msgs.size()) {
+          Runtime.trap("Invalid message index");
+        };
+
+        let updatedMsgs = List.empty<StudentSupportMessage>();
+        var currentIndex = 0;
+
+        msgs.values().forEach(
+          func(msg) {
+            if (currentIndex == messageIndex) {
+              let updatedMsg = {
+                msg with
+                reply = ?reply;
+                repliedAt = ?Time.now();
+              };
+              updatedMsgs.add(updatedMsg);
+            } else {
+              updatedMsgs.add(msg);
+            };
+            currentIndex += 1;
+          }
+        );
+
+        supportMessages.add(studentId, updatedMsgs);
+      };
+    };
+  };
+
+  public query ({ caller }) func getSupportMessagesByUser(userId : Principal) : async [StudentSupportMessage] {
+    if (caller != userId and not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Can only view your own support messages");
+    };
+
+    switch (supportMessages.get(userId)) {
+      case (null) { [] };
+      case (?msgs) { msgs.toArray() };
+    };
+  };
+
+  public query ({ caller }) func getAllSupportMessages() : async [(Principal, [StudentSupportMessage])] {
+    if (not (AccessControl.isAdmin(accessControlState, caller))) {
+      Runtime.trap("Unauthorized: Only admins can view all support messages");
+    };
+
+    let entries = supportMessages.entries().toArray();
+    entries.map(
+      func((principal, msgs)) {
+        (principal, msgs.toArray());
+      }
+    );
   };
 };

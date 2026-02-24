@@ -1,75 +1,114 @@
-import { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Hero } from './components/Hero';
 import { Services } from './components/Services';
 import { EnrollmentCTA } from './components/EnrollmentCTA';
 import { Footer } from './components/Footer';
 import { LoginButton } from './components/LoginButton';
 import { ProfileSetup } from './components/ProfileSetup';
-import { AdminDashboard } from './components/AdminDashboard';
 import { CompletedSessions } from './components/CompletedSessions';
-import { Toaster } from './components/ui/sonner';
-import { ThemeProvider } from 'next-themes';
+import AdminDashboard from './components/AdminDashboard';
+import StudentPortal from './components/StudentPortal';
+import { useGetCallerUserProfile, useTrackVisitorActivity } from './hooks/useQueries';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
-import { useGetCallerUserProfile } from './hooks/useQueries';
-import { Skeleton } from './components/ui/skeleton';
+import { EventType } from './backend';
+import { Toaster } from '@/components/ui/sonner';
 
-type Route = '/' | '/admin' | '/completed-sessions';
+function getRoute(): string {
+  return window.location.hash.replace('#', '') || '/';
+}
 
-function App() {
+export default function App() {
+  const [route, setRoute] = React.useState(getRoute);
   const { identity, isInitializing } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
-  const [currentRoute, setCurrentRoute] = useState<Route>('/');
+  const trackActivity = useTrackVisitorActivity();
+  const loginTrackedRef = useRef(false);
 
   const isAuthenticated = !!identity;
   const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
 
-  const navigate = (route: string) => {
-    setCurrentRoute(route as Route);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Track login activity once per session
+  useEffect(() => {
+    if (isAuthenticated && !loginTrackedRef.current) {
+      const sessionKey = 'login_tracked_' + identity?.getPrincipal().toString();
+      if (!sessionStorage.getItem(sessionKey)) {
+        loginTrackedRef.current = true;
+        sessionStorage.setItem(sessionKey, '1');
+        trackActivity.mutate({ eventType: EventType.login, courseId: null });
+      }
+    }
+  }, [isAuthenticated, identity]);
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(getRoute());
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   if (isInitializing) {
     return (
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <Skeleton className="h-12 w-64 mx-auto" />
-            <Skeleton className="h-6 w-48 mx-auto" />
-          </div>
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-warm-text">Loading...</p>
         </div>
-      </ThemeProvider>
+      </div>
     );
   }
 
-  return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <div className="min-h-screen bg-background">
-        {/* Login button always visible in top-right corner (only on home page) */}
-        {currentRoute === '/' && (
-          <div className="fixed top-4 right-4 z-50">
-            <LoginButton />
-          </div>
-        )}
+  const navigate = (path: string) => {
+    window.location.hash = path;
+    setRoute(path);
+  };
 
-        {currentRoute === '/admin' ? (
-          <AdminDashboard onBack={() => navigate('/')} />
-        ) : currentRoute === '/completed-sessions' ? (
-          <CompletedSessions onBack={() => navigate('/')} />
-        ) : showProfileSetup ? (
-          <ProfileSetup />
+  const renderRoute = () => {
+    switch (route) {
+      case '/admin':
+        return isAuthenticated ? (
+          <AdminDashboard />
         ) : (
-          <>
+          <div className="min-h-screen bg-cream flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <p className="text-navy font-semibold">Please log in to access the admin dashboard.</p>
+              <LoginButton />
+            </div>
+          </div>
+        );
+      case '/portal':
+        return isAuthenticated ? (
+          <StudentPortal onNavigate={navigate} />
+        ) : (
+          <div className="min-h-screen bg-cream flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <p className="text-navy font-semibold">Please log in to access the student portal.</p>
+              <LoginButton />
+            </div>
+          </div>
+        );
+      case '/completed-sessions':
+        return <CompletedSessions onBack={() => navigate('/')} />;
+      default:
+        return (
+          <main>
             <Hero onNavigate={navigate} />
             <Services />
             <EnrollmentCTA />
-            <Footer onNavigate={navigate} />
-          </>
-        )}
+          </main>
+        );
+    }
+  };
 
-        <Toaster />
+  const showFooter =
+    route === '/' || route === '/completed-sessions' || route === '/portal';
+
+  return (
+    <>
+      {showProfileSetup && <ProfileSetup />}
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1">{renderRoute()}</div>
+        {showFooter && <Footer onNavigate={navigate} />}
       </div>
-    </ThemeProvider>
+      <Toaster richColors position="top-right" />
+    </>
   );
 }
-
-export default App;

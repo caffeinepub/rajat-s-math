@@ -1,90 +1,138 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T11:49:00.495Z",
+  "generatedAt": "2026-02-24T17:31:26.024Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 6,
-    "implemented": 4,
+    "total": 11,
+    "implemented": 6,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Extend the backend booking record type to include a `status` field with variants: `#pending`, `#awaitingPayment`, `#completed`. New bookings default to `#pending`. Add a `paymentConfirmedAt` timestamp field (optional). Expose an admin-only `markAsPaid(bookingId: Text) : async Bool` function that transitions a booking from `#awaitingPayment` to `#completed` and records the confirmation timestamp. Only the canister owner/admin principal may call this function.",
+        "summary": "Add an Attendance data model to the backend that stores class sessions per student/booking with a present/absent status. Admin can mark students present or absent for each session. Store session date, course/booking reference, and attendance status per student.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
+        "id": "REQ-10",
+        "summary": "Trigger backend visitor activity logging from the frontend: record a login event when an authenticated user lands on the app, and record a course-view event when an authenticated user views a course detail they have not purchased.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/CourseOffering.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/components/CourseOffering.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Add an Unpurchased Visitor Tracking section to the Admin Dashboard showing a table of logged-in users who have not purchased, with columns for user principal/name (if available), login timestamps, and list of courses viewed without purchase.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/VisitorTrackingView.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminDashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/VisitorTrackingView.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminDashboard.tsx"
+        ]
+      },
+      {
         "id": "REQ-2",
-        "summary": "Add a backend query `getCompletedBookings() : async [BookingRecord]` that returns all bookings with status `#completed`. This query should be publicly accessible (no authentication required) so the public-facing page can fetch completed sessions without login.",
+        "summary": "Expose backend query functions that return attendance records filterable by date range, showing total classes held in that range and how many a student attended, including an attendance rate percentage.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "Update the booking submission flow (BookingFlowManager / BookingForm) so that after a student/parent submits a booking and completes the UPI payment step, the booking is saved with status `#awaitingPayment` instead of a generic submitted state. Update `useBooking.ts` and relevant hooks to pass the correct initial status when creating a new booking.",
+        "summary": "Add an Attendance section to the Admin Dashboard that lists enrolled students, allows the admin to select a student, choose a date range, and mark each session in that range as present or absent. Display total classes held, attended, and attendance rate.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/BookingFlowManager.tsx",
-          "frontend/src/hooks/useBooking.ts",
-          "frontend/src/types/booking.ts",
-          "frontend/src/components/BookingConfirmation.tsx"
+          "frontend/src/components/AttendanceManager.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminDashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/BookingFlowManager.tsx",
-          "frontend/src/components/BookingConfirmation.tsx"
+          "frontend/src/components/AttendanceManager.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminDashboard.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Create an Admin Dashboard page (accessible only to the admin/owner principal after login) that lists all bookings grouped by status. For bookings with status `#awaitingPayment`, display a prominent 'Mark as Paid' button. Clicking it calls the backend `markAsPaid` function and refreshes the list. Display each booking's name, phone, service, date, time, and current status. Use the existing navy/gold brand tokens and Tailwind styling consistent with the rest of the app.",
+        "summary": "Add an Attendance tab to the Student Portal that shows the authenticated student's own attendance records. Include a date-range filter and display total classes held vs attended with attendance rate.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/AdminDashboard.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx"
+          "frontend/src/components/StudentAttendanceView.tsx",
+          "frontend/src/components/StudentPortal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/AdminDashboard.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx"
+          "frontend/src/components/StudentAttendanceView.tsx",
+          "frontend/src/components/StudentPortal.tsx"
         ]
       },
       {
         "id": "REQ-5",
-        "summary": "Create a public-facing 'Completed Sessions' page (no login required) that fetches and displays all bookings with status `#completed` using `getCompletedBookings()`. Each completed session card should show the student/parent name, service type, session date, and a 'Completed ✓' badge. This page should be reachable via a route or section within the existing single-page app layout. Style it consistently with the navy/gold/cream brand theme.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/CompletedSessions.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/CompletedSessions.tsx",
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/App.tsx"
-        ]
+        "summary": "Add a DiscountCode data model to the backend with fields: code string, percentage (0–100), isActive boolean, isUsed boolean, and usedByPrincipal. Provide admin functions to generate a new single-use percentage-based discount code, list all codes, and deactivate a code.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-6",
-        "summary": "Add a navigation link or button in the app (e.g., in the Footer or Hero section) that allows any user to navigate to the public 'Completed Sessions' page. Additionally, add an 'Admin' link in the navigation that is only visible when the admin principal is authenticated.",
+        "summary": "Add a backend function to validate and apply a discount code at checkout. It should verify the code is active and unused, return the discount percentage, and mark it as used (tied to the purchasing user's principal) when a booking/purchase is confirmed.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Add a Discount Codes section to the Admin Dashboard where the admin can generate new single-use percentage-based codes, view all codes with their status (active, used, deactivated), and deactivate any active code.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/Hero.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/DiscountCodeManager.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminDashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Footer.tsx",
-          "frontend/src/components/Hero.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/components/DiscountCodeManager.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminDashboard.tsx"
         ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Integrate the discount code input into the booking/checkout flow (BookingForm or UpiPaymentStep). Allow the user to enter a discount code, validate it against the backend, and apply the percentage discount to the displayed total before confirming payment.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/UpiPaymentStep.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BookingConfirmation.tsx",
+          "frontend/src/components/BookingFlowManager.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/UpiPaymentStep.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/BookingFlowManager.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Add a VisitorActivity data model to the backend that records login events and course-view events for authenticated users who have not purchased a course. Store principal, timestamp, event type (login or courseView), and course ID (for view events).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
@@ -99,11 +147,16 @@
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/components/AdminDashboard.tsx",
-    "frontend/src/components/BookingConfirmation.tsx",
+    "frontend/src/components/AdminSupportMessages.tsx",
+    "frontend/src/components/AttendanceManager.tsx",
     "frontend/src/components/BookingFlowManager.tsx",
-    "frontend/src/components/CompletedSessions.tsx",
-    "frontend/src/components/Footer.tsx",
-    "frontend/src/components/Hero.tsx",
+    "frontend/src/components/CourseOffering.tsx",
+    "frontend/src/components/DiscountCodeManager.tsx",
+    "frontend/src/components/StudentAttendanceView.tsx",
+    "frontend/src/components/StudentPortal.tsx",
+    "frontend/src/components/StudentSupportView.tsx",
+    "frontend/src/components/UpiPaymentStep.tsx",
+    "frontend/src/components/VisitorTrackingView.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",

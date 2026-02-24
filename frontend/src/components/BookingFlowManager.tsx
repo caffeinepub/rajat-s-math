@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { BookingForm, SERVICE_OPTIONS } from './BookingForm';
-import BookingConfirmation from './BookingConfirmation';
+import { BookingForm } from './BookingForm';
 import UpiPaymentStep from './UpiPaymentStep';
+import BookingConfirmation from './BookingConfirmation';
 import { useAddBookingRecord } from '../hooks/useBooking';
 import type { BookingFormData } from '../types/booking';
-import { BookingStatus } from '../backend';
+import { BookingStatus, ClassType } from '../backend';
+import { toast } from 'sonner';
+
+type FlowStep = 'form' | 'payment' | 'confirmation';
 
 interface BookingFlowManagerProps {
   open: boolean;
   onClose: () => void;
   preSelectedService?: string;
 }
-
-type FlowStep = 'form' | 'payment' | 'confirmation';
 
 interface ConfirmationData {
   name: string;
@@ -23,6 +23,10 @@ interface ConfirmationData {
   time: string;
   phone: string;
   paymentId: string;
+  classType: ClassType;
+  numberOfClasses: number;
+  discountPercent: number;
+  finalAmount: number;
 }
 
 export function BookingFlowManager({ open, onClose, preSelectedService }: BookingFlowManagerProps) {
@@ -44,7 +48,7 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
     setStep('payment');
   };
 
-  const handlePaymentConfirmed = async () => {
+  const handlePaymentConfirmed = async (discountPercent: number, finalAmount: number) => {
     if (!bookingData) return;
 
     const upiRef = `UPI-${Date.now()}`;
@@ -59,6 +63,10 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
         paymentId: upiRef,
         paymentStatus: 'UPI_CONFIRMED',
         status: BookingStatus.awaitingPayment,
+        classType: bookingData.classType,
+        numberOfClasses: BigInt(bookingData.numberOfClasses),
+        discountApplied: discountPercent,
+        finalAmount: BigInt(finalAmount),
       });
     } catch (error) {
       console.error('Booking record save error:', error);
@@ -72,25 +80,24 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
       time: bookingData.time,
       phone: bookingData.phone,
       paymentId: upiRef,
+      classType: bookingData.classType,
+      numberOfClasses: bookingData.numberOfClasses,
+      discountPercent,
+      finalAmount,
     });
     setStep('confirmation');
   };
 
   const getDialogTitle = () => {
     switch (step) {
-      case 'form': return 'Book Your Session';
-      case 'payment': return 'Complete Payment';
-      case 'confirmation': return 'Booking Received!';
+      case 'form':
+        return 'Book Your Session';
+      case 'payment':
+        return 'Complete Payment';
+      case 'confirmation':
+        return 'Booking Received!';
     }
   };
-
-  const amount = bookingData
-    ? (SERVICE_OPTIONS.find((s) => s.value === bookingData.serviceType)?.price ?? 500)
-    : 0;
-
-  const transactionNote = bookingData
-    ? `Booking: ${bookingData.serviceType} on ${bookingData.date}`
-    : '';
 
   if (!open) return null;
 
@@ -116,11 +123,13 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
 
         {step === 'payment' && bookingData && (
           <UpiPaymentStep
-            amount={amount}
-            transactionNote={transactionNote}
-            onPaymentConfirmed={handlePaymentConfirmed}
-            onCancel={() => setStep('form')}
-            isConfirming={addBookingRecord.isPending}
+            amount={bookingData.finalAmount}
+            bookingName={bookingData.name}
+            service={bookingData.serviceType}
+            classType={bookingData.classType === ClassType.oneOnOne ? 'oneOnOne' : 'group'}
+            numberOfClasses={bookingData.numberOfClasses}
+            onConfirm={handlePaymentConfirmed}
+            onBack={() => setStep('form')}
           />
         )}
 
@@ -132,6 +141,10 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
             time={confirmationData.time}
             phone={confirmationData.phone}
             paymentId={confirmationData.paymentId}
+            classType={confirmationData.classType}
+            numberOfClasses={confirmationData.numberOfClasses}
+            discountPercent={confirmationData.discountPercent}
+            finalAmount={confirmationData.finalAmount}
             onClose={handleClose}
           />
         )}

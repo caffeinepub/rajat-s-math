@@ -1,6 +1,7 @@
 import React from 'react';
-import { Clock, Calendar, Phone, BookOpen, Hash, AlertCircle } from 'lucide-react';
+import { Clock, Calendar, Phone, BookOpen, Hash, AlertCircle, Users, UserCheck, Tag, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ClassType } from '../backend';
 
 interface BookingConfirmationProps {
   name: string;
@@ -9,6 +10,10 @@ interface BookingConfirmationProps {
   time: string;
   phone: string;
   paymentId: string;
+  classType?: ClassType;
+  numberOfClasses?: number;
+  discountPercent?: number;
+  finalAmount?: number;
   onClose: () => void;
 }
 
@@ -19,6 +24,10 @@ export default function BookingConfirmation({
   time,
   phone,
   paymentId,
+  classType,
+  numberOfClasses,
+  discountPercent,
+  finalAmount,
   onClose,
 }: BookingConfirmationProps) {
   return (
@@ -53,6 +62,56 @@ export default function BookingConfirmation({
             <p className="text-sm font-medium text-foreground">{service}</p>
           </div>
         </div>
+
+        {/* Class Type */}
+        {classType && (
+          <div className="flex items-center gap-3">
+            {classType === ClassType.oneOnOne ? (
+              <UserCheck className="w-4 h-4 text-gold-dark flex-shrink-0" />
+            ) : (
+              <Users className="w-4 h-4 text-primary flex-shrink-0" />
+            )}
+            <div>
+              <p className="text-xs text-muted-foreground">Class Type</p>
+              <p className="text-sm font-medium text-foreground">
+                {classType === ClassType.oneOnOne ? 'One-on-One' : 'Group Classes'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Number of Classes */}
+        {numberOfClasses !== undefined && (
+          <div className="flex items-center gap-3">
+            <Hash className="w-4 h-4 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Number of Classes</p>
+              <p className="text-sm font-medium text-foreground">{numberOfClasses} classes</p>
+            </div>
+          </div>
+        )}
+
+        {/* Discount */}
+        {discountPercent !== undefined && discountPercent > 0 && (
+          <div className="flex items-center gap-3">
+            <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Discount Applied</p>
+              <p className="text-sm font-medium text-green-700">{discountPercent}% off</p>
+            </div>
+          </div>
+        )}
+
+        {/* Total Amount */}
+        {finalAmount !== undefined && (
+          <div className="flex items-center gap-3">
+            <IndianRupee className="w-4 h-4 text-gold-dark flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Total Amount</p>
+              <p className="text-base font-bold text-gold-dark">₹{finalAmount.toLocaleString('en-IN')}</p>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center gap-3">
           <Calendar className="w-4 h-4 text-primary flex-shrink-0" />

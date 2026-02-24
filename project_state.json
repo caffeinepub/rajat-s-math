@@ -1,45 +1,59 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Tutoring session booking platform with UPI payment flow. Admin can mark sessions as paid after UPI transfer. Once marked paid, booking status updates to 'Completed' and becomes publicly visible. Booking statuses: Pending → Awaiting Payment → Completed.",
+  "summary": "Education/course platform with admin and student roles. Features include attendance tracking, discount code generation, and unpurchased visitor tracking.",
   "architectural_notes": [
-    "Booking status flow: Pending → Awaiting Payment → Completed (publicly visible only after admin marks as paid)",
-    "Payment method: UPI (manual confirmation by admin, no payment gateway integration)"
+    "Platform has two roles: admin and student",
+    "Authentication via Internet Identity"
   ],
-  "known_issues": [
-    "Email bill feature (send payment confirmation to rkj.jain2204@gmail.com) is blocked — requires paid plan upgrade"
-  ],
+  "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-booking-submission-flow-bookingflowmanager-bookingform-so-that-after-a-student-parent-submits-a-booking-and-completes-the-upi-payment-step-the-booking-is-saved-with-status-awaitingpayment-instead-of-a-generic-submitted-state-update-usebooking-ts-and-relevant-hooks-to-pass-the-correct-initial-status-when-creating-a-new-booking",
-      "title": "Update the booking submission flow (BookingFlowManager / BookingForm) so that after a student/parent submits a booking and completes the UPI payment step, the booking is saved with status `#awaitingPayment` instead of a generic submitted state. Update `useBooking.ts` and relevant hooks to pass the correct initial status when creating a new booking.",
+      "id": "feature-add-an-attendance-section-to-the-admin-dashboard-that-lists-enrolled-students-allows-the-admin-to-select-a-student-choose-a-date-range-and-mark-each-session-in-that-range-as-present-or-absent-display-total-classes-held-attended-and-attendance-rate",
+      "title": "Add an Attendance section to the Admin Dashboard that lists enrolled students, allows the admin to select a student, choose a date range, and mark each session in that range as present or absent. Display total classes held, attended, and attendance rate.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-an-admin-dashboard-page-accessible-only-to-the-admin-owner-principal-after-login-that-lists-all-bookings-grouped-by-status-for-bookings-with-status-awaitingpayment-display-a-prominent-mark-as-paid-button-clicking-it-calls-the-backend-markaspaid-function-and-refreshes-the-list-display-each-booking-s-name-phone-service-date-time-and-current-status-use-the-existing-navy-gold-brand-tokens-and-tailwind-styling-consistent-with-the-rest-of-the-app",
-      "title": "Create an Admin Dashboard page (accessible only to the admin/owner principal after login) that lists all bookings grouped by status. For bookings with status `#awaitingPayment`, display a prominent 'Mark as Paid' button. Clicking it calls the backend `markAsPaid` function and refreshes the list. Display each booking's name, phone, service, date, time, and current status. Use the existing navy/gold brand tokens and Tailwind styling consistent with the rest of the app.",
+      "id": "feature-add-an-attendance-tab-to-the-student-portal-that-shows-the-authenticated-student-s-own-attendance-records-include-a-date-range-filter-and-display-total-classes-held-vs-attended-with-attendance-rate",
+      "title": "Add an Attendance tab to the Student Portal that shows the authenticated student's own attendance records. Include a date-range filter and display total classes held vs attended with attendance rate.",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-a-public-facing-completed-sessions-page-no-login-required-that-fetches-and-displays-all-bookings-with-status-completed-using-getcompletedbookings-each-completed-session-card-should-show-the-student-parent-name-service-type-session-date-and-a-completed-badge-this-page-should-be-reachable-via-a-route-or-section-within-the-existing-single-page-app-layout-style-it-consistently-with-the-navy-gold-cream-brand-theme",
-      "title": "Create a public-facing 'Completed Sessions' page (no login required) that fetches and displays all bookings with status `#completed` using `getCompletedBookings()`. Each completed session card should show the student/parent name, service type, session date, and a 'Completed ✓' badge. This page should be reachable via a route or section within the existing single-page app layout. Style it consistently with the navy/gold/cream brand theme.",
+      "id": "feature-add-a-discount-codes-section-to-the-admin-dashboard-where-the-admin-can-generate-new-single-use-percentage-based-codes-view-all-codes-with-their-status-active-used-deactivated-and-deactivate-any-active-code",
+      "title": "Add a Discount Codes section to the Admin Dashboard where the admin can generate new single-use percentage-based codes, view all codes with their status (active, used, deactivated), and deactivate any active code.",
       "reqIds": [
-        "REQ-5"
+        "REQ-7"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-navigation-link-or-button-in-the-app-e-g-in-the-footer-or-hero-section-that-allows-any-user-to-navigate-to-the-public-completed-sessions-page-additionally-add-an-admin-link-in-the-navigation-that-is-only-visible-when-the-admin-principal-is-authenticated",
-      "title": "Add a navigation link or button in the app (e.g., in the Footer or Hero section) that allows any user to navigate to the public 'Completed Sessions' page. Additionally, add an 'Admin' link in the navigation that is only visible when the admin principal is authenticated.",
+      "id": "feature-integrate-the-discount-code-input-into-the-booking-checkout-flow-bookingform-or-upipaymentstep-allow-the-user-to-enter-a-discount-code-validate-it-against-the-backend-and-apply-the-percentage-discount-to-the-displayed-total-before-confirming-payment",
+      "title": "Integrate the discount code input into the booking/checkout flow (BookingForm or UpiPaymentStep). Allow the user to enter a discount code, validate it against the backend, and apply the percentage discount to the displayed total before confirming payment.",
       "reqIds": [
-        "REQ-6"
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-trigger-backend-visitor-activity-logging-from-the-frontend-record-a-login-event-when-an-authenticated-user-lands-on-the-app-and-record-a-course-view-event-when-an-authenticated-user-views-a-course-detail-they-have-not-purchased",
+      "title": "Trigger backend visitor activity logging from the frontend: record a login event when an authenticated user lands on the app, and record a course-view event when an authenticated user views a course detail they have not purchased.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-unpurchased-visitor-tracking-section-to-the-admin-dashboard-showing-a-table-of-logged-in-users-who-have-not-purchased-with-columns-for-user-principal-name-if-available-login-timestamps-and-list-of-courses-viewed-without-purchase",
+      "title": "Add an Unpurchased Visitor Tracking section to the Admin Dashboard showing a table of logged-in users who have not purchased, with columns for user principal/name (if available), login timestamps, and list of courses viewed without purchase.",
+      "reqIds": [
+        "REQ-11"
       ],
       "version": 1
     }
@@ -47,25 +61,25 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Tutoring session booking system for parents/students to submit session requests",
+      "summary": "Attendance tracking: admin marks students present/absent per session; students view own attendance with date-range filtering showing total classes held vs attended",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Admin dashboard with 'Mark as Paid' button to confirm UPI payments manually",
+      "summary": "Discount code generator: admin creates single-use percentage-based codes (0-100%), manages/deactivates from dashboard, codes applied at course checkout",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Public-facing page showing completed/paid bookings — only sessions confirmed as paid show as 'Completed' publicly",
+      "summary": "Unpurchased visitor tracking: track logged-in users' login activity and courses viewed without purchase; admin-only dashboard",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Extend the backend booking record type to include a `status` field with variants: `#pending`, `#awaitingPayment`, `#completed`. New bookings default to `#pending`. Add a `paymentConfirmedAt` timestamp field (optional). Expose an admin-only `markAsPaid(bookingId: Text) : async Bool` function that transitions a booking from `#awaitingPayment` to `#completed` and records the confirmation timestamp. Only the canister owner/admin principal may call this function.",
+      "summary": "Add an Attendance data model to the backend that stores class sessions per student/booking with a present/absent status. Admin can mark students present or absent for each session. Store session date, course/booking reference, and attendance status per student.",
       "reqIds": [
         "REQ-1"
       ],
@@ -73,15 +87,39 @@
     },
     {
       "id": "AR-5",
-      "summary": "Add a backend query `getCompletedBookings() : async [BookingRecord]` that returns all bookings with status `#completed`. This query should be publicly accessible (no authentication required) so the public-facing page can fetch completed sessions without login.",
+      "summary": "Expose backend query functions that return attendance records filterable by date range, showing total classes held in that range and how many a student attended, including an attendance rate percentage.",
       "reqIds": [
         "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add a DiscountCode data model to the backend with fields: code string, percentage (0–100), isActive boolean, isUsed boolean, and usedByPrincipal. Provide admin functions to generate a new single-use percentage-based discount code, list all codes, and deactivate a code.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Add a backend function to validate and apply a discount code at checkout. It should verify the code is active and unused, return the discount percentage, and mark it as used (tied to the purchasing user's principal) when a booking/purchase is confirmed.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add a VisitorActivity data model to the backend that records login events and course-view events for authenticated users who have not purchased a course. Store principal, timestamp, event type (login or courseView), and course ID (for view events).",
+      "reqIds": [
+        "REQ-9"
       ],
       "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "Tutoring Booking Platform",
+  "projectName": "Rajat's Equation",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

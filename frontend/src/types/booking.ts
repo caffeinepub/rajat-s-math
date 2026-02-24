@@ -1,9 +1,15 @@
+import { ClassType } from '../backend';
+
 export interface BookingFormData {
   name: string;
   phone: string;
   date: string;
   time: string;
   serviceType: string;
+  classType: ClassType;
+  numberOfClasses: number;
+  discountPercent: number;
+  finalAmount: number;
 }
 
 export interface BookingRecord {
