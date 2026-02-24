@@ -1,0 +1,126 @@
+{
+  "kind": "build_request",
+  "title": "Tutoring Session Booking with Admin Mark-as-Paid and Public Completed View",
+  "projectName": "Rajat's Equation",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Extend the backend booking record type to include a `status` field with variants: `#pending`, `#awaitingPayment`, `#completed`. New bookings default to `#pending`. Add a `paymentConfirmedAt` timestamp field (optional). Expose an admin-only `markAsPaid(bookingId: Text) : async Bool` function that transitions a booking from `#awaitingPayment` to `#completed` and records the confirmation timestamp. Only the canister owner/admin principal may call this function.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-recent-4",
+          "msg-recent-6"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Booking records have a status field defaulting to #pending on creation",
+        "markAsPaid transitions status from #awaitingPayment to #completed",
+        "Non-admin principals cannot call markAsPaid (returns an error or traps)",
+        "paymentConfirmedAt is set when markAsPaid is called",
+        "Existing bookings are preserved and default to #pending status"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add a backend query `getCompletedBookings() : async [BookingRecord]` that returns all bookings with status `#completed`. This query should be publicly accessible (no authentication required) so the public-facing page can fetch completed sessions without login.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-recent-4",
+          "msg-recent-6"
+        ]
+      },
+      "acceptanceCriteria": [
+        "getCompletedBookings returns only bookings with status #completed",
+        "The query is callable by anonymous/unauthenticated users",
+        "Returns an empty array when no completed bookings exist"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Update the booking submission flow (BookingFlowManager / BookingForm) so that after a student/parent submits a booking and completes the UPI payment step, the booking is saved with status `#awaitingPayment` instead of a generic submitted state. Update `useBooking.ts` and relevant hooks to pass the correct initial status when creating a new booking.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-recent-4"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Newly submitted bookings that have gone through UPI payment step are saved with status #awaitingPayment",
+        "Bookings not yet through the payment step remain #pending",
+        "The confirmation screen (BookingConfirmation.tsx) reflects 'Awaiting Payment Confirmation' messaging"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create an Admin Dashboard page (accessible only to the admin/owner principal after login) that lists all bookings grouped by status. For bookings with status `#awaitingPayment`, display a prominent 'Mark as Paid' button. Clicking it calls the backend `markAsPaid` function and refreshes the list. Display each booking's name, phone, service, date, time, and current status. Use the existing navy/gold brand tokens and Tailwind styling consistent with the rest of the app.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent-4",
+          "msg-recent-6"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin dashboard is only visible/accessible to the authenticated admin principal",
+        "Bookings are grouped by status: Pending, Awaiting Payment, Completed",
+        "Each 'Awaiting Payment' booking has a 'Mark as Paid' button",
+        "Clicking 'Mark as Paid' calls the backend and updates the UI without full page reload",
+        "Booking details (name, phone, service, date, time, status) are displayed per row",
+        "Non-admin users cannot access the admin dashboard"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Create a public-facing 'Completed Sessions' page (no login required) that fetches and displays all bookings with status `#completed` using `getCompletedBookings()`. Each completed session card should show the student/parent name, service type, session date, and a 'Completed ✓' badge. This page should be reachable via a route or section within the existing single-page app layout. Style it consistently with the navy/gold/cream brand theme.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent-3",
+          "msg-recent-4",
+          "msg-recent-6"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Page is publicly accessible without authentication",
+        "Displays all bookings with #completed status fetched from backend",
+        "Each card shows: student/parent name, service, date, and 'Completed ✓' badge",
+        "Shows an empty state message when no completed bookings exist",
+        "Page is styled with navy/gold/cream brand tokens matching the rest of the app"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Add a navigation link or button in the app (e.g., in the Footer or Hero section) that allows any user to navigate to the public 'Completed Sessions' page. Additionally, add an 'Admin' link in the navigation that is only visible when the admin principal is authenticated.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent-4"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A visible link to the Completed Sessions page is present for all users",
+        "An Admin link appears in the navigation only when the admin is logged in",
+        "Navigation links are styled consistently with existing UI"
+      ]
+    }
+  ],
+  "constraints": [
+    "All Motoko logic must remain in backend/main.mo (single-actor architecture)",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Email functionality must NOT be implemented (blocked — requires paid plan upgrade)",
+    "Admin access control must be enforced using the canister owner principal on the backend"
+  ],
+  "nonGoals": [
+    "Sending email bills or payment confirmations to rkj.jain2204@gmail.com (blocked by plan)",
+    "Automated payment verification via UPI APIs (manual Mark as Paid only)",
+    "Razorpay or Stripe payment gateway integration",
+    "Real-time notifications or WebSocket updates"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

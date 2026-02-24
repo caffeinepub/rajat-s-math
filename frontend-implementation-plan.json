@@ -1,0 +1,126 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Tutoring Session Booking with Admin Mark-as-Paid and Public Completed View",
+  "requirements": [
+    {
+      "id": "REQ-3",
+      "summary": "Update booking submission flow to save bookings with #awaitingPayment status after UPI payment step",
+      "acceptanceCriteria": [
+        "Newly submitted bookings that have gone through UPI payment step are saved with status #awaitingPayment",
+        "Bookings not yet through the payment step remain #pending",
+        "The confirmation screen (BookingConfirmation.tsx) reflects 'Awaiting Payment Confirmation' messaging"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingFlowManager.tsx",
+          "operation": "modify",
+          "description": "Update the booking submission logic to pass status: 'awaitingPayment' when creating a new booking record after the UPI payment step is completed. Ensure the booking record includes the paymentConfirmedAt field (optional). Review the current multi-step flow and ensure the status is set correctly based on the step progression."
+        },
+        {
+          "path": "frontend/src/hooks/useBooking.ts",
+          "operation": "modify",
+          "description": "Update the addBookingRecord mutation to accept and pass the status field to the backend. Ensure the TypeScript interface for BookingRecord includes the status field with variants 'pending', 'awaitingPayment', 'completed' and the optional paymentConfirmedAt timestamp."
+        },
+        {
+          "path": "frontend/src/types/booking.ts",
+          "operation": "modify",
+          "description": "Add the status field to the BookingRecord interface with type string literals 'pending' | 'awaitingPayment' | 'completed'. Add the optional paymentConfirmedAt field of type bigint or number to match the backend Time type."
+        },
+        {
+          "path": "frontend/src/components/BookingConfirmation.tsx",
+          "operation": "modify",
+          "description": "Update the confirmation message to display 'Awaiting Payment Confirmation' or similar messaging that indicates the booking is pending admin payment verification. Keep the existing UPI payment note visible."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Create an admin dashboard page to manage bookings with Mark as Paid functionality",
+      "acceptanceCriteria": [
+        "Admin dashboard is only visible/accessible to the authenticated admin principal",
+        "Bookings are grouped by status: Pending, Awaiting Payment, Completed",
+        "Each 'Awaiting Payment' booking has a 'Mark as Paid' button",
+        "Clicking 'Mark as Paid' calls the backend and updates the UI without full page reload",
+        "Booking details (name, phone, service, date, time, status) are displayed per row",
+        "Non-admin users cannot access the admin dashboard"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AdminDashboard.tsx",
+          "operation": "create",
+          "description": "Create an admin-only dashboard component that fetches all booking records using the existing useBookingRecords hook. Group bookings by their status field into three sections: Pending, Awaiting Payment, and Completed. For each booking in the Awaiting Payment section, render a 'Mark as Paid' button. Display booking details (name, phone, service, date, time, status) in a table or card layout. Use navy/gold brand tokens and Tailwind styling consistent with the existing app. Include a loading state while fetching bookings and an empty state for each group when no bookings exist."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new mutation hook useMarkAsPaid that calls actor.markAsPaid(bookingId) and invalidates the bookingRecords query cache on success. Ensure proper error handling and return the mutation result status."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new query hook useIsCallerAdmin that calls actor.isCallerAdmin() to check if the current user is an admin. This hook will be used to conditionally render the admin dashboard link and guard the admin dashboard component. Cache the result with a staleTime to avoid excessive backend calls."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add conditional rendering logic to show the AdminDashboard component when the current route is '/admin' and the user is authenticated as an admin (using the useIsCallerAdmin hook). Ensure the admin dashboard is not accessible to non-admin users by showing an access denied message or redirecting them. Keep the existing Hero/Services/EnrollmentCTA/Footer layout for non-admin routes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Create a public-facing Completed Sessions page displaying all completed bookings",
+      "acceptanceCriteria": [
+        "Page is publicly accessible without authentication",
+        "Displays all bookings with #completed status fetched from backend",
+        "Each card shows: student/parent name, service, date, and 'Completed ✓' badge",
+        "Shows an empty state message when no completed bookings exist",
+        "Page is styled with navy/gold/cream brand tokens matching the rest of the app"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CompletedSessions.tsx",
+          "operation": "create",
+          "description": "Create a public component that fetches completed bookings using a new useCompletedBookings query hook (which calls actor.getCompletedBookings). Display each completed session as a card showing the student/parent name, service type, session date, and a 'Completed ✓' badge. Style the cards using navy/gold/cream brand tokens and Tailwind classes consistent with the existing Services.tsx component. Include a heading, loading state, and an empty state message ('No completed sessions yet' or similar) when the array is empty. This component should be accessible to unauthenticated users."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new query hook useCompletedBookings that calls actor.getCompletedBookings() and returns an array of BookingRecord objects with status 'completed'. This query should not require authentication (enabled regardless of identity state). Cache the result with a reasonable staleTime and set refetchOnMount to true to ensure fresh data on page load."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add conditional rendering logic to show the CompletedSessions component when the current route is '/completed-sessions'. This route should be publicly accessible without requiring authentication. Keep the existing layout structure and ensure the route does not conflict with the admin dashboard or other existing pages."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Add navigation links for Completed Sessions (public) and Admin Dashboard (admin-only)",
+      "acceptanceCriteria": [
+        "A visible link to the Completed Sessions page is present for all users",
+        "An Admin link appears in the navigation only when the admin is logged in",
+        "Navigation links are styled consistently with existing UI"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Add a navigation link to the Completed Sessions page (route '/completed-sessions') in the footer. This link should be visible to all users (authenticated and unauthenticated). Style it consistently with the existing footer social media buttons or as a text link. Ensure the link triggers a route change to display the CompletedSessions component."
+        },
+        {
+          "path": "frontend/src/components/Hero.tsx",
+          "operation": "modify",
+          "description": "Add a conditionally rendered 'Admin' navigation button that is only visible when the user is authenticated and the useIsCallerAdmin hook returns true. This button should navigate to the '/admin' route to display the AdminDashboard component. Style it consistently with the existing CTA buttons using navy/gold brand tokens. Position it appropriately in the hero section (e.g., near the existing auth-gated buttons)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Implement basic client-side routing logic to handle '/admin' and '/completed-sessions' routes. Use a simple hash-based or path-based routing mechanism (e.g., window.location.hash or window.location.pathname) to conditionally render AdminDashboard, CompletedSessions, or the default home layout (Hero/Services/EnrollmentCTA/Footer). Ensure route changes update the displayed component without a full page reload. Add click handlers to navigation links that update the route state."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Tutoring session booking platform with UPI payment flow. Admin can mark sessions as paid after UPI transfer. Once marked paid, booking status updates to 'Completed' and becomes publicly visible. Booking statuses: Pending → Awaiting Payment → Completed.",
+  "architectural_notes": [
+    "Booking status flow: Pending → Awaiting Payment → Completed (publicly visible only after admin marks as paid)",
+    "Payment method: UPI (manual confirmation by admin, no payment gateway integration)"
+  ],
+  "known_issues": [
+    "Email bill feature (send payment confirmation to rkj.jain2204@gmail.com) is blocked — requires paid plan upgrade"
+  ],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-update-the-booking-submission-flow-bookingflowmanager-bookingform-so-that-after-a-student-parent-submits-a-booking-and-completes-the-upi-payment-step-the-booking-is-saved-with-status-awaitingpayment-instead-of-a-generic-submitted-state-update-usebooking-ts-and-relevant-hooks-to-pass-the-correct-initial-status-when-creating-a-new-booking",
+      "title": "Update the booking submission flow (BookingFlowManager / BookingForm) so that after a student/parent submits a booking and completes the UPI payment step, the booking is saved with status `#awaitingPayment` instead of a generic submitted state. Update `useBooking.ts` and relevant hooks to pass the correct initial status when creating a new booking.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-admin-dashboard-page-accessible-only-to-the-admin-owner-principal-after-login-that-lists-all-bookings-grouped-by-status-for-bookings-with-status-awaitingpayment-display-a-prominent-mark-as-paid-button-clicking-it-calls-the-backend-markaspaid-function-and-refreshes-the-list-display-each-booking-s-name-phone-service-date-time-and-current-status-use-the-existing-navy-gold-brand-tokens-and-tailwind-styling-consistent-with-the-rest-of-the-app",
+      "title": "Create an Admin Dashboard page (accessible only to the admin/owner principal after login) that lists all bookings grouped by status. For bookings with status `#awaitingPayment`, display a prominent 'Mark as Paid' button. Clicking it calls the backend `markAsPaid` function and refreshes the list. Display each booking's name, phone, service, date, time, and current status. Use the existing navy/gold brand tokens and Tailwind styling consistent with the rest of the app.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-public-facing-completed-sessions-page-no-login-required-that-fetches-and-displays-all-bookings-with-status-completed-using-getcompletedbookings-each-completed-session-card-should-show-the-student-parent-name-service-type-session-date-and-a-completed-badge-this-page-should-be-reachable-via-a-route-or-section-within-the-existing-single-page-app-layout-style-it-consistently-with-the-navy-gold-cream-brand-theme",
+      "title": "Create a public-facing 'Completed Sessions' page (no login required) that fetches and displays all bookings with status `#completed` using `getCompletedBookings()`. Each completed session card should show the student/parent name, service type, session date, and a 'Completed ✓' badge. This page should be reachable via a route or section within the existing single-page app layout. Style it consistently with the navy/gold/cream brand theme.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-navigation-link-or-button-in-the-app-e-g-in-the-footer-or-hero-section-that-allows-any-user-to-navigate-to-the-public-completed-sessions-page-additionally-add-an-admin-link-in-the-navigation-that-is-only-visible-when-the-admin-principal-is-authenticated",
+      "title": "Add a navigation link or button in the app (e.g., in the Footer or Hero section) that allows any user to navigate to the public 'Completed Sessions' page. Additionally, add an 'Admin' link in the navigation that is only visible when the admin principal is authenticated.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Tutoring session booking system for parents/students to submit session requests",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Admin dashboard with 'Mark as Paid' button to confirm UPI payments manually",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Public-facing page showing completed/paid bookings — only sessions confirmed as paid show as 'Completed' publicly",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Extend the backend booking record type to include a `status` field with variants: `#pending`, `#awaitingPayment`, `#completed`. New bookings default to `#pending`. Add a `paymentConfirmedAt` timestamp field (optional). Expose an admin-only `markAsPaid(bookingId: Text) : async Bool` function that transitions a booking from `#awaitingPayment` to `#completed` and records the confirmation timestamp. Only the canister owner/admin principal may call this function.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Add a backend query `getCompletedBookings() : async [BookingRecord]` that returns all bookings with status `#completed`. This query should be publicly accessible (no authentication required) so the public-facing page can fetch completed sessions without login.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Tutoring Booking Platform",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

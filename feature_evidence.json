@@ -1,0 +1,108 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-booking-submission-flow-bookingflowmanager-bookingform-so-that-after-a-student-parent-submits-a-booking-and-completes-the-upi-payment-step-the-booking-is-saved-with-status-awaitingpayment-instead-of-a-generic-submitted-state-update-usebooking-ts-and-relevant-hooks-to-pass-the-correct-initial-status-when-creating-a-new-booking",
+      "featureTitle": "Update the booking submission flow (BookingFlowManager / BookingForm) so that after a student/parent submits a booking and completes the UPI payment step, the booking is saved with status `#awaitingPayment` instead of a generic submitted state. Update `useBooking.ts` and relevant hooks to pass the correct initial status when creating a new booking.",
+      "files": [
+        "frontend/src/components/BookingConfirmation.tsx",
+        "frontend/src/components/BookingFlowManager.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-an-admin-dashboard-page-accessible-only-to-the-admin-owner-principal-after-login-that-lists-all-bookings-grouped-by-status-for-bookings-with-status-awaitingpayment-display-a-prominent-mark-as-paid-button-clicking-it-calls-the-backend-markaspaid-function-and-refreshes-the-list-display-each-booking-s-name-phone-service-date-time-and-current-status-use-the-existing-navy-gold-brand-tokens-and-tailwind-styling-consistent-with-the-rest-of-the-app",
+      "featureTitle": "Create an Admin Dashboard page (accessible only to the admin/owner principal after login) that lists all bookings grouped by status. For bookings with status `#awaitingPayment`, display a prominent 'Mark as Paid' button. Clicking it calls the backend `markAsPaid` function and refreshes the list. Display each booking's name, phone, service, date, time, and current status. Use the existing navy/gold brand tokens and Tailwind styling consistent with the rest of the app.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/AdminDashboard.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-public-facing-completed-sessions-page-no-login-required-that-fetches-and-displays-all-bookings-with-status-completed-using-getcompletedbookings-each-completed-session-card-should-show-the-student-parent-name-service-type-session-date-and-a-completed-badge-this-page-should-be-reachable-via-a-route-or-section-within-the-existing-single-page-app-layout-style-it-consistently-with-the-navy-gold-cream-brand-theme",
+      "featureTitle": "Create a public-facing 'Completed Sessions' page (no login required) that fetches and displays all bookings with status `#completed` using `getCompletedBookings()`. Each completed session card should show the student/parent name, service type, session date, and a 'Completed ✓' badge. This page should be reachable via a route or section within the existing single-page app layout. Style it consistently with the navy/gold/cream brand theme.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/CompletedSessions.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-navigation-link-or-button-in-the-app-e-g-in-the-footer-or-hero-section-that-allows-any-user-to-navigate-to-the-public-completed-sessions-page-additionally-add-an-admin-link-in-the-navigation-that-is-only-visible-when-the-admin-principal-is-authenticated",
+      "featureTitle": "Add a navigation link or button in the app (e.g., in the Footer or Hero section) that allows any user to navigate to the public 'Completed Sessions' page. Additionally, add an 'Admin' link in the navigation that is only visible when the admin principal is authenticated.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Footer.tsx",
+        "frontend/src/components/Hero.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
