@@ -32,9 +32,9 @@ export function LoginButton() {
     <Button
       onClick={handleAuth}
       disabled={isLoggingIn}
-      className={`px-6 py-2 shadow-lg transition-all ${
+      className={`px-6 py-2 shadow-lg transition-all font-semibold ${
         isAuthenticated
-          ? 'bg-[oklch(0.90_0.02_40)] hover:bg-[oklch(0.85_0.03_40)] text-[oklch(0.40_0.08_40)] border-2 border-[oklch(0.85_0.03_40)]'
+          ? 'bg-gray-900 hover:bg-gray-800 text-white border-2 border-gray-700'
           : 'bg-[oklch(0.55_0.15_40)] hover:bg-[oklch(0.50_0.15_40)] text-white'
       }`}
     >

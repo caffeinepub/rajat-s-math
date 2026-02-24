@@ -1,71 +1,25 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "App with Internet Identity authentication, login/logout in navigation bar, and an admin dashboard restricted to rkj.jain2204@gmail.com. After login, admin users are redirected to the admin dashboard and regular users to the home page.",
-  "architectural_notes": [
-    "Authentication is handled via Internet Identity (supports passkeys, Google, Apple, Microsoft)",
-    "Admin access is gated by specific email address: rkj.jain2204@gmail.com"
-  ],
+  "summary": "Web application with authentication (login/logout) and admin dashboard. Working on UI improvements to make the logout button more visible with a dark color.",
+  "architectural_notes": [],
   "known_issues": [
-    "Admin dashboard not appearing in navigation for rkj.jain2204@gmail.com (reported in Version 33)"
+    "Logout button not clearly visible - needs dark color styling"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-a-login-button-and-a-logout-button-to-the-navigation-bar-visible-on-all-pages-use-internet-identity-for-authentication-when-the-user-is-not-logged-in-show-the-login-button-when-logged-in-show-the-logout-button-alongside-the-user-s-identity-indicator-on-logout-clear-the-react-query-cache-and-return-the-user-to-the-home-page",
-      "title": "Add a Login button and a Logout button to the navigation bar (visible on all pages). Use Internet Identity for authentication. When the user is not logged in, show the Login button. When logged in, show the Logout button alongside the user's identity indicator. On logout, clear the React Query cache and return the user to the home page.",
+      "id": "feature-update-the-logout-button-link-in-the-header-component-and-loginbutton-component-to-use-a-dark-color-e-g-dark-text-or-dark-background-so-it-is-clearly-visible-against-the-navigation-bar-background-ensure-the-styling-is-consistent-across-both-desktop-and-mobile-nav-layouts",
+      "title": "Update the logout button/link in the Header component and LoginButton component to use a dark color (e.g., dark text or dark background) so it is clearly visible against the navigation bar background. Ensure the styling is consistent across both desktop and mobile nav layouts.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-the-admin-dashboard-admindashboard-component-hash-route-admin-must-be-completely-hidden-and-inaccessible-to-any-user-who-is-not-authenticated-as-the-admin-principal-associated-with-rkj-jain2204-gmail-com-any-attempt-to-navigate-to-admin-by-a-non-admin-user-must-redirect-them-to-the-home-page-the-admin-dashboard-link-button-must-not-appear-in-the-navigation-bar-or-hero-section-for-non-admin-users-fix-the-existing-issue-where-the-admin-dashboard-was-not-appearing-for-the-admin-user-in-version-33",
-      "title": "The admin dashboard (AdminDashboard component, hash route #admin) must be completely hidden and inaccessible to any user who is not authenticated as the admin principal associated with rkj.jain2204@gmail.com. Any attempt to navigate to #admin by a non-admin user must redirect them to the home page. The admin dashboard link/button must not appear in the navigation bar or hero section for non-admin users. Fix the existing issue where the admin dashboard was not appearing for the admin user in Version 33.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Add login/logout buttons to the navigation bar using Internet Identity authentication",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Admin dashboard restricted to rkj.jain2204@gmail.com only; hidden from all other users",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "After login, redirect admin (rkj.jain2204@gmail.com) to admin dashboard and regular users to home page",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "After a successful Internet Identity login, if the authenticated user's principal corresponds to the email rkj.jain2204@gmail.com (i.e., the admin), automatically redirect them to the admin dashboard page (hash route #admin). All other authenticated users should be redirected to the home page (hash route #home or root).",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Ensure the backend's isAdmin function or authorization check correctly identifies the principal associated with rkj.jain2204@gmail.com and returns true only for that principal. Verify the admin principal ID stored in the backend matches the one produced by Internet Identity for rkj.jain2204@gmail.com.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    }
-  ],
+  "new_feature_requests": [],
   "gameProjectType": "none",
-  "projectName": "Rajat's Equation",
+  "projectName": "Make logout button clearly visible with dark color styling",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

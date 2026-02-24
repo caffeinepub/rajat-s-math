@@ -1,106 +1,36 @@
 {
   "kind": "build_request",
-  "title": "Add Login/Logout to Nav & Fix Admin Dashboard Access for rkj.jain2204@gmail.com",
-  "projectName": "Rajat's Equation",
-  "priority": "high",
+  "title": "Make logout button clearly visible with dark color styling",
+  "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a Login button and a Logout button to the navigation bar (visible on all pages). Use Internet Identity for authentication. When the user is not logged in, show the Login button. When logged in, show the Logout button alongside the user's identity indicator. On logout, clear the React Query cache and return the user to the home page.",
+      "text": "Update the logout button/link in the Header component and LoginButton component to use a dark color (e.g., dark text or dark background) so it is clearly visible against the navigation bar background. Ensure the styling is consistent across both desktop and mobile nav layouts.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-recent-6",
-          "msg-recent-7"
+          "msg-4"
         ],
         "quotes": [
-          "give an option og login and logout also",
-          "Login/Logout buttons in the navigation bar (visible on all pages)"
+          "logout is not properly visible change it to a dark colour"
         ]
       },
       "acceptanceCriteria": [
-        "A Login button appears in the navigation bar when no user is authenticated.",
-        "A Logout button appears in the navigation bar when a user is authenticated.",
-        "Clicking Login opens the Internet Identity authentication flow.",
-        "Clicking Logout ends the session, clears React Query cache, and redirects to the home page.",
-        "The Login/Logout controls are visible on every page of the app."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "After a successful Internet Identity login, if the authenticated user's principal corresponds to the email rkj.jain2204@gmail.com (i.e., the admin), automatically redirect them to the admin dashboard page (hash route #admin). All other authenticated users should be redirected to the home page (hash route #home or root).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-recent-7"
-        ],
-        "quotes": [
-          "After login: admin (rkj.jain2204@gmail.com) is redirected to the admin dashboard, all other users go to the home page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Upon login, the app checks whether the authenticated identity is the admin.",
-        "Admin user (rkj.jain2204@gmail.com) is redirected to #admin after login.",
-        "Non-admin users are redirected to the home page after login.",
-        "Redirect happens automatically without requiring any additional user action."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "The admin dashboard (AdminDashboard component, hash route #admin) must be completely hidden and inaccessible to any user who is not authenticated as the admin principal associated with rkj.jain2204@gmail.com. Any attempt to navigate to #admin by a non-admin user must redirect them to the home page. The admin dashboard link/button must not appear in the navigation bar or hero section for non-admin users. Fix the existing issue where the admin dashboard was not appearing for the admin user in Version 33.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-recent-2",
-          "msg-recent-3",
-          "msg-recent-5"
-        ],
-        "quotes": [
-          "entire admin dashboard is missing",
-          "does not simply appear in the menu",
-          "only should be specific email address",
-          "Admin dashboard is fully hidden and only accessible to rkj.jain2204@gmail.com"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When logged in as the admin principal (rkj.jain2204@gmail.com), the admin dashboard link appears in the navigation bar and/or hero section.",
-        "When logged in as any other user, or when not logged in, the admin dashboard link is not rendered anywhere in the UI.",
-        "Directly navigating to #admin as a non-admin user redirects to the home page.",
-        "The admin dashboard page loads and renders correctly for the admin user without any missing content.",
-        "The admin check uses the correct principal ID corresponding to rkj.jain2204@gmail.com and does not silently fail."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Ensure the backend's isAdmin function or authorization check correctly identifies the principal associated with rkj.jain2204@gmail.com and returns true only for that principal. Verify the admin principal ID stored in the backend matches the one produced by Internet Identity for rkj.jain2204@gmail.com.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-recent-2",
-          "msg-recent-3"
-        ],
-        "quotes": [
-          "admin dashboard still not visible",
-          "entire admin dashboard is missing"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The backend isAdmin or equivalent authorization function returns true when called by the principal of rkj.jain2204@gmail.com.",
-        "The backend returns false for all other principals.",
-        "The admin principal value is correctly hardcoded or stored in the backend actor."
+        "The logout button/link is rendered with a dark color that provides strong contrast against its background",
+        "The logout option is visually distinguishable and easy to locate in the navigation bar",
+        "Dark color styling is applied consistently on both desktop and mobile views",
+        "The logout button remains functional (triggers logout when clicked)"
       ]
     }
   ],
   "constraints": [
-    "Admin access must be restricted exclusively to the principal associated with rkj.jain2204@gmail.com.",
-    "Authentication must use Internet Identity only.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts",
+    "Do not alter logout functionality — only change visual styling"
   ],
   "nonGoals": [
-    "Adding any other authentication provider beyond Internet Identity.",
-    "Role-based access control for multiple admin users.",
-    "Email-based login or password authentication.",
-    "Changes to the booking, payment, or student portal flows."
+    "Redesigning the entire header or navigation",
+    "Changes to login button styling",
+    "Any backend changes"
   ],
   "imageRequirements": {
     "required": [],

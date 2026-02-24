@@ -2,10 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-login-button-and-a-logout-button-to-the-navigation-bar-visible-on-all-pages-use-internet-identity-for-authentication-when-the-user-is-not-logged-in-show-the-login-button-when-logged-in-show-the-logout-button-alongside-the-user-s-identity-indicator-on-logout-clear-the-react-query-cache-and-return-the-user-to-the-home-page",
-      "featureTitle": "Add a Login button and a Logout button to the navigation bar (visible on all pages). Use Internet Identity for authentication. When the user is not logged in, show the Login button. When logged in, show the Logout button alongside the user's identity indicator. On logout, clear the React Query cache and return the user to the home page.",
+      "featureId": "feature-update-the-logout-button-link-in-the-header-component-and-loginbutton-component-to-use-a-dark-color-e-g-dark-text-or-dark-background-so-it-is-clearly-visible-against-the-navigation-bar-background-ensure-the-styling-is-consistent-across-both-desktop-and-mobile-nav-layouts",
+      "featureTitle": "Update the logout button/link in the Header component and LoginButton component to use a dark color (e.g., dark text or dark background) so it is clearly visible against the navigation bar background. Ensure the styling is consistent across both desktop and mobile nav layouts.",
       "files": [
-        "frontend/src/App.tsx",
         "frontend/src/components/Header.tsx",
         "frontend/src/components/LoginButton.tsx"
       ],
@@ -24,31 +23,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-the-admin-dashboard-admindashboard-component-hash-route-admin-must-be-completely-hidden-and-inaccessible-to-any-user-who-is-not-authenticated-as-the-admin-principal-associated-with-rkj-jain2204-gmail-com-any-attempt-to-navigate-to-admin-by-a-non-admin-user-must-redirect-them-to-the-home-page-the-admin-dashboard-link-button-must-not-appear-in-the-navigation-bar-or-hero-section-for-non-admin-users-fix-the-existing-issue-where-the-admin-dashboard-was-not-appearing-for-the-admin-user-in-version-33",
-      "featureTitle": "The admin dashboard (AdminDashboard component, hash route #admin) must be completely hidden and inaccessible to any user who is not authenticated as the admin principal associated with rkj.jain2204@gmail.com. Any attempt to navigate to #admin by a non-admin user must redirect them to the home page. The admin dashboard link/button must not appear in the navigation bar or hero section for non-admin users. Fix the existing issue where the admin dashboard was not appearing for the admin user in Version 33.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/Header.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "blob-storage@4.0.0",
-        "qr-code@1.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

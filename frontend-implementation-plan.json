@@ -1,93 +1,27 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Login/Logout to Nav & Fix Admin Dashboard Access for rkj.jain2204@gmail.com",
+  "title": "Make logout button clearly visible with dark color styling",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add Login and Logout buttons to the navigation bar visible on all pages, using Internet Identity for authentication. Show Login when unauthenticated and Logout when authenticated. On logout, clear React Query cache and redirect to home.",
+      "summary": "Update logout button styling in Header and LoginButton components to use dark colors for better visibility",
       "acceptanceCriteria": [
-        "A Login button appears in the navigation bar when no user is authenticated.",
-        "A Logout button appears in the navigation bar when a user is authenticated.",
-        "Clicking Login opens the Internet Identity authentication flow.",
-        "Clicking Logout ends the session, clears React Query cache, and redirects to the home page.",
-        "The Login/Logout controls are visible on every page of the app."
+        "The logout button/link is rendered with a dark color that provides strong contrast against its background",
+        "The logout option is visually distinguishable and easy to locate in the navigation bar",
+        "Dark color styling is applied consistently on both desktop and mobile views",
+        "The logout button remains functional (triggers logout when clicked)"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Header.tsx",
-          "operation": "create",
-          "description": "Create a Header component that renders on all pages. Import and render the existing LoginButton component from frontend/src/components/LoginButton.tsx. Include navigation links and ensure the header is responsive. The LoginButton already implements Internet Identity login/logout with React Query cache clearing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Import the new Header component and render it above the router outlet so it appears on all pages. Place it before the existing ProfileSetup modal and route content to ensure visibility across the entire application."
+          "description": "Update the logout button/link styling in the Header component's navigation (both desktop and mobile layouts) to use dark text colors (e.g., text-navy-900 or text-gray-900) with appropriate hover states for strong contrast against the navigation bar background. Ensure consistent dark styling across responsive breakpoints without altering logout functionality."
         },
         {
           "path": "frontend/src/components/LoginButton.tsx",
           "operation": "modify",
-          "description": "Ensure the logout handler calls queryClient.clear() and programmatically navigates to the home page (hash route #home or root) after clearing identity. Verify that the button displays the user's identity indicator when logged in alongside the Logout button text."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "After successful Internet Identity login, redirect admin user (rkj.jain2204@gmail.com) to the admin dashboard (#admin) and all other authenticated users to the home page (#home or root).",
-      "acceptanceCriteria": [
-        "Upon login, the app checks whether the authenticated identity is the admin.",
-        "Admin user (rkj.jain2204@gmail.com) is redirected to #admin after login.",
-        "Non-admin users are redirected to the home page after login.",
-        "Redirect happens automatically without requiring any additional user action."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useInternetIdentity.ts",
-          "operation": "modify",
-          "description": "Add post-login redirect logic in the login function. After successful authentication, check if the user is an admin by calling the backend isCallerAdmin() method. If true, navigate to #admin; otherwise, navigate to #home or root. Ensure this redirect only occurs after login, not on page reload with existing session."
-        },
-        {
-          "path": "frontend/src/utils/adminCheck.ts",
-          "operation": "create",
-          "description": "Create a utility function that accepts an actor and returns a boolean indicating whether the current caller is the admin. This function wraps the backend isCallerAdmin() call and can be reused across components for admin authorization checks."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Hide the admin dashboard completely from non-admin users. Only the admin principal (rkj.jain2204@gmail.com) can access the dashboard at #admin. Non-admin attempts to navigate to #admin redirect to home. Admin dashboard link only appears in navigation for the admin user. Fix the Version 33 issue where the dashboard was missing for the admin.",
-      "acceptanceCriteria": [
-        "When logged in as the admin principal (rkj.jain2204@gmail.com), the admin dashboard link appears in the navigation bar and/or hero section.",
-        "When logged in as any other user, or when not logged in, the admin dashboard link is not rendered anywhere in the UI.",
-        "Directly navigating to #admin as a non-admin user redirects to the home page.",
-        "The admin dashboard page loads and renders correctly for the admin user without any missing content.",
-        "The admin check uses the correct principal ID corresponding to rkj.jain2204@gmail.com and does not silently fail."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wrap the #admin route with an admin authorization guard. Before rendering AdminDashboard, check if the user is authenticated and call the backend isCallerAdmin() method. If false or unauthenticated, programmatically redirect to #home. Ensure the guard does not cause the dashboard to disappear for legitimate admin users by properly handling loading states."
-        },
-        {
-          "path": "frontend/src/components/Hero.tsx",
-          "operation": "modify",
-          "description": "Conditionally render the admin dashboard button only when the user is authenticated as admin. Use the useIsCallerAdmin hook from frontend/src/hooks/useQueries.ts to check admin status. Ensure the button is hidden (not just disabled) for non-admin users and displays correctly for the admin without flickering or disappearing."
-        },
-        {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Add a navigation link to the admin dashboard (#admin) that is only visible when the authenticated user is the admin. Use the useIsCallerAdmin hook to conditionally render this link. Place it in a prominent position in the navigation menu alongside other links."
-        },
-        {
-          "path": "frontend/src/components/AdminDashboard.tsx",
-          "operation": "modify",
-          "description": "Add a defensive check at the top of the component to verify admin status using the useIsCallerAdmin hook. If the user is not an admin, display an unauthorized message and provide a link back to the home page. This prevents the dashboard from rendering if the route guard fails or is bypassed."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Review and ensure the useIsCallerAdmin hook correctly calls the backend isCallerAdmin() method and returns accurate admin status. Verify the query is enabled only when the user is authenticated and the actor is available. Add proper error handling and retry configuration to prevent silent failures that caused the Version 33 issue."
+          "description": "Modify the logout button state styling in the LoginButton component to use dark background or dark text colors (e.g., bg-navy-800 text-white or text-navy-900) that provide clear visibility. Update hover states to maintain dark color scheme while preserving the existing authentication logic and loading states."
         }
       ]
     }
