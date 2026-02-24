@@ -205,6 +205,12 @@ export const ValidationResult = IDL.Record({
   'feedback' : IDL.Text,
   'isCorrect' : IDL.Bool,
 });
+export const DiscountCodeValidationResponse = IDL.Record({
+  'discountPercent' : IDL.Nat,
+  'isUsed' : IDL.Bool,
+  'isActive' : IDL.Bool,
+  'isValid' : IDL.Bool,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -349,8 +355,12 @@ export const idlService = IDL.Service({
       [IDL.Bool],
       [],
     ),
-  'validateAndApplyDiscountCode' : IDL.Func([IDL.Text], [IDL.Nat], []),
   'validateAnswer' : IDL.Func([IDL.Nat, IDL.Int], [ValidationResult], []),
+  'validateDiscountCode' : IDL.Func(
+      [IDL.Text],
+      [DiscountCodeValidationResponse],
+      ['query'],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -547,6 +557,12 @@ export const idlFactory = ({ IDL }) => {
     'feedback' : IDL.Text,
     'isCorrect' : IDL.Bool,
   });
+  const DiscountCodeValidationResponse = IDL.Record({
+    'discountPercent' : IDL.Nat,
+    'isUsed' : IDL.Bool,
+    'isActive' : IDL.Bool,
+    'isValid' : IDL.Bool,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -695,8 +711,12 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Bool],
         [],
       ),
-    'validateAndApplyDiscountCode' : IDL.Func([IDL.Text], [IDL.Nat], []),
     'validateAnswer' : IDL.Func([IDL.Nat, IDL.Int], [ValidationResult], []),
+    'validateDiscountCode' : IDL.Func(
+        [IDL.Text],
+        [DiscountCodeValidationResponse],
+        ['query'],
+      ),
   });
 };
 

@@ -12,6 +12,7 @@ import type {
   ExtendedDiscountCode,
   VisitorActivity,
   EventType,
+  DiscountCodeValidationResponse,
 } from '../backend';
 
 // ─── User Profile ─────────────────────────────────────────────────────────────
@@ -473,15 +474,30 @@ export function useSetDiscountCodeActiveState() {
   });
 }
 
+/**
+ * Validates a discount code against the backend.
+ * Returns { discountPercent, code } on success.
+ * Throws an error with a user-friendly message if the code is invalid, used, or inactive.
+ * NOTE: This does NOT mark the code as used — that happens only on booking confirmation.
+ */
 export function useValidateDiscountCode() {
   const { actor } = useActor();
 
   return useMutation({
     mutationFn: async (code: string): Promise<{ discountPercent: number; code: string }> => {
       if (!actor) throw new Error('Actor not available');
-      const discountPercentBigInt = await actor.validateAndApplyDiscountCode(code);
+      const result: DiscountCodeValidationResponse = await actor.validateDiscountCode(code);
+      if (!result.isValid) {
+        if (result.isUsed) {
+          throw new Error('This discount code has already been used');
+        }
+        if (!result.isActive) {
+          throw new Error('This discount code is no longer active');
+        }
+        throw new Error('Invalid discount code');
+      }
       return {
-        discountPercent: Number(discountPercentBigInt),
+        discountPercent: Number(result.discountPercent),
         code,
       };
     },

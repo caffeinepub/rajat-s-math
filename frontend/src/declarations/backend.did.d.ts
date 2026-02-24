@@ -72,6 +72,12 @@ export type CourseMaterialType = { 'pdf' : null } |
   { 'link' : null } |
   { 'note' : null };
 export interface CourseRoadmap { 'modules' : Array<RoadmapModule> }
+export interface DiscountCodeValidationResponse {
+  'discountPercent' : bigint,
+  'isUsed' : boolean,
+  'isActive' : boolean,
+  'isValid' : boolean,
+}
 export type EventType = { 'login' : null } |
   { 'courseView' : null };
 export interface ExtendedDiscountCode {
@@ -306,11 +312,14 @@ export interface _SERVICE {
    * / Admin updates a single module's status within a booking's roadmap.
    */
   'updateModuleStatus' : ActorMethod<[string, bigint, ModuleStatus], boolean>,
-  /**
-   * / Validate and apply discount code at checkout
-   */
-  'validateAndApplyDiscountCode' : ActorMethod<[string], bigint>,
   'validateAnswer' : ActorMethod<[bigint, bigint], ValidationResult>,
+  /**
+   * / Validate discount code without side effects
+   */
+  'validateDiscountCode' : ActorMethod<
+    [string],
+    DiscountCodeValidationResponse
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

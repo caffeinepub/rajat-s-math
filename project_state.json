@@ -1,25 +1,24 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Portal project with admin dashboard and user-facing features including attendance tracking, discount codes, visitor tracking, and payment enquiry forms. Currently implementing discount code integration in the payment enquiry form and opaque dropdown styling.",
+  "summary": "E-commerce or shopping project with discount code functionality. Existing codes: SAVE10, SUMMER20. New codes: RAJAT50 (50% off), MATHS30 (30% off).",
   "architectural_notes": [
-    "Discount codes are generated via the admin dashboard and must be validated against admin-created codes on the frontend payment enquiry form",
-    "All dropdown menus should use fully opaque styling — no transparency or glassmorphism effects"
+    "Discount codes: SAVE10, SUMMER20, RAJAT50 (50%), MATHS30 (30%) — applied via Apply button"
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-a-discount-code-input-field-to-the-payment-enquiry-booking-form-upipaymentstep-and-bookingflowmanager-that-allows-users-to-enter-admin-generated-discount-codes-when-a-valid-code-is-entered-calculate-and-display-the-discounted-price-in-real-time-before-submission-include-the-discount-code-and-final-discounted-price-as-part-of-the-same-form-submission-payload-sent-to-the-backend",
-      "title": "Add a discount code input field to the payment enquiry / booking form (UpiPaymentStep and BookingFlowManager) that allows users to enter admin-generated discount codes. When a valid code is entered, calculate and display the discounted price in real-time before submission. Include the discount code and final discounted price as part of the same form submission payload sent to the backend.",
+      "id": "feature-add-two-new-discount-codes-to-the-discount-code-validation-logic-in-upipaymentstep-tsx-rajat50-50-discount-and-maths30-30-discount-these-must-work-alongside-the-existing-save10-10-and-summer20-20-codes",
+      "title": "Add two new discount codes to the discount code validation logic in UpiPaymentStep.tsx: RAJAT50 (50% discount) and MATHS30 (30% discount). These must work alongside the existing SAVE10 (10%) and SUMMER20 (20%) codes.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-make-all-dropdown-menus-throughout-the-portal-student-portal-admin-dashboard-booking-forms-service-selections-and-any-other-dropdowns-fully-opaque-remove-all-transparency-glassmorphism-or-backdrop-blur-effects-from-dropdown-menus-so-they-have-a-solid-opaque-background",
-      "title": "Make all dropdown menus throughout the portal (student portal, admin dashboard, booking forms, service selections, and any other dropdowns) fully opaque. Remove all transparency, glassmorphism, or backdrop-blur effects from dropdown menus so they have a solid, opaque background.",
+      "id": "feature-update-the-discountcodemanager-admin-ui-to-display-rajat50-50-and-maths30-30-alongside-the-existing-discount-codes-so-admins-can-see-all-active-codes",
+      "title": "Update the DiscountCodeManager admin UI to display RAJAT50 (50%) and MATHS30 (30%) alongside the existing discount codes so admins can see all active codes.",
       "reqIds": [
         "REQ-2"
       ],
@@ -29,13 +28,13 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Connect admin-generated discount codes to payment enquiry form with real-time price calculation and unified form submission",
+      "summary": "Add discount code RAJAT50 for 50% discount",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Make all dropdown menus throughout the portal fully opaque (remove transparency/glassmorphism styling)",
+      "summary": "Add discount code MATHS30 for 30% discount",
       "reqIds": [],
       "status": "pending"
     }

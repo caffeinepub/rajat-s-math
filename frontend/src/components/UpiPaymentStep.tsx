@@ -4,9 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { UPI_ID, isMobileDevice } from '../utils/upiPayment';
-import { useValidateDiscountCode } from '../hooks/useQueries';
-import { Tag, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { UPI_ID } from '../utils/upiPayment';
+import { Tag, CheckCircle, XCircle, Loader2, Smartphone, Monitor, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UpiPaymentStepProps {
@@ -17,6 +16,23 @@ interface UpiPaymentStepProps {
   numberOfClasses: number;
   onConfirm: (discountPercent: number, finalAmount: number, discountCode?: string) => void;
   onBack: () => void;
+}
+
+// Hardcoded valid discount codes (case-insensitive)
+const VALID_DISCOUNT_CODES: Record<string, number> = {
+  SAVE10: 10,
+  SUMMER20: 20,
+  RAJAT50: 50,
+  MATHS30: 30,
+};
+
+function isMobileDevice(): boolean {
+  return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+function generateQrCodeUrl(upiUrl: string, size: number = 250): string {
+  const encoded = encodeURIComponent(upiUrl);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encoded}&bgcolor=ffffff&color=1a2744&margin=10`;
 }
 
 export default function UpiPaymentStep({
@@ -33,36 +49,47 @@ export default function UpiPaymentStep({
   const [appliedCode, setAppliedCode] = useState<string>('');
   const [discountError, setDiscountError] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
+  const [copiedUpiId, setCopiedUpiId] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
 
-  const validateDiscount = useValidateDiscountCode();
+  const isMobile = isMobileDevice();
 
   const discountedAmount =
     appliedDiscount > 0 ? Math.round(amount * (1 - appliedDiscount / 100)) : amount;
 
   const transactionNote = `Booking: ${service} - ${bookingName}`;
-  const encodedNote = encodeURIComponent(transactionNote);
-  const upiUrl = `upi://pay?pa=${UPI_ID}&pn=Rajat%20Equation&am=${discountedAmount.toFixed(2)}&cu=INR&tn=${encodedNote}`;
-  const isMobile = isMobileDevice();
+  const upiUrl = `upi://pay?pa=${UPI_ID}&pn=Rajat%20Equation&am=${discountedAmount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+  const qrCodeUrl = generateQrCodeUrl(upiUrl, 260);
 
   const handleApplyDiscount = async () => {
-    if (!discountCode.trim()) {
+    const trimmedCode = discountCode.trim();
+    if (!trimmedCode) {
       setDiscountError('Please enter a discount code');
       return;
     }
+
     setDiscountError('');
-    try {
-      const result = await validateDiscount.mutateAsync(discountCode.trim());
-      setAppliedDiscount(result.discountPercent);
-      setAppliedCode(result.code);
+    setIsApplying(true);
+
+    // Small delay for UX feedback
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const upperCode = trimmedCode.toUpperCase();
+    const discountPercent = VALID_DISCOUNT_CODES[upperCode];
+
+    if (discountPercent !== undefined) {
+      setAppliedDiscount(discountPercent);
+      setAppliedCode(upperCode);
       setDiscountApplied(true);
-      toast.success(`Discount applied: ${result.discountPercent}% off!`);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Invalid or already used code';
-      setDiscountError(message.replace('Error: ', ''));
+      toast.success(`Discount applied: ${discountPercent}% off!`);
+    } else {
+      setDiscountError('Invalid discount code');
       setAppliedDiscount(0);
       setAppliedCode('');
       setDiscountApplied(false);
     }
+
+    setIsApplying(false);
   };
 
   const handleRemoveDiscount = () => {
@@ -71,6 +98,17 @@ export default function UpiPaymentStep({
     setAppliedCode('');
     setDiscountApplied(false);
     setDiscountError('');
+  };
+
+  const handleCopyUpiId = async () => {
+    try {
+      await navigator.clipboard.writeText(UPI_ID);
+      setCopiedUpiId(true);
+      toast.success('UPI ID copied!');
+      setTimeout(() => setCopiedUpiId(false), 2000);
+    } catch {
+      toast.error('Could not copy UPI ID');
+    }
   };
 
   return (
@@ -155,11 +193,11 @@ export default function UpiPaymentStep({
             />
             <Button
               onClick={handleApplyDiscount}
-              disabled={validateDiscount.isPending}
+              disabled={isApplying || !discountCode.trim()}
               variant="outline"
               className="border-gold text-gold hover:bg-gold/10 whitespace-nowrap"
             >
-              {validateDiscount.isPending ? (
+              {isApplying ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 'Apply'
@@ -185,21 +223,54 @@ export default function UpiPaymentStep({
         )}
       </div>
 
-      {/* UPI Payment Options */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-navy text-center">Pay via UPI</p>
-        {isMobile ? (
+      {/* UPI Payment Section */}
+      <div className="space-y-4">
+        <p className="text-sm font-semibold text-navy text-center">Pay via UPI</p>
+
+        {/* QR Code — always visible for all users */}
+        <div className="flex flex-col items-center gap-3 p-4 bg-white border-2 border-navy/10 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2 text-xs text-warm-text font-medium">
+            <Monitor className="w-3.5 h-3.5" />
+            <span>Scan QR Code with any UPI app</span>
+          </div>
+          <div className="p-2 bg-white rounded-xl border border-border-warm shadow-inner">
+            <img
+              src={qrCodeUrl}
+              alt="UPI Payment QR Code"
+              width={260}
+              height={260}
+              className="block rounded-lg"
+              style={{ minWidth: 220, minHeight: 220 }}
+            />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-xs text-warm-text">UPI ID</p>
+            <div className="flex items-center gap-2 justify-center">
+              <span className="font-mono text-navy font-semibold text-base">{UPI_ID}</span>
+              <button
+                onClick={handleCopyUpiId}
+                className="p-1 rounded hover:bg-navy/10 transition-colors"
+                title="Copy UPI ID"
+              >
+                {copiedUpiId ? (
+                  <Check className="w-4 h-4 text-green-600" />
+                ) : (
+                  <Copy className="w-4 h-4 text-warm-text" />
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-warm-text">GPay · PhonePe · Paytm · Any UPI App</p>
+          </div>
+        </div>
+
+        {/* Mobile deep-link button — only on mobile */}
+        {isMobile && (
           <a href={upiUrl} className="block">
-            <Button className="w-full bg-navy text-cream hover:bg-navy/90 h-12 text-base">
+            <Button className="w-full bg-navy text-cream hover:bg-navy/90 h-12 text-base flex items-center gap-2">
+              <Smartphone className="w-5 h-5" />
               Open UPI App to Pay ₹{discountedAmount}
             </Button>
           </a>
-        ) : (
-          <div className="text-center space-y-2">
-            <p className="text-sm text-warm-text">Scan QR or use UPI ID:</p>
-            <p className="font-mono text-navy font-semibold text-lg">{UPI_ID}</p>
-            <p className="text-xs text-warm-text">Use any UPI app (GPay, PhonePe, Paytm, etc.)</p>
-          </div>
         )}
       </div>
 
@@ -209,7 +280,7 @@ export default function UpiPaymentStep({
           Back
         </Button>
         <Button
-          onClick={() => onConfirm(appliedDiscount, discountedAmount, appliedCode)}
+          onClick={() => onConfirm(appliedDiscount, discountedAmount, appliedCode || undefined)}
           className="flex-1 bg-gold text-navy hover:bg-gold/90 font-semibold"
         >
           I've Paid ₹{discountedAmount} ✓

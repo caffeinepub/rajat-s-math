@@ -1,67 +1,39 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Connect discount codes to payment enquiry form and make dropdowns opaque",
+  "title": "Add RAJAT50 and MATHS30 discount codes",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Add discount code input field to payment enquiry / booking form with real-time validation, discounted price display, and form submission integration",
+      "summary": "Add RAJAT50 (50%) and MATHS30 (30%) discount codes to UpiPaymentStep validation logic alongside existing codes",
       "acceptanceCriteria": [
-        "A discount code text input is visible in the payment enquiry / booking form (UpiPaymentStep component)",
-        "When a user enters a valid admin-generated discount code, the discounted price is calculated and displayed in real-time before submission",
-        "Invalid or expired codes show a clear error message",
-        "The discount code and resulting discounted price are included in the booking form submission payload",
-        "The BookingConfirmation screen shows the applied discount code and discounted amount",
-        "The backend validateDiscountCode (or equivalent) query is called to verify the code before applying it"
+        "Entering RAJAT50 in the discount code field applies a 50% discount to the booking total",
+        "Entering MATHS30 in the discount code field applies a 30% discount to the booking total",
+        "Existing codes SAVE10 (10%) and SUMMER20 (20%) continue to work correctly",
+        "Invalid codes still show an appropriate error message",
+        "The discounted final amount is correctly reflected in the payment summary and booking confirmation"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add a new React Query mutation hook `useValidateAndApplyDiscountCode` that calls the backend `validateAndApplyDiscountCode` method. This hook will enable real-time discount code validation and return the discount percentage when a code is valid."
-        },
-        {
           "path": "frontend/src/components/UpiPaymentStep.tsx",
           "operation": "modify",
-          "description": "Add a discount code input field above the booking summary. Implement state management for the discount code input, validation status, and applied discount percentage. When the user enters a code and clicks 'Apply', call the `useValidateAndApplyDiscountCode` mutation hook to validate the code with the backend. On success, recalculate and display the discounted price in real-time. Show clear error messages for invalid or expired codes. Update the component to pass the discount code and final discounted amount to the parent component via the onSubmit callback."
-        },
-        {
-          "path": "frontend/src/components/BookingFlowManager.tsx",
-          "operation": "modify",
-          "description": "Update the state management to track the discount code and discounted amount received from UpiPaymentStep. Modify the handlePaymentSubmit function to include the discount code and final discounted amount in the booking record payload when calling addBookingRecord. Ensure these fields are passed through to BookingConfirmation for display."
-        },
-        {
-          "path": "frontend/src/components/BookingConfirmation.tsx",
-          "operation": "modify",
-          "description": "Add UI elements to display the applied discount code (if any) and the discounted amount. Show a badge or label indicating the discount code used and the amount saved, positioned near the final amount display."
-        },
-        {
-          "path": "frontend/src/types/booking.ts",
-          "operation": "modify",
-          "description": "Update the BookingFormData and BookingRecord interfaces to include optional `discountCode: string` and `discountPercent: number` fields to support discount tracking throughout the booking flow."
+          "description": "Update the discount code validation logic to include two new codes: RAJAT50 with 50% discount and MATHS30 with 30% discount. Extend the existing validDiscountCodes object (currently containing SAVE10: 10 and SUMMER20: 20) to include RAJAT50: 50 and MATHS30: 30. Ensure the validation, discount calculation, and final amount display logic correctly handle all four codes."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Make all dropdown menus fully opaque by removing transparency, glassmorphism, and backdrop-blur effects",
+      "summary": "Update DiscountCodeManager admin UI to display RAJAT50 and MATHS30 alongside existing codes",
       "acceptanceCriteria": [
-        "All dropdown menus across the portal (service type, class type, date pickers, select inputs, etc.) have fully opaque backgrounds",
-        "No dropdown menu uses a transparent, semi-transparent, or glassmorphism/backdrop-blur style",
-        "Dropdowns use a solid background color consistent with the app's design system (navy/cream/gold tokens)",
-        "The opaque styling applies in both light and dark mode where applicable",
-        "Dropdown items remain clearly readable against the solid background"
+        "Admin discount codes panel lists RAJAT50 with 50% label",
+        "Admin discount codes panel lists MATHS30 with 30% label",
+        "All four codes (SAVE10, SUMMER20, RAJAT50, MATHS30) are visible in the admin view"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/DiscountCodeManager.tsx",
           "operation": "modify",
-          "description": "Add global CSS rules targeting all dropdown-related selectors (select elements, shadcn/ui dropdown components like DropdownMenuContent, SelectContent, PopoverContent, etc.) to enforce fully opaque backgrounds. Use solid background colors from the design system CSS custom properties (--navy, --cream, --gold). Remove any existing backdrop-blur, transparency, or glassmorphism effects. Ensure these styles apply in both light and dark mode contexts using the appropriate CSS variable tokens."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Review and update the Tailwind configuration to ensure that dropdown-related components use solid, opaque background utilities. If necessary, add custom utility classes or extend the theme with dropdown-specific background overrides that enforce opacity: 1 and disable backdrop filters."
+          "description": "Update the admin discount code display to include RAJAT50 (50%) and MATHS30 (30%) in the list of active discount codes. Ensure the UI renders all four codes (SAVE10, SUMMER20, RAJAT50, MATHS30) with their corresponding discount percentages and active/inactive status indicators. The display should clearly show each code's name and discount percentage for admin visibility."
         }
       ]
     }

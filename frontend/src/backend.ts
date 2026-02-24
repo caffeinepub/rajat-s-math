@@ -236,6 +236,12 @@ export interface ClassSession {
     courseName: string;
     googleCalendarLink: string;
 }
+export interface DiscountCodeValidationResponse {
+    discountPercent: bigint;
+    isUsed: boolean;
+    isActive: boolean;
+    isValid: boolean;
+}
 export interface ValidationResult {
     correctAnswer: bigint;
     feedback: string;
@@ -385,11 +391,11 @@ export interface backendInterface {
      * / Admin updates a single module's status within a booking's roadmap.
      */
     updateModuleStatus(paymentId: string, moduleIndex: bigint, newStatus: ModuleStatus): Promise<boolean>;
-    /**
-     * / Validate and apply discount code at checkout
-     */
-    validateAndApplyDiscountCode(code: string): Promise<bigint>;
     validateAnswer(problemId: bigint, studentAnswer: bigint): Promise<ValidationResult>;
+    /**
+     * / Validate discount code without side effects
+     */
+    validateDiscountCode(code: string): Promise<DiscountCodeValidationResponse>;
 }
 import type { AttendanceSummary as _AttendanceSummary, BookingRecord as _BookingRecord, BookingStatus as _BookingStatus, ClassType as _ClassType, CourseMaterial as _CourseMaterial, CourseMaterialType as _CourseMaterialType, CourseRoadmap as _CourseRoadmap, EventType as _EventType, ExtendedDiscountCode as _ExtendedDiscountCode, MathProblem as _MathProblem, ModuleStatus as _ModuleStatus, ProgressStats as _ProgressStats, RoadmapModule as _RoadmapModule, StripeSessionStatus as _StripeSessionStatus, StudentSupportMessage as _StudentSupportMessage, Time as _Time, Topic as _Topic, UserProfile as _UserProfile, UserRole as _UserRole, VisitorActivity as _VisitorActivity, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -1150,20 +1156,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async validateAndApplyDiscountCode(arg0: string): Promise<bigint> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.validateAndApplyDiscountCode(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.validateAndApplyDiscountCode(arg0);
-            return result;
-        }
-    }
     async validateAnswer(arg0: bigint, arg1: bigint): Promise<ValidationResult> {
         if (this.processError) {
             try {
@@ -1175,6 +1167,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.validateAnswer(arg0, arg1);
+            return result;
+        }
+    }
+    async validateDiscountCode(arg0: string): Promise<DiscountCodeValidationResponse> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.validateDiscountCode(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.validateDiscountCode(arg0);
             return result;
         }
     }

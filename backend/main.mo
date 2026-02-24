@@ -17,8 +17,6 @@ import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import Stripe "stripe/stripe";
 
-
-
 actor {
   include MixinStorage();
 
@@ -211,6 +209,14 @@ actor {
     name : Text;
     lastLogin : Time.Time;
     viewedCourses : [Text];
+  };
+
+  // New response type for discount code validation
+  public type DiscountCodeValidationResponse = {
+    isValid : Bool;
+    discountPercent : Nat;
+    isActive : Bool;
+    isUsed : Bool;
   };
 
   // Persistent State
@@ -521,31 +527,28 @@ actor {
 
   // ─── Extended Discount Code Functions ────────────────────────────────────────
 
-  /// Validate and apply discount code at checkout
-  public shared ({ caller }) func validateAndApplyDiscountCode(code : Text) : async Nat {
+  /// Validate discount code without side effects
+  public query ({ caller }) func validateDiscountCode(code : Text) : async DiscountCodeValidationResponse {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can validate discount codes");
     };
 
     switch (discountCodes.get(code)) {
-      case (null) { Runtime.trap("Invalid discount code") };
+      case (null) {
+        {
+          isValid = false;
+          discountPercent = 0;
+          isActive = false;
+          isUsed = false;
+        };
+      };
       case (?dc) {
-        if (not dc.isActive) {
-          Runtime.trap("Discount code is not active");
+        {
+          isValid = dc.isActive and not dc.isUsed;
+          discountPercent = dc.discountPercent;
+          isActive = dc.isActive;
+          isUsed = dc.isUsed;
         };
-        if (dc.isUsed) {
-          Runtime.trap("Discount code has already been used");
-        };
-
-        // Mark as used
-        let updatedCode = {
-          dc with
-          isUsed = true;
-          usedBy = ?caller;
-        };
-        discountCodes.add(code, updatedCode);
-
-        dc.discountPercent;
       };
     };
   };

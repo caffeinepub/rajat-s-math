@@ -11,6 +11,14 @@ import { Tag, Copy, Check, XCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useActor } from '../hooks/useActor';
 
+// Built-in hardcoded discount codes always shown in the admin panel
+const BUILTIN_CODES = [
+  { code: 'SAVE10', discountPercent: 10, isActive: true, isUsed: false },
+  { code: 'SUMMER20', discountPercent: 20, isActive: true, isUsed: false },
+  { code: 'RAJAT50', discountPercent: 50, isActive: true, isUsed: false },
+  { code: 'MATHS30', discountPercent: 30, isActive: true, isUsed: false },
+];
+
 function generateCodeLocally(percent: number): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const prefix = `DISC${percent}-`;
@@ -40,14 +48,9 @@ export default function DiscountCodeManager() {
 
     setIsGenerating(true);
     try {
-      // Generate code locally and save via setDiscountCodeActiveState workaround
-      // Since backend doesn't expose generateDiscountCode, we create the code client-side
-      // and activate it via a direct actor call to a hypothetical endpoint.
-      // For now, we generate locally and show the code for manual backend entry.
       const code = generateCodeLocally(p);
       setGeneratedCode(code);
       toast.success(`Discount code generated: ${code}`);
-      // Note: This code needs to be manually added to the backend or via a generateDiscountCode endpoint
     } catch (err: any) {
       toast.error(err.message ?? 'Failed to generate code');
     } finally {
@@ -78,6 +81,43 @@ export default function DiscountCodeManager() {
         <Tag className="w-5 h-5 text-gold" />
         <h2 className="text-xl font-semibold text-navy">Discount Code Manager</h2>
       </div>
+
+      {/* Built-in Codes Overview */}
+      <Card className="border-border-warm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base text-navy">Active Discount Codes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Discount</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {BUILTIN_CODES.map((item) => (
+                  <TableRow key={item.code}>
+                    <TableCell className="font-mono font-semibold text-navy">{item.code}</TableCell>
+                    <TableCell>
+                      <Badge className="bg-gold/20 text-gold border-gold/30" variant="outline">
+                        {item.discountPercent}% OFF
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="bg-green-100 text-green-700 border-green-200" variant="outline">
+                        Active
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Generate Code */}
       <Card className="border-border-warm">
@@ -132,17 +172,17 @@ export default function DiscountCodeManager() {
           )}
 
           <div className="text-xs text-warm-text bg-amber-50 border border-amber-200 rounded p-2">
-            <strong>Note:</strong> Generated codes are displayed for reference. To activate them in the system, 
-            the backend requires a <code>generateDiscountCode</code> endpoint (currently not available). 
+            <strong>Note:</strong> Generated codes are displayed for reference. To activate them in the system,
+            the backend requires a <code>generateDiscountCode</code> endpoint (currently not available).
             Codes shown here are for manual tracking purposes.
           </div>
         </CardContent>
       </Card>
 
-      {/* Active Codes Table */}
+      {/* Backend-managed Active Codes Table */}
       <Card className="border-border-warm">
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
-          <CardTitle className="text-base text-navy">Active Discount Codes</CardTitle>
+          <CardTitle className="text-base text-navy">Backend-Managed Codes</CardTitle>
           <Button variant="ghost" size="sm" onClick={() => refetch()} className="text-warm-text">
             <RefreshCw className="w-4 h-4" />
           </Button>
@@ -155,7 +195,7 @@ export default function DiscountCodeManager() {
           ) : !codes || codes.length === 0 ? (
             <div className="text-center py-8 text-warm-text">
               <Tag className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p>No active discount codes found.</p>
+              <p>No backend-managed discount codes found.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -180,17 +220,21 @@ export default function DiscountCodeManager() {
                       </TableCell>
                       <TableCell>
                         {code.isUsed ? (
-                          <Badge variant="secondary">Used</Badge>
+                          <Badge variant="outline" className="bg-gray-100 text-gray-500 border-gray-200">
+                            Used
+                          </Badge>
                         ) : code.isActive ? (
-                          <Badge className="bg-green-100 text-green-700 border-green-200" variant="outline">Active</Badge>
+                          <Badge className="bg-green-100 text-green-700 border-green-200" variant="outline">
+                            Active
+                          </Badge>
                         ) : (
-                          <Badge variant="destructive">Inactive</Badge>
+                          <Badge variant="outline" className="bg-red-50 text-red-500 border-red-200">
+                            Inactive
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-xs text-warm-text">
-                        {code.usedBy
-                          ? code.usedBy.toString().slice(0, 12) + '...'
-                          : '—'}
+                        {code.usedBy ? code.usedBy.toString().slice(0, 12) + '…' : '—'}
                       </TableCell>
                       <TableCell>
                         {code.isActive && !code.isUsed && (
@@ -198,11 +242,9 @@ export default function DiscountCodeManager() {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDeactivate(code.code)}
-                            disabled={deactivate.isPending}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           >
-                            <XCircle className="w-4 h-4 mr-1" />
-                            Deactivate
+                            <XCircle className="w-4 h-4" />
                           </Button>
                         )}
                       </TableCell>

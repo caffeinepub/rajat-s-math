@@ -147,6 +147,12 @@ export interface ClassSession {
     courseName: string;
     googleCalendarLink: string;
 }
+export interface DiscountCodeValidationResponse {
+    discountPercent: bigint;
+    isUsed: boolean;
+    isActive: boolean;
+    isValid: boolean;
+}
 export interface ValidationResult {
     correctAnswer: bigint;
     feedback: string;
@@ -285,9 +291,9 @@ export interface backendInterface {
      * / Admin updates a single module's status within a booking's roadmap.
      */
     updateModuleStatus(paymentId: string, moduleIndex: bigint, newStatus: ModuleStatus): Promise<boolean>;
-    /**
-     * / Validate and apply discount code at checkout
-     */
-    validateAndApplyDiscountCode(code: string): Promise<bigint>;
     validateAnswer(problemId: bigint, studentAnswer: bigint): Promise<ValidationResult>;
+    /**
+     * / Validate discount code without side effects
+     */
+    validateDiscountCode(code: string): Promise<DiscountCodeValidationResponse>;
 }

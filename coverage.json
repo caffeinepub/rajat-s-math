@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T18:37:37.209Z",
+  "generatedAt": "2026-02-24T19:41:59.753Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,32 +12,24 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a discount code input field to the payment enquiry / booking form (UpiPaymentStep and BookingFlowManager) that allows users to enter admin-generated discount codes. When a valid code is entered, calculate and display the discounted price in real-time before submission. Include the discount code and final discounted price as part of the same form submission payload sent to the backend.",
+        "summary": "Add two new discount codes to the discount code validation logic in UpiPaymentStep.tsx: RAJAT50 (50% discount) and MATHS30 (30% discount). These must work alongside the existing SAVE10 (10%) and SUMMER20 (20%) codes.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/UpiPaymentStep.tsx",
-          "frontend/src/components/BookingFlowManager.tsx",
-          "frontend/src/components/BookingConfirmation.tsx",
-          "frontend/src/types/booking.ts"
+          "frontend/src/components/UpiPaymentStep.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/UpiPaymentStep.tsx",
-          "frontend/src/components/BookingFlowManager.tsx",
-          "frontend/src/components/BookingConfirmation.tsx"
+          "frontend/src/components/UpiPaymentStep.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Make all dropdown menus throughout the portal (student portal, admin dashboard, booking forms, service selections, and any other dropdowns) fully opaque. Remove all transparency, glassmorphism, or backdrop-blur effects from dropdown menus so they have a solid, opaque background.",
+        "summary": "Update the DiscountCodeManager admin UI to display RAJAT50 (50%) and MATHS30 (30%) alongside the existing discount codes so admins can see all active codes.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
+          "frontend/src/components/DiscountCodeManager.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css"
+          "frontend/src/components/DiscountCodeManager.tsx"
         ]
       }
     ]
@@ -47,14 +39,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/AttendanceManager.tsx",
-    "frontend/src/components/BookingConfirmation.tsx",
-    "frontend/src/components/BookingFlowManager.tsx",
-    "frontend/src/components/CourseOffering.tsx",
-    "frontend/src/components/StudentSupportView.tsx",
+    "frontend/src/components/DiscountCodeManager.tsx",
     "frontend/src/components/UpiPaymentStep.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

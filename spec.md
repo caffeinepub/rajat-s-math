@@ -1,14 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Connect admin-generated discount codes to the payment/booking form and make all dropdown menus fully opaque across the portal.
+**Goal:** Add two new discount codes (RAJAT50 and MATHS30) to the booking payment flow and admin panel.
 
 **Planned changes:**
-- Add a discount code input field to the UpiPaymentStep / BookingFlowManager form
-- On code entry, call the backend validation endpoint and display the discounted price in real-time
-- Show clear error messages for invalid or expired codes
-- Include the discount code and final discounted price in the booking form submission payload
-- Display the applied discount code and discounted amount on the BookingConfirmation screen
-- Remove all transparency, glassmorphism, and backdrop-blur effects from every dropdown menu across the portal (student portal, admin dashboard, booking forms, service selections, etc.) and replace with solid, opaque backgrounds using the app's navy/cream/gold design tokens
+- Add `RAJAT50` (50% discount) to the discount code validation logic in `UpiPaymentStep.tsx`
+- Add `MATHS30` (30% discount) to the discount code validation logic in `UpiPaymentStep.tsx`
+- Update the `DiscountCodeManager` admin UI to display all four active codes: `SAVE10`, `SUMMER20`, `RAJAT50`, and `MATHS30`
 
-**User-visible outcome:** Users can apply admin-generated discount codes at checkout and see the reduced price before submitting. All dropdown menus throughout the portal now display with solid, fully opaque backgrounds.
+**User-visible outcome:** Users can apply `RAJAT50` for 50% off or `MATHS30` for 30% off during checkout, and admins can see all four active discount codes listed in the admin panel.
