@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, Calendar, Phone, BookOpen, Hash, AlertCircle, Users, UserCheck, Tag, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ClassType } from '../backend';
 
 interface BookingConfirmationProps {
@@ -13,6 +14,7 @@ interface BookingConfirmationProps {
   classType?: ClassType;
   numberOfClasses?: number;
   discountPercent?: number;
+  discountCode?: string;
   finalAmount?: number;
   onClose: () => void;
 }
@@ -27,6 +29,7 @@ export default function BookingConfirmation({
   classType,
   numberOfClasses,
   discountPercent,
+  discountCode,
   finalAmount,
   onClose,
 }: BookingConfirmationProps) {
@@ -91,8 +94,26 @@ export default function BookingConfirmation({
           </div>
         )}
 
-        {/* Discount */}
-        {discountPercent !== undefined && discountPercent > 0 && (
+        {/* Discount Code */}
+        {discountCode && discountCode.length > 0 && (
+          <div className="flex items-center gap-3">
+            <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="text-xs text-muted-foreground">Discount Code</p>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="border-green-400 text-green-700 text-xs font-mono">
+                  {discountCode}
+                </Badge>
+                {discountPercent !== undefined && discountPercent > 0 && (
+                  <span className="text-xs text-green-600 font-medium">{discountPercent}% off</span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Discount (no code) */}
+        {(!discountCode || discountCode.length === 0) && discountPercent !== undefined && discountPercent > 0 && (
           <div className="flex items-center gap-3">
             <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
             <div>

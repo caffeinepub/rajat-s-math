@@ -31,7 +31,6 @@ export default function StudentSupportView({ studentPrincipal }: StudentSupportV
   const [newMessage, setNewMessage] = useState('');
 
   const { data: messages, isLoading, refetch, isFetching } = useGetMySupportMessages(studentPrincipal);
-  // useSubmitSupportMessage now takes no arguments
   const submitMessage = useSubmitSupportMessage();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,7 +56,7 @@ export default function StudentSupportView({ studentPrincipal }: StudentSupportV
         <div className="flex items-center justify-between">
           <CardTitle className="text-navy font-serif flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-gold" />
-            Support & Messages
+            Support &amp; Messages
           </CardTitle>
           <Button
             variant="outline"

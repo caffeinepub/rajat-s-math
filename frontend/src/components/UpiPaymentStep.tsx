@@ -15,7 +15,7 @@ interface UpiPaymentStepProps {
   service: string;
   classType: 'oneOnOne' | 'group';
   numberOfClasses: number;
-  onConfirm: (discountPercent: number, finalAmount: number) => void;
+  onConfirm: (discountPercent: number, finalAmount: number, discountCode?: string) => void;
   onBack: () => void;
 }
 
@@ -30,6 +30,7 @@ export default function UpiPaymentStep({
 }: UpiPaymentStepProps) {
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<number>(0);
+  const [appliedCode, setAppliedCode] = useState<string>('');
   const [discountError, setDiscountError] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
 
@@ -50,14 +51,16 @@ export default function UpiPaymentStep({
     }
     setDiscountError('');
     try {
-      const percent = await validateDiscount.mutateAsync(discountCode.trim());
-      const percentNum = Number(percent);
-      setAppliedDiscount(percentNum);
+      const result = await validateDiscount.mutateAsync(discountCode.trim());
+      setAppliedDiscount(result.discountPercent);
+      setAppliedCode(result.code);
       setDiscountApplied(true);
-      toast.success(`Discount applied: ${percentNum}% off!`);
-    } catch (err: any) {
-      setDiscountError(err.message ?? 'Invalid or already used code');
+      toast.success(`Discount applied: ${result.discountPercent}% off!`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Invalid or already used code';
+      setDiscountError(message.replace('Error: ', ''));
       setAppliedDiscount(0);
+      setAppliedCode('');
       setDiscountApplied(false);
     }
   };
@@ -65,6 +68,7 @@ export default function UpiPaymentStep({
   const handleRemoveDiscount = () => {
     setDiscountCode('');
     setAppliedDiscount(0);
+    setAppliedCode('');
     setDiscountApplied(false);
     setDiscountError('');
   };
@@ -124,7 +128,7 @@ export default function UpiPaymentStep({
             <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium text-green-700">
-                Code "{discountCode}" applied — {appliedDiscount}% off!
+                Code &quot;{appliedCode}&quot; applied — {appliedDiscount}% off!
               </p>
               <p className="text-xs text-green-600">You save ₹{amount - discountedAmount}</p>
             </div>
@@ -205,7 +209,7 @@ export default function UpiPaymentStep({
           Back
         </Button>
         <Button
-          onClick={() => onConfirm(appliedDiscount, discountedAmount)}
+          onClick={() => onConfirm(appliedDiscount, discountedAmount, appliedCode)}
           className="flex-1 bg-gold text-navy hover:bg-gold/90 font-semibold"
         >
           I've Paid ₹{discountedAmount} ✓

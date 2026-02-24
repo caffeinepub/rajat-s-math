@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
+import { Principal } from '@dfinity/principal';
 import type {
   UserProfile,
   BookingRecord,
@@ -12,7 +13,6 @@ import type {
   VisitorActivity,
   EventType,
 } from '../backend';
-import { Principal } from '@dfinity/principal';
 
 // ─── User Profile ─────────────────────────────────────────────────────────────
 
@@ -137,6 +137,7 @@ export function useAddBookingRecord() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookingRecords'] });
+      queryClient.invalidateQueries({ queryKey: ['completedBookings'] });
     },
   });
 }
@@ -184,6 +185,7 @@ export function useDeleteBooking() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookingRecords'] });
+      queryClient.invalidateQueries({ queryKey: ['completedBookings'] });
     },
   });
 }
@@ -315,7 +317,7 @@ export function useGetAllSupportMessages() {
     queryKey: ['allSupportMessages'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllSupportMessages();
+      return actor.getAllSupportMessages() as Promise<Array<[Principal, StudentSupportMessage[]]>>;
     },
     enabled: !!actor && !isFetching,
   });
@@ -475,9 +477,13 @@ export function useValidateDiscountCode() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async (code: string): Promise<bigint> => {
+    mutationFn: async (code: string): Promise<{ discountPercent: number; code: string }> => {
       if (!actor) throw new Error('Actor not available');
-      return actor.validateAndApplyDiscountCode(code);
+      const discountPercentBigInt = await actor.validateAndApplyDiscountCode(code);
+      return {
+        discountPercent: Number(discountPercentBigInt),
+        code,
+      };
     },
   });
 }

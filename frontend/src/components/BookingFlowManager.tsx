@@ -26,6 +26,7 @@ interface ConfirmationData {
   classType: ClassType;
   numberOfClasses: number;
   discountPercent: number;
+  discountCode: string;
   finalAmount: number;
 }
 
@@ -48,7 +49,11 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
     setStep('payment');
   };
 
-  const handlePaymentConfirmed = async (discountPercent: number, finalAmount: number) => {
+  const handlePaymentConfirmed = async (
+    discountPercent: number,
+    finalAmount: number,
+    discountCode: string = ''
+  ) => {
     if (!bookingData) return;
 
     const upiRef = `UPI-${Date.now()}`;
@@ -83,6 +88,7 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
       classType: bookingData.classType,
       numberOfClasses: bookingData.numberOfClasses,
       discountPercent,
+      discountCode,
       finalAmount,
     });
     setStep('confirmation');
@@ -144,6 +150,7 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
             classType={confirmationData.classType}
             numberOfClasses={confirmationData.numberOfClasses}
             discountPercent={confirmationData.discountPercent}
+            discountCode={confirmationData.discountCode}
             finalAmount={confirmationData.finalAmount}
             onClose={handleClose}
           />

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, Users, CheckCircle, XCircle, Plus, BookOpen } from 'lucide-react';
+import { CalendarDays, CheckCircle, XCircle, Plus, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 function dateToNanoseconds(dateStr: string): bigint {
@@ -35,14 +35,16 @@ export default function AttendanceManager() {
   // New session form
   const [newSessionDate, setNewSessionDate] = useState<string>('');
   const [newSessionPresent, setNewSessionPresent] = useState(true);
+  const [manualPrincipal, setManualPrincipal] = useState<string>('');
 
   const selectedBooking = bookings?.find(b => b.paymentId === selectedBookingId);
-  const studentPrincipal = selectedBooking ? (() => {
-    try { return Principal.fromText(selectedBooking.phone); } catch { return null; }
-  })() : null;
 
-  // We use phone as a proxy identifier since bookings don't store principal directly
-  // Instead we'll use paymentId as bookingId and derive student from booking name
+  // Parse principal from manual input
+  const studentPrincipal: Principal | null = (() => {
+    if (!manualPrincipal.trim()) return null;
+    try { return Principal.fromText(manualPrincipal.trim()); } catch { return null; }
+  })();
+
   const startNs = startDate ? dateToNanoseconds(startDate) : BigInt(0);
   const endNs = endDate ? dateToNanoseconds(endDate + 'T23:59:59') : BigInt(Date.now()) * BigInt(1_000_000);
 
@@ -69,6 +71,10 @@ export default function AttendanceManager() {
       toast.error('Please select a student booking');
       return;
     }
+    if (!studentPrincipal) {
+      toast.error('Please enter a valid student principal ID');
+      return;
+    }
     setQueryEnabled(true);
   };
 
@@ -77,12 +83,25 @@ export default function AttendanceManager() {
       toast.error('Please select a session date');
       return;
     }
+    if (!studentPrincipal) {
+      toast.error('Please enter a valid student principal ID to mark attendance');
+      return;
+    }
 
-    // For attendance, we need a principal. Since bookings don't store principal,
-    // we'll use a deterministic approach based on paymentId
-    // In a real scenario, the admin would select from enrolled students with known principals
-    toast.error('Cannot mark attendance: student principal not available in booking record. Please use the student\'s principal ID.');
-    return;
+    try {
+      await markAttendance.mutateAsync({
+        student: studentPrincipal,
+        bookingId: selectedBooking.paymentId,
+        course: selectedBooking.service,
+        sessionDate: dateToNanoseconds(newSessionDate),
+        isPresent: newSessionPresent,
+      });
+      toast.success('Attendance marked successfully');
+      setNewSessionDate('');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to mark attendance';
+      toast.error(msg);
+    }
   };
 
   const handleToggleAttendance = async (
@@ -101,8 +120,9 @@ export default function AttendanceManager() {
         isPresent: !currentPresent,
       });
       toast.success('Attendance updated');
-    } catch (err: any) {
-      toast.error(err.message ?? 'Failed to update attendance');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update attendance';
+      toast.error(msg);
     }
   };
 
@@ -119,7 +139,7 @@ export default function AttendanceManager() {
           <CardTitle className="text-base text-navy">Search Attendance Records</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label className="text-warm-text text-sm">Student Booking</Label>
               {bookingsLoading ? (
@@ -139,6 +159,20 @@ export default function AttendanceManager() {
                 </Select>
               )}
             </div>
+            <div className="space-y-1">
+              <Label className="text-warm-text text-sm">Student Principal ID</Label>
+              <Input
+                placeholder="Enter student's principal ID..."
+                value={manualPrincipal}
+                onChange={e => setManualPrincipal(e.target.value)}
+                className="border-border-warm font-mono text-xs"
+              />
+              {manualPrincipal && !studentPrincipal && (
+                <p className="text-xs text-red-500">Invalid principal ID format</p>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label className="text-warm-text text-sm">Start Date</Label>
               <Input
@@ -222,70 +256,94 @@ export default function AttendanceManager() {
               </div>
               <Button
                 onClick={handleMarkSession}
-                disabled={markAttendance.isPending}
+                disabled={markAttendance.isPending || !studentPrincipal}
                 className="bg-gold text-navy hover:bg-gold/90"
               >
                 {markAttendance.isPending ? 'Saving...' : 'Mark Attendance'}
               </Button>
             </div>
-            <p className="text-xs text-warm-text mt-3 bg-amber-50 border border-amber-200 rounded p-2">
-              <strong>Note:</strong> Attendance marking requires the student's Internet Identity principal. 
-              Students must be registered with their principal linked to their booking.
-            </p>
+            {!studentPrincipal && (
+              <p className="text-xs text-amber-600 mt-2">
+                Enter the student's principal ID above to mark attendance.
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
 
       {/* Records List */}
-      {queryEnabled && (
+      {queryEnabled && records && records.length > 0 && (
         <Card className="border-border-warm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base text-navy flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Attendance Records
-              {records && <Badge variant="secondary">{records.length}</Badge>}
-            </CardTitle>
+            <CardTitle className="text-base text-navy">Attendance Records</CardTitle>
           </CardHeader>
           <CardContent>
             {recordsLoading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
               </div>
-            ) : !records || records.length === 0 ? (
-              <div className="text-center py-8 text-warm-text">
-                <CalendarDays className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p>No attendance records found for this period.</p>
-              </div>
             ) : (
               <div className="space-y-2">
-                {records.map((record, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border-warm bg-warm-light/30"
-                  >
-                    <div className="flex items-center gap-3">
-                      {record.isPresent ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-400" />
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-navy">
+                {[...records]
+                  .sort((a, b) => Number(b.sessionDate - a.sessionDate))
+                  .map((record, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 rounded-lg border border-border-warm"
+                    >
+                      <div className="flex items-center gap-3">
+                        {record.isPresent ? (
+                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                        )}
+                        <span className="text-sm text-navy font-medium">
                           {nanosecondsToDate(record.sessionDate)}
-                        </p>
-                        <p className="text-xs text-warm-text">{record.course}</p>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          className={
+                            record.isPresent
+                              ? 'bg-green-100 text-green-700 border-green-200'
+                              : 'bg-red-100 text-red-700 border-red-200'
+                          }
+                          variant="outline"
+                        >
+                          {record.isPresent ? 'Present' : 'Absent'}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            studentPrincipal &&
+                            handleToggleAttendance(
+                              studentPrincipal,
+                              record.bookingId,
+                              record.course,
+                              record.sessionDate,
+                              record.isPresent
+                            )
+                          }
+                          disabled={markAttendance.isPending || !studentPrincipal}
+                          className="text-xs h-7 text-navy hover:bg-navy/5"
+                        >
+                          Toggle
+                        </Button>
                       </div>
                     </div>
-                    <Badge
-                      variant={record.isPresent ? 'default' : 'destructive'}
-                      className={record.isPresent ? 'bg-green-100 text-green-700 border-green-200' : ''}
-                    >
-                      {record.isPresent ? 'Present' : 'Absent'}
-                    </Badge>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {queryEnabled && (!records || records.length === 0) && !recordsLoading && (
+        <Card className="border-border-warm">
+          <CardContent className="py-8 text-center text-warm-text">
+            <CalendarDays className="w-10 h-10 mx-auto mb-2 opacity-30" />
+            <p>No attendance records found for the selected filters.</p>
           </CardContent>
         </Card>
       )}

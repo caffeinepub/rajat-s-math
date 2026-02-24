@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,72 +6,109 @@
 
 @layer base {
   :root {
-    /* Navy brand */
-    --navy: oklch(0.22 0.06 240);
-    --navy-light: oklch(0.30 0.07 240);
+    --background: oklch(0.98 0.01 85);
+    --foreground: oklch(0.18 0.04 250);
 
-    /* Gold accent */
-    --gold: oklch(0.72 0.14 75);
-    --gold-dark: oklch(0.58 0.14 70);
-
-    /* Warm neutrals */
-    --cream: oklch(0.97 0.015 80);
-    --warm-light: oklch(0.95 0.02 90);
-    --warm-text: oklch(0.45 0.05 50);
-    --border-warm: oklch(0.88 0.03 60);
-
-    /* Shadcn tokens */
-    --background: oklch(0.98 0.01 80);
-    --foreground: oklch(0.22 0.06 240);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.22 0.06 240);
+    --card-foreground: oklch(0.18 0.04 250);
+
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.22 0.06 240);
-    --primary: oklch(0.22 0.06 240);
-    --primary-foreground: oklch(0.98 0.01 80);
-    --secondary: oklch(0.95 0.02 90);
-    --secondary-foreground: oklch(0.22 0.06 240);
-    --muted: oklch(0.95 0.02 90);
-    --muted-foreground: oklch(0.50 0.05 50);
-    --accent: oklch(0.72 0.14 75);
-    --accent-foreground: oklch(0.22 0.06 240);
+    --popover-foreground: oklch(0.18 0.04 250);
+
+    --primary: oklch(0.22 0.06 255);
+    --primary-foreground: oklch(0.97 0.02 85);
+
+    --secondary: oklch(0.94 0.03 85);
+    --secondary-foreground: oklch(0.22 0.06 255);
+
+    --muted: oklch(0.94 0.02 85);
+    --muted-foreground: oklch(0.52 0.03 250);
+
+    --accent: oklch(0.78 0.12 75);
+    --accent-foreground: oklch(0.18 0.04 250);
+
     --destructive: oklch(0.55 0.22 25);
-    --destructive-foreground: oklch(0.98 0.01 80);
-    --border: oklch(0.88 0.03 60);
-    --input: oklch(0.88 0.03 60);
-    --ring: oklch(0.22 0.06 240);
-    --radius: 0.75rem;
-    --success: oklch(0.55 0.15 145);
-    --warning: oklch(0.72 0.14 75);
+    --destructive-foreground: oklch(0.97 0.01 85);
+
+    --border: oklch(0.88 0.03 85);
+    --input: oklch(0.88 0.03 85);
+    --ring: oklch(0.78 0.12 75);
+
+    --radius: 0.5rem;
+
+    --navy: oklch(0.22 0.06 255);
+    --gold: oklch(0.78 0.12 75);
+    --cream: oklch(0.97 0.02 85);
+    --warm-light: oklch(0.96 0.03 85);
+    --warm-text: oklch(0.35 0.04 250);
+    --border-warm: oklch(0.88 0.03 85);
+
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+
+    --sidebar-background: oklch(0.22 0.06 255);
+    --sidebar-foreground: oklch(0.97 0.02 85);
+    --sidebar-primary: oklch(0.78 0.12 75);
+    --sidebar-primary-foreground: oklch(0.18 0.04 250);
+    --sidebar-accent: oklch(0.28 0.06 255);
+    --sidebar-accent-foreground: oklch(0.97 0.02 85);
+    --sidebar-border: oklch(0.30 0.05 255);
+    --sidebar-ring: oklch(0.78 0.12 75);
   }
 
   .dark {
-    --background: oklch(0.15 0.04 240);
-    --foreground: oklch(0.95 0.01 80);
-    --card: oklch(0.18 0.04 240);
-    --card-foreground: oklch(0.95 0.01 80);
-    --popover: oklch(0.18 0.04 240);
-    --popover-foreground: oklch(0.95 0.01 80);
-    --primary: oklch(0.72 0.14 75);
-    --primary-foreground: oklch(0.15 0.04 240);
-    --secondary: oklch(0.22 0.05 240);
-    --secondary-foreground: oklch(0.95 0.01 80);
-    --muted: oklch(0.22 0.05 240);
-    --muted-foreground: oklch(0.65 0.04 80);
-    --accent: oklch(0.72 0.14 75);
-    --accent-foreground: oklch(0.15 0.04 240);
+    --background: oklch(0.14 0.04 255);
+    --foreground: oklch(0.95 0.02 85);
+
+    --card: oklch(0.18 0.05 255);
+    --card-foreground: oklch(0.95 0.02 85);
+
+    --popover: oklch(0.18 0.05 255);
+    --popover-foreground: oklch(0.95 0.02 85);
+
+    --primary: oklch(0.78 0.12 75);
+    --primary-foreground: oklch(0.18 0.04 250);
+
+    --secondary: oklch(0.25 0.05 255);
+    --secondary-foreground: oklch(0.95 0.02 85);
+
+    --muted: oklch(0.25 0.05 255);
+    --muted-foreground: oklch(0.65 0.03 250);
+
+    --accent: oklch(0.78 0.12 75);
+    --accent-foreground: oklch(0.18 0.04 250);
+
     --destructive: oklch(0.55 0.22 25);
-    --destructive-foreground: oklch(0.98 0.01 80);
-    --border: oklch(0.28 0.05 240);
-    --input: oklch(0.28 0.05 240);
-    --ring: oklch(0.72 0.14 75);
-    --navy: oklch(0.72 0.14 75);
-    --gold: oklch(0.72 0.14 75);
-    --gold-dark: oklch(0.65 0.14 70);
-    --cream: oklch(0.18 0.04 240);
-    --warm-light: oklch(0.20 0.04 240);
-    --warm-text: oklch(0.70 0.04 80);
-    --border-warm: oklch(0.28 0.05 240);
+    --destructive-foreground: oklch(0.97 0.01 85);
+
+    --border: oklch(0.28 0.05 255);
+    --input: oklch(0.28 0.05 255);
+    --ring: oklch(0.78 0.12 75);
+
+    --navy: oklch(0.22 0.06 255);
+    --gold: oklch(0.78 0.12 75);
+    --cream: oklch(0.97 0.02 85);
+    --warm-light: oklch(0.20 0.05 255);
+    --warm-text: oklch(0.80 0.03 85);
+    --border-warm: oklch(0.28 0.05 255);
+
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+
+    --sidebar-background: oklch(0.16 0.05 255);
+    --sidebar-foreground: oklch(0.95 0.02 85);
+    --sidebar-primary: oklch(0.78 0.12 75);
+    --sidebar-primary-foreground: oklch(0.18 0.04 250);
+    --sidebar-accent: oklch(0.22 0.05 255);
+    --sidebar-accent-foreground: oklch(0.95 0.02 85);
+    --sidebar-border: oklch(0.25 0.05 255);
+    --sidebar-ring: oklch(0.78 0.12 75);
   }
 }
 
@@ -83,19 +120,122 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
   }
-  h1, h2, h3, .font-serif {
-    font-family: 'Playfair Display', Georgia, serif;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
   }
 }
 
-/* Ensure booking dialog is fully opaque and visible */
+/* Booking dialog: force fully opaque background */
 .booking-dialog-content {
-  background-color: oklch(1 0 0) !important;
-  opacity: 1 !important;
+  background-color: oklch(0.97 0.02 85) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-.dark .booking-dialog-content {
-  background-color: oklch(0.18 0.04 240) !important;
+/* ─── Opaque Dropdowns & Popovers ─────────────────────────────────────────── */
+/* Force all Radix UI dropdown/select/popover/context-menu content to be fully opaque */
+
+[data-radix-popper-content-wrapper] > *,
+[role="listbox"],
+[role="menu"],
+[role="dialog"][data-state],
+.select-content,
+.dropdown-content,
+.popover-content {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Radix Select content */
+[data-radix-select-viewport],
+[data-radix-select-content] {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Radix DropdownMenu content */
+[data-radix-dropdown-menu-content],
+[data-radix-dropdown-menu-sub-content] {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Radix Popover content */
+[data-radix-popover-content] {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Radix Context Menu content */
+[data-radix-context-menu-content],
+[data-radix-context-menu-sub-content] {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Radix Menubar content */
+[data-radix-menubar-content],
+[data-radix-menubar-sub-content] {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Radix NavigationMenu content */
+[data-radix-navigation-menu-viewport],
+[data-radix-navigation-menu-content] {
+  background-color: oklch(1 0 0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Radix Tooltip content */
+[data-radix-tooltip-content] {
+  background-color: oklch(0.22 0.06 255) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Native select elements */
+select {
+  background-color: oklch(1 0 0) !important;
+  opacity: 1 !important;
+}
+
+/* Dark mode overrides for dropdowns */
+.dark [data-radix-popper-content-wrapper] > *,
+.dark [role="listbox"],
+.dark [role="menu"],
+.dark [data-radix-select-viewport],
+.dark [data-radix-select-content],
+.dark [data-radix-dropdown-menu-content],
+.dark [data-radix-dropdown-menu-sub-content],
+.dark [data-radix-popover-content],
+.dark [data-radix-context-menu-content],
+.dark [data-radix-context-menu-sub-content],
+.dark [data-radix-menubar-content],
+.dark [data-radix-menubar-sub-content],
+.dark [data-radix-navigation-menu-viewport],
+.dark [data-radix-navigation-menu-content] {
+  background-color: oklch(0.18 0.05 255) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.dark select {
+  background-color: oklch(0.18 0.05 255) !important;
+}
+
+/* Ensure shadcn/ui component classes are also opaque */
+.bg-popover {
+  background-color: oklch(1 0 0) !important;
+}
+.dark .bg-popover {
+  background-color: oklch(0.18 0.05 255) !important;
 }

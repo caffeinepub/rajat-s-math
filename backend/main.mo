@@ -16,9 +16,9 @@ import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import Stripe "stripe/stripe";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   include MixinStorage();
 

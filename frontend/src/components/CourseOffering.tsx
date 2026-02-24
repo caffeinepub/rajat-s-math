@@ -23,8 +23,9 @@ export default function CourseOffering() {
       await recordUPIPayment.mutateAsync();
       setPurchased(true);
       setShowPayment(false);
-    } catch (error: any) {
-      if (error?.message?.includes('already purchased')) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.includes('already purchased')) {
         setPurchased(true);
         setShowPayment(false);
       }
@@ -70,56 +71,51 @@ export default function CourseOffering() {
                 <BookOpen className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-foreground font-serif">{title}</h3>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                  <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> 4.9
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3" /> 500+ students
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> Self-paced
-                  </span>
+                <h3 className="font-bold text-foreground font-serif text-lg">{title}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className="w-3.5 h-3.5 fill-gold text-gold" />
+                    ))}
+                  </div>
+                  <span className="text-xs text-muted-foreground">Top Rated</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-primary font-serif">
-                ₹{price.toLocaleString('en-IN')}
-              </p>
+              <p className="text-3xl font-bold text-primary">₹{price.toLocaleString('en-IN')}</p>
               <p className="text-xs text-muted-foreground">One-time payment</p>
             </div>
           </div>
 
-          <div className="px-6 py-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              {[
-                'Complete curriculum from basics to advanced',
-                'Step-by-step problem solving techniques',
-                'Topic-wise practice problems',
-                'Progress tracking dashboard',
-                'Lifetime access to materials',
-                'Direct mentorship support',
-              ].map((feature) => (
-                <div key={feature} className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-foreground">{feature}</span>
-                </div>
-              ))}
+          <div className="px-6 py-5 grid sm:grid-cols-3 gap-4 border-b border-border-warm">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="text-sm text-muted-foreground">Self-paced learning</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
+              <span className="text-sm text-muted-foreground">All skill levels</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span className="text-sm text-muted-foreground">Certificate included</span>
+            </div>
+          </div>
 
+          <div className="px-6 py-5">
             {hasPurchased ? (
-              <div className="flex items-center justify-center gap-2 py-4 bg-green-50 rounded-xl border border-green-200">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="font-semibold text-green-700">
-                  Course Purchased — Enjoy Full Access!
-                </span>
+              <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-green-800">Course Purchased!</p>
+                  <p className="text-sm text-green-600">You have full access to all course materials.</p>
+                </div>
               </div>
             ) : (
               <Button
                 onClick={() => setShowPayment(true)}
-                className="w-full py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-md"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-6 text-lg rounded-xl"
               >
                 Enroll Now — ₹{price.toLocaleString('en-IN')}
               </Button>
@@ -129,64 +125,52 @@ export default function CourseOffering() {
       </div>
 
       {/* UPI Payment Dialog */}
-      <Dialog open={showPayment} onOpenChange={(open) => { if (!open) setShowPayment(false); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <Dialog open={showPayment} onOpenChange={setShowPayment}>
+        <DialogContent className="booking-dialog-content max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl text-primary">
-              Complete Course Payment
-            </DialogTitle>
+            <DialogTitle className="font-serif text-primary">Complete Payment</DialogTitle>
           </DialogHeader>
-          <div className="space-y-5 py-2">
-            <div className="text-center py-4 bg-navy/5 rounded-xl border border-navy/10">
-              <p className="text-sm text-warm-text mb-1">Amount to Pay</p>
-              <p className="text-4xl font-bold text-navy">₹{price.toLocaleString('en-IN')}</p>
+          <div className="space-y-4 py-2">
+            <div className="text-center py-4 bg-primary/5 rounded-xl border border-primary/10">
+              <p className="text-sm text-muted-foreground mb-1">Amount to Pay</p>
+              <p className="text-4xl font-bold text-primary">₹{price.toLocaleString('en-IN')}</p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-navy text-center">Pay via UPI</p>
+              <p className="text-sm font-medium text-foreground text-center">Pay via UPI</p>
               {isMobile ? (
                 <a href={upiUrl} className="block">
-                  <Button className="w-full bg-navy text-cream hover:bg-navy/90 h-12 text-base">
-                    Open UPI App to Pay ₹{price.toLocaleString('en-IN')}
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-base">
+                    Open UPI App to Pay
                   </Button>
                 </a>
               ) : (
                 <div className="text-center space-y-2">
-                  <p className="text-sm text-warm-text">Use UPI ID:</p>
-                  <p className="font-mono text-navy font-semibold text-lg">{UPI_ID}</p>
-                  <p className="text-xs text-warm-text">
-                    Use any UPI app (GPay, PhonePe, Paytm, etc.)
-                  </p>
+                  <p className="text-sm text-muted-foreground">Use UPI ID:</p>
+                  <p className="font-mono text-primary font-semibold text-lg">{UPI_ID}</p>
+                  <p className="text-xs text-muted-foreground">Use any UPI app (GPay, PhonePe, Paytm, etc.)</p>
                 </div>
               )}
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-              <p className="text-xs text-amber-800 text-center">
-                ⚠️ After completing the UPI payment, click the button below to confirm.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <Button
                 variant="outline"
                 onClick={() => setShowPayment(false)}
-                className="flex-1 border-border-warm"
+                className="flex-1"
+                disabled={isConfirming}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handlePaymentConfirmed}
                 disabled={isConfirming}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold"
+                className="flex-1 bg-gold text-navy hover:bg-gold/90 font-semibold"
               >
                 {isConfirming ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Confirming...
-                  </span>
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  '✅ I have paid'
+                  "I've Paid ✓"
                 )}
               </Button>
             </div>

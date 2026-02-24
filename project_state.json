@@ -1,59 +1,27 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Education/course platform with admin and student roles. Features include attendance tracking, discount code generation, and unpurchased visitor tracking.",
+  "summary": "Portal project with admin dashboard and user-facing features including attendance tracking, discount codes, visitor tracking, and payment enquiry forms. Currently implementing discount code integration in the payment enquiry form and opaque dropdown styling.",
   "architectural_notes": [
-    "Platform has two roles: admin and student",
-    "Authentication via Internet Identity"
+    "Discount codes are generated via the admin dashboard and must be validated against admin-created codes on the frontend payment enquiry form",
+    "All dropdown menus should use fully opaque styling — no transparency or glassmorphism effects"
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-add-an-attendance-section-to-the-admin-dashboard-that-lists-enrolled-students-allows-the-admin-to-select-a-student-choose-a-date-range-and-mark-each-session-in-that-range-as-present-or-absent-display-total-classes-held-attended-and-attendance-rate",
-      "title": "Add an Attendance section to the Admin Dashboard that lists enrolled students, allows the admin to select a student, choose a date range, and mark each session in that range as present or absent. Display total classes held, attended, and attendance rate.",
+      "id": "feature-add-a-discount-code-input-field-to-the-payment-enquiry-booking-form-upipaymentstep-and-bookingflowmanager-that-allows-users-to-enter-admin-generated-discount-codes-when-a-valid-code-is-entered-calculate-and-display-the-discounted-price-in-real-time-before-submission-include-the-discount-code-and-final-discounted-price-as-part-of-the-same-form-submission-payload-sent-to-the-backend",
+      "title": "Add a discount code input field to the payment enquiry / booking form (UpiPaymentStep and BookingFlowManager) that allows users to enter admin-generated discount codes. When a valid code is entered, calculate and display the discounted price in real-time before submission. Include the discount code and final discounted price as part of the same form submission payload sent to the backend.",
       "reqIds": [
-        "REQ-3"
+        "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-attendance-tab-to-the-student-portal-that-shows-the-authenticated-student-s-own-attendance-records-include-a-date-range-filter-and-display-total-classes-held-vs-attended-with-attendance-rate",
-      "title": "Add an Attendance tab to the Student Portal that shows the authenticated student's own attendance records. Include a date-range filter and display total classes held vs attended with attendance rate.",
+      "id": "feature-make-all-dropdown-menus-throughout-the-portal-student-portal-admin-dashboard-booking-forms-service-selections-and-any-other-dropdowns-fully-opaque-remove-all-transparency-glassmorphism-or-backdrop-blur-effects-from-dropdown-menus-so-they-have-a-solid-opaque-background",
+      "title": "Make all dropdown menus throughout the portal (student portal, admin dashboard, booking forms, service selections, and any other dropdowns) fully opaque. Remove all transparency, glassmorphism, or backdrop-blur effects from dropdown menus so they have a solid, opaque background.",
       "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-discount-codes-section-to-the-admin-dashboard-where-the-admin-can-generate-new-single-use-percentage-based-codes-view-all-codes-with-their-status-active-used-deactivated-and-deactivate-any-active-code",
-      "title": "Add a Discount Codes section to the Admin Dashboard where the admin can generate new single-use percentage-based codes, view all codes with their status (active, used, deactivated), and deactivate any active code.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-integrate-the-discount-code-input-into-the-booking-checkout-flow-bookingform-or-upipaymentstep-allow-the-user-to-enter-a-discount-code-validate-it-against-the-backend-and-apply-the-percentage-discount-to-the-displayed-total-before-confirming-payment",
-      "title": "Integrate the discount code input into the booking/checkout flow (BookingForm or UpiPaymentStep). Allow the user to enter a discount code, validate it against the backend, and apply the percentage discount to the displayed total before confirming payment.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-trigger-backend-visitor-activity-logging-from-the-frontend-record-a-login-event-when-an-authenticated-user-lands-on-the-app-and-record-a-course-view-event-when-an-authenticated-user-views-a-course-detail-they-have-not-purchased",
-      "title": "Trigger backend visitor activity logging from the frontend: record a login event when an authenticated user lands on the app, and record a course-view event when an authenticated user views a course detail they have not purchased.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-unpurchased-visitor-tracking-section-to-the-admin-dashboard-showing-a-table-of-logged-in-users-who-have-not-purchased-with-columns-for-user-principal-name-if-available-login-timestamps-and-list-of-courses-viewed-without-purchase",
-      "title": "Add an Unpurchased Visitor Tracking section to the Admin Dashboard showing a table of logged-in users who have not purchased, with columns for user principal/name (if available), login timestamps, and list of courses viewed without purchase.",
-      "reqIds": [
-        "REQ-11"
+        "REQ-2"
       ],
       "version": 1
     }
@@ -61,60 +29,14 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Attendance tracking: admin marks students present/absent per session; students view own attendance with date-range filtering showing total classes held vs attended",
+      "summary": "Connect admin-generated discount codes to payment enquiry form with real-time price calculation and unified form submission",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Discount code generator: admin creates single-use percentage-based codes (0-100%), manages/deactivates from dashboard, codes applied at course checkout",
+      "summary": "Make all dropdown menus throughout the portal fully opaque (remove transparency/glassmorphism styling)",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Unpurchased visitor tracking: track logged-in users' login activity and courses viewed without purchase; admin-only dashboard",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Add an Attendance data model to the backend that stores class sessions per student/booking with a present/absent status. Admin can mark students present or absent for each session. Store session date, course/booking reference, and attendance status per student.",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Expose backend query functions that return attendance records filterable by date range, showing total classes held in that range and how many a student attended, including an attendance rate percentage.",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Add a DiscountCode data model to the backend with fields: code string, percentage (0–100), isActive boolean, isUsed boolean, and usedByPrincipal. Provide admin functions to generate a new single-use percentage-based discount code, list all codes, and deactivate a code.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Add a backend function to validate and apply a discount code at checkout. It should verify the code is active and unused, return the discount percentage, and mark it as used (tied to the purchasing user's principal) when a booking/purchase is confirmed.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Add a VisitorActivity data model to the backend that records login events and course-view events for authenticated users who have not purchased a course. Store principal, timestamp, event type (login or courseView), and course ID (for view events).",
-      "reqIds": [
-        "REQ-9"
-      ],
       "status": "pending"
     }
   ],
