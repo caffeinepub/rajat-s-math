@@ -34,7 +34,7 @@ export function LoginButton() {
       disabled={isLoggingIn}
       className={`px-6 py-2 shadow-lg transition-all font-semibold ${
         isAuthenticated
-          ? 'bg-gray-900 hover:bg-gray-800 text-white border-2 border-gray-700'
+          ? 'bg-gray-200 hover:bg-gray-300 text-gray-800'
           : 'bg-[oklch(0.55_0.15_40)] hover:bg-[oklch(0.50_0.15_40)] text-white'
       }`}
     >

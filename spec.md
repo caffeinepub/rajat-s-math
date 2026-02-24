@@ -1,10 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Make the logout button clearly visible by applying dark color styling in the navigation bar.
+**Goal:** Revert the logout button styling back to how it appeared in Version 34, undoing the dark color change introduced in Version 35.
 
 **Planned changes:**
-- Update the logout button/link in the Header component to use dark color styling for strong contrast against the navigation bar background
-- Apply consistent dark color styling to the logout option in both desktop and mobile nav layouts
+- Revert the logout button color/style in the desktop Header component to its Version 34 appearance
+- Revert the logout button color/style in the mobile navigation to its Version 34 appearance
+- Revert the LoginButton component styling to remove the darker color introduced in Version 35
 
-**User-visible outcome:** The logout button is clearly visible and easy to locate in the navigation bar on both desktop and mobile views.
+**User-visible outcome:** The logout button appears with its original styling from Version 34, no longer showing the darker color applied in Version 35.

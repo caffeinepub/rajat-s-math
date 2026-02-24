@@ -115,7 +115,7 @@ export function Header({ onNavigate, currentPage }: HeaderProps) {
               <Button
                 onClick={handleLogout}
                 size="sm"
-                className="bg-cream text-navy hover:bg-cream/90 border border-cream font-semibold shadow-sm"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold shadow-sm"
               >
                 <LogOut className="w-4 h-4 mr-1.5" />
                 <span className="hidden sm:inline">Logout</span>
@@ -187,7 +187,7 @@ export function Header({ onNavigate, currentPage }: HeaderProps) {
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-semibold transition-colors text-left bg-cream text-navy hover:bg-cream/90 mt-2"
+                className="w-full flex items-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors text-left bg-gray-200 hover:bg-gray-300 text-gray-800 mt-2"
               >
                 <LogOut className="w-4 h-4" />
                 Logout

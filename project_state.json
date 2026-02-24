@@ -1,16 +1,14 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Web application with authentication (login/logout) and admin dashboard. Working on UI improvements to make the logout button more visible with a dark color.",
+  "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Logout button not clearly visible - needs dark color styling"
-  ],
+  "known_issues": [],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-update-the-logout-button-link-in-the-header-component-and-loginbutton-component-to-use-a-dark-color-e-g-dark-text-or-dark-background-so-it-is-clearly-visible-against-the-navigation-bar-background-ensure-the-styling-is-consistent-across-both-desktop-and-mobile-nav-layouts",
-      "title": "Update the logout button/link in the Header component and LoginButton component to use a dark color (e.g., dark text or dark background) so it is clearly visible against the navigation bar background. Ensure the styling is consistent across both desktop and mobile nav layouts.",
+      "id": "feature-revert-the-logout-button-styling-in-the-header-component-and-loginbutton-component-back-to-how-it-appeared-in-version-34-undoing-the-dark-color-change-that-was-applied-in-version-35",
+      "title": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35.",
       "reqIds": [
         "REQ-1"
       ],
@@ -18,8 +16,7 @@
     }
   ],
   "new_feature_requests": [],
-  "gameProjectType": "none",
-  "projectName": "Make logout button clearly visible with dark color styling",
+  "projectName": "Revert logout button color change (roll back to Version 34)",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

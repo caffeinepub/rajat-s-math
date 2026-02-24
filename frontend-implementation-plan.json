@@ -1,27 +1,27 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Make logout button clearly visible with dark color styling",
+  "title": "Revert logout button color change (roll back to Version 34)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Update logout button styling in Header and LoginButton components to use dark colors for better visibility",
+      "summary": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35",
       "acceptanceCriteria": [
-        "The logout button/link is rendered with a dark color that provides strong contrast against its background",
-        "The logout option is visually distinguishable and easy to locate in the navigation bar",
-        "Dark color styling is applied consistently on both desktop and mobile views",
-        "The logout button remains functional (triggers logout when clicked)"
+        "The logout button in the desktop header navigation displays the same color/style as it did before the Version 35 dark color change.",
+        "The logout button in the mobile navigation displays the same color/style as it did before the Version 35 dark color change.",
+        "The LoginButton component no longer has the darker color styling introduced in Version 35.",
+        "No other UI elements are affected by this revert."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Header.tsx",
           "operation": "modify",
-          "description": "Update the logout button/link styling in the Header component's navigation (both desktop and mobile layouts) to use dark text colors (e.g., text-navy-900 or text-gray-900) with appropriate hover states for strong contrast against the navigation bar background. Ensure consistent dark styling across responsive breakpoints without altering logout functionality."
+          "description": "Revert the logout button styling in both desktop and mobile navigation sections to match Version 34. Remove any dark color classes (e.g., bg-gray-800, bg-gray-700, text-gray-200) applied in Version 35 and restore the original lighter styling that was present in Version 34. Ensure both the desktop nav link and mobile nav button for logout are reverted."
         },
         {
           "path": "frontend/src/components/LoginButton.tsx",
           "operation": "modify",
-          "description": "Modify the logout button state styling in the LoginButton component to use dark background or dark text colors (e.g., bg-navy-800 text-white or text-navy-900) that provide clear visibility. Update hover states to maintain dark color scheme while preserving the existing authentication logic and loading states."
+          "description": "Revert the logout button styling to match Version 34. Remove the darker color scheme (likely bg-gray-800/700 or similar dark classes) introduced in Version 35 from the logout button state. Restore the original Version 34 styling which likely used lighter colors such as bg-gray-200 with hover:bg-gray-300 and text-gray-800 for the logout state."
         }
       ]
     }

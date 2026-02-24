@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-logout-button-link-in-the-header-component-and-loginbutton-component-to-use-a-dark-color-e-g-dark-text-or-dark-background-so-it-is-clearly-visible-against-the-navigation-bar-background-ensure-the-styling-is-consistent-across-both-desktop-and-mobile-nav-layouts",
-      "featureTitle": "Update the logout button/link in the Header component and LoginButton component to use a dark color (e.g., dark text or dark background) so it is clearly visible against the navigation bar background. Ensure the styling is consistent across both desktop and mobile nav layouts.",
+      "featureId": "feature-revert-the-logout-button-styling-in-the-header-component-and-loginbutton-component-back-to-how-it-appeared-in-version-34-undoing-the-dark-color-change-that-was-applied-in-version-35",
+      "featureTitle": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35.",
       "files": [
         "frontend/src/components/Header.tsx",
         "frontend/src/components/LoginButton.tsx"
