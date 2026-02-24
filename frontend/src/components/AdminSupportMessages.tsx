@@ -54,8 +54,8 @@ function MessageThread({
       return;
     }
     try {
-      // Cast to bigint as required by the hook
-      await replyMutation.mutateAsync({ studentId, messageIndex: BigInt(messageIndex), reply });
+      // messageIndex is passed as number — the hook converts to bigint internally
+      await replyMutation.mutateAsync({ studentId, messageIndex, reply });
       toast.success('Reply sent');
       setReplyTexts((prev) => ({ ...prev, [messageIndex]: '' }));
     } catch {

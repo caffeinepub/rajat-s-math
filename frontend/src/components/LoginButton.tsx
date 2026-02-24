@@ -14,6 +14,7 @@ export function LoginButton() {
     if (isAuthenticated) {
       await clear();
       queryClient.clear();
+      window.location.hash = '/';
     } else {
       try {
         await login();

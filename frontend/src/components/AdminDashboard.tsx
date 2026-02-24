@@ -1,346 +1,309 @@
 import React, { useState } from 'react';
-import {
-  useGetBookingRecords,
-  useMarkAsPaid,
-  useConfirmPaymentAndGenerateAccessCode,
-  useDeleteBooking,
-} from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useIsCallerAdmin, useGetBookingRecords, useMarkAsPaid, useConfirmPaymentAndGenerateAccessCode, useDeleteBooking } from '../hooks/useQueries';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BookingRecord } from '../backend';
-import {
-  CheckCircle,
-  Clock,
-  Trash2,
-  Key,
-  ChevronDown,
-  ChevronUp,
-  CalendarDays,
-  Tag,
-  Eye,
-  BookOpen,
-  Calendar,
-  MessageSquare,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import StudentMaterialsTab from './StudentMaterialsTab';
-import StudentScheduleTab from './StudentScheduleTab';
-import AdminSupportMessages from './AdminSupportMessages';
+import { BookingRecord, BookingStatus, ClassType } from '../backend';
 import AttendanceManager from './AttendanceManager';
+import AdminSupportMessages from './AdminSupportMessages';
 import DiscountCodeManager from './DiscountCodeManager';
+import CourseMaterialsManager from './CourseMaterialsManager';
+import ClassSessionsManager from './ClassSessionsManager';
 import VisitorTrackingView from './VisitorTrackingView';
+import { Users, BookOpen, MessageSquare, Tag, Calendar, BarChart2, Shield, Loader2 } from 'lucide-react';
 
-function formatDate(timestamp: bigint | undefined): string {
-  if (!timestamp) return 'N/A';
-  const ms = Number(timestamp / BigInt(1_000_000));
-  return new Date(ms).toLocaleString('en-IN');
-}
-
-function BookingCard({ booking }: { booking: BookingRecord }) {
-  const markAsPaid = useMarkAsPaid();
-  const confirmPayment = useConfirmPaymentAndGenerateAccessCode();
-  const deleteBooking = useDeleteBooking();
-  const [expanded, setExpanded] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-
-  const handleMarkPaid = async () => {
-    try {
-      await markAsPaid.mutateAsync(booking.paymentId);
-      toast.success('Booking marked as paid');
-    } catch (err: any) {
-      toast.error(err.message ?? 'Failed to mark as paid');
-    }
+function BookingCard({ booking, onMarkPaid, onConfirmPayment, onDelete, isLoading }: {
+  booking: BookingRecord;
+  onMarkPaid: (id: string) => void;
+  onConfirmPayment: (id: string) => void;
+  onDelete: (id: string) => void;
+  isLoading: boolean;
+}) {
+  const statusColor = {
+    [BookingStatus.pending]: 'bg-yellow-100 text-yellow-800',
+    [BookingStatus.awaitingPayment]: 'bg-blue-100 text-blue-800',
+    [BookingStatus.completed]: 'bg-green-100 text-green-800',
   };
 
-  const handleConfirmAndGenerate = async () => {
-    try {
-      const code = await confirmPayment.mutateAsync(booking.paymentId);
-      if (code) {
-        setGeneratedCode(code);
-        toast.success(`Access code generated: ${code}`);
-      }
-    } catch (err: any) {
-      toast.error(err.message ?? 'Failed to confirm payment');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this booking?')) return;
-    try {
-      await deleteBooking.mutateAsync(booking.paymentId);
-      toast.success('Booking deleted');
-    } catch (err: any) {
-      toast.error(err.message ?? 'Failed to delete booking');
-    }
-  };
-
-  const statusColorMap: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    awaitingPayment: 'bg-blue-100 text-blue-700 border-blue-200',
-    completed: 'bg-green-100 text-green-700 border-green-200',
-  };
-  const statusColor = statusColorMap[booking.status] ?? 'bg-gray-100 text-gray-700';
+  const classTypeLabel = booking.classType === ClassType.oneOnOne ? 'One-on-One' : 'Group';
 
   return (
-    <Card className="border-border-warm">
+    <Card className="mb-4">
       <CardContent className="pt-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1 flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold text-navy">{booking.name}</h3>
-              <Badge variant="outline" className={statusColor}>
-                {booking.status}
-              </Badge>
-              {booking.discountApplied > 0 && (
-                <Badge variant="outline" className="bg-gold/10 text-gold border-gold/30">
-                  {booking.discountApplied}% OFF
-                </Badge>
-              )}
-            </div>
-            <p className="text-sm text-warm-text">{booking.service}</p>
-            <p className="text-xs text-warm-text">
-              {booking.date} at {booking.time} · {booking.phone}
-            </p>
-            <p className="text-xs text-warm-text">
-              {booking.classType === 'oneOnOne' ? '1-on-1' : 'Group'} ·{' '}
-              {booking.numberOfClasses.toString()} classes · ₹{booking.finalAmount.toString()}
-            </p>
-            {booking.accessCode && (
-              <p className="text-xs font-mono bg-green-50 text-green-700 px-2 py-1 rounded inline-block">
-                Access: {booking.accessCode}
-              </p>
-            )}
-            {generatedCode && (
-              <p className="text-xs font-mono bg-blue-50 text-blue-700 px-2 py-1 rounded inline-block">
-                New Code: {generatedCode}
-              </p>
-            )}
+        <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+          <div>
+            <h3 className="font-semibold text-foreground">{booking.name}</h3>
+            <p className="text-sm text-muted-foreground">{booking.phone}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {booking.status === 'awaitingPayment' && (
-              <>
-                <Button
-                  size="sm"
-                  onClick={handleMarkPaid}
-                  disabled={markAsPaid.isPending}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  {markAsPaid.isPending ? 'Saving...' : 'Mark Paid'}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleConfirmAndGenerate}
-                  disabled={confirmPayment.isPending}
-                  className="bg-navy text-cream hover:bg-navy/90"
-                >
-                  <Key className="w-3 h-3 mr-1" />
-                  {confirmPayment.isPending ? 'Generating...' : 'Confirm + Code'}
-                </Button>
-              </>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleDelete}
-              disabled={deleteBooking.isPending}
-              className="text-red-500 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-3 h-3" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setExpanded(!expanded)}
-              className="text-warm-text"
-            >
-              {expanded ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor[booking.status as BookingStatus] || 'bg-gray-100 text-gray-800'}`}>
+            {booking.status}
+          </span>
         </div>
 
-        {expanded && (
-          <div className="mt-4 space-y-4 border-t border-border-warm pt-4">
-            <div>
-              <p className="text-xs font-semibold text-warm-text uppercase tracking-wide mb-2">
-                Payment Info
-              </p>
-              <p className="text-xs text-warm-text">ID: {booking.paymentId}</p>
-              <p className="text-xs text-warm-text">Status: {booking.paymentStatus}</p>
-              {booking.paymentConfirmedAt && (
-                <p className="text-xs text-warm-text">
-                  Confirmed: {formatDate(booking.paymentConfirmedAt)}
-                </p>
-              )}
-            </div>
-            <StudentMaterialsTab courseName={booking.service} />
-            <StudentScheduleTab courseName={booking.service} />
-          </div>
-        )}
+        <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+          <div><span className="text-muted-foreground">Service:</span> <span className="font-medium">{booking.service}</span></div>
+          <div><span className="text-muted-foreground">Type:</span> <span className="font-medium">{classTypeLabel}</span></div>
+          <div><span className="text-muted-foreground">Classes:</span> <span className="font-medium">{Number(booking.numberOfClasses)}</span></div>
+          <div><span className="text-muted-foreground">Date:</span> <span className="font-medium">{booking.date}</span></div>
+          <div><span className="text-muted-foreground">Time:</span> <span className="font-medium">{booking.time}</span></div>
+          <div><span className="text-muted-foreground">Amount:</span> <span className="font-medium">₹{Number(booking.finalAmount)}</span></div>
+          {booking.discountApplied > 0 && (
+            <div><span className="text-muted-foreground">Discount:</span> <span className="font-medium text-green-600">{booking.discountApplied}%</span></div>
+          )}
+          {booking.accessCode && (
+            <div className="col-span-2"><span className="text-muted-foreground">Access Code:</span> <span className="font-mono font-bold text-primary">{booking.accessCode}</span></div>
+          )}
+        </div>
+
+        <div className="text-xs text-muted-foreground mb-3">
+          Payment ID: <span className="font-mono">{booking.paymentId}</span>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {booking.status === BookingStatus.awaitingPayment && (
+            <>
+              <Button size="sm" onClick={() => onMarkPaid(booking.paymentId)} disabled={isLoading}>
+                {isLoading ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                Mark as Paid
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => onConfirmPayment(booking.paymentId)} disabled={isLoading}>
+                Confirm & Generate Code
+              </Button>
+            </>
+          )}
+          <Button size="sm" variant="destructive" onClick={() => onDelete(booking.paymentId)} disabled={isLoading}>
+            Delete
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-export default function AdminDashboard() {
+function BookingsTab() {
   const { data: bookings, isLoading } = useGetBookingRecords();
+  const markAsPaid = useMarkAsPaid();
+  const confirmPayment = useConfirmPaymentAndGenerateAccessCode();
+  const deleteBooking = useDeleteBooking();
 
-  const pending = bookings?.filter((b) => b.status === 'pending') ?? [];
-  const awaiting = bookings?.filter((b) => b.status === 'awaitingPayment') ?? [];
-  const completed = bookings?.filter((b) => b.status === 'completed') ?? [];
+  const [filter, setFilter] = useState<'all' | 'pending' | 'awaitingPayment' | 'completed'>('all');
+
+  const filtered = (bookings ?? []).filter(b => {
+    if (filter === 'all') return true;
+    return b.status === filter;
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => <Skeleton key={i} className="h-40 w-full" />)}
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-cream p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-navy font-serif">Admin Dashboard</h1>
-          <p className="text-warm-text text-sm mt-1">
-            Manage bookings, materials, sessions, and more
+    <div>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {(['all', 'pending', 'awaitingPayment', 'completed'] as const).map(f => (
+          <Button
+            key={f}
+            size="sm"
+            variant={filter === f ? 'default' : 'outline'}
+            onClick={() => setFilter(f)}
+          >
+            {f === 'all' ? 'All' : f === 'awaitingPayment' ? 'Awaiting Payment' : f.charAt(0).toUpperCase() + f.slice(1)}
+            <Badge variant="secondary" className="ml-1">
+              {f === 'all' ? (bookings ?? []).length : (bookings ?? []).filter(b => b.status === f).length}
+            </Badge>
+          </Button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          No bookings found.
+        </div>
+      ) : (
+        filtered.map(booking => (
+          <BookingCard
+            key={booking.paymentId}
+            booking={booking}
+            onMarkPaid={(id) => markAsPaid.mutate(id)}
+            onConfirmPayment={(id) => confirmPayment.mutate(id)}
+            onDelete={(id) => deleteBooking.mutate(id)}
+            isLoading={markAsPaid.isPending || confirmPayment.isPending || deleteBooking.isPending}
+          />
+        ))
+      )}
+    </div>
+  );
+}
+
+export default function AdminDashboard() {
+  const { identity } = useInternetIdentity();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsCallerAdmin();
+
+  if (isAdminLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          <p className="text-muted-foreground">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!identity) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center p-8">
+          <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-foreground mb-4">Authentication Required</h2>
+          <p className="text-muted-foreground mb-6">Please log in to access the admin dashboard.</p>
+          <a href="/" className="text-primary hover:underline">Return to Home</a>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAdmin === false) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center p-8">
+          <Shield className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-foreground mb-4">Access Denied</h2>
+          <p className="text-muted-foreground mb-6">You do not have admin privileges to view this page.</p>
+          <a href="/" className="text-primary hover:underline">Return to Home</a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Shield className="w-8 h-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground font-serif">Admin Dashboard</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Manage bookings, students, materials, and more.
           </p>
         </div>
 
-        <Tabs defaultValue="bookings">
-          <TabsList className="flex flex-wrap h-auto gap-1 mb-6 bg-warm-light/50 p-1 rounded-lg">
-            <TabsTrigger value="bookings" className="text-xs sm:text-sm">
-              Bookings
+        <Tabs defaultValue="bookings" className="w-full">
+          <TabsList className="flex flex-wrap h-auto gap-1 mb-6 bg-muted p-1 rounded-lg">
+            <TabsTrigger value="bookings" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline">Bookings</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="materials"
-              className="text-xs sm:text-sm flex items-center gap-1"
-            >
-              <BookOpen className="w-3 h-3" /> Course Materials
+            <TabsTrigger value="materials" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <BookOpen className="w-4 h-4" />
+              <span className="hidden sm:inline">Materials</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="sessions"
-              className="text-xs sm:text-sm flex items-center gap-1"
-            >
-              <Calendar className="w-3 h-3" /> Class Schedule
+            <TabsTrigger value="sessions" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline">Sessions</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="support"
-              className="text-xs sm:text-sm flex items-center gap-1"
-            >
-              <MessageSquare className="w-3 h-3" /> Support
+            <TabsTrigger value="attendance" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Attendance</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="attendance"
-              className="text-xs sm:text-sm flex items-center gap-1"
-            >
-              <CalendarDays className="w-3 h-3" /> Attendance
+            <TabsTrigger value="support" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Support</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="discounts"
-              className="text-xs sm:text-sm flex items-center gap-1"
-            >
-              <Tag className="w-3 h-3" /> Discounts
+            <TabsTrigger value="discounts" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <Tag className="w-4 h-4" />
+              <span className="hidden sm:inline">Discounts</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="visitors"
-              className="text-xs sm:text-sm flex items-center gap-1"
-            >
-              <Eye className="w-3 h-3" /> Visitors
+            <TabsTrigger value="visitors" className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <BarChart2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Visitors</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Bookings Tab */}
-          <TabsContent value="bookings" className="space-y-4">
-            {isLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-32 w-full" />
-                ))}
-              </div>
-            ) : (
-              <>
-                {awaiting.length > 0 && (
-                  <div>
-                    <h2 className="text-sm font-semibold text-warm-text uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Awaiting Payment ({awaiting.length})
-                    </h2>
-                    <div className="space-y-3">
-                      {awaiting.map((b) => (
-                        <BookingCard key={b.paymentId} booking={b} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {pending.length > 0 && (
-                  <div>
-                    <h2 className="text-sm font-semibold text-warm-text uppercase tracking-wide mb-2">
-                      Pending ({pending.length})
-                    </h2>
-                    <div className="space-y-3">
-                      {pending.map((b) => (
-                        <BookingCard key={b.paymentId} booking={b} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {completed.length > 0 && (
-                  <div>
-                    <h2 className="text-sm font-semibold text-warm-text uppercase tracking-wide mb-2 flex items-center gap-1">
-                      <CheckCircle className="w-3 h-3 text-green-600" /> Completed (
-                      {completed.length})
-                    </h2>
-                    <div className="space-y-3">
-                      {completed.map((b) => (
-                        <BookingCard key={b.paymentId} booking={b} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {(!bookings || bookings.length === 0) && (
-                  <div className="text-center py-12 text-warm-text">
-                    <p>No bookings yet.</p>
-                  </div>
-                )}
-              </>
-            )}
+          <TabsContent value="bookings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Booking Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <BookingsTab />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Course Materials Tab */}
           <TabsContent value="materials">
-            <div className="space-y-4">
-              <p className="text-sm text-warm-text">
-                Manage course materials for each service/course.
-              </p>
-              <StudentMaterialsTab courseName="Comprehensive Mathematics Program" />
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Course Materials</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CourseMaterialsManager />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Class Schedule Tab */}
           <TabsContent value="sessions">
-            <div className="space-y-4">
-              <p className="text-sm text-warm-text">Manage class sessions and schedules.</p>
-              <StudentScheduleTab courseName="Comprehensive Mathematics Program" />
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Class Sessions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ClassSessionsManager />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Support Tab */}
-          <TabsContent value="support">
-            <AdminSupportMessages />
-          </TabsContent>
-
-          {/* Attendance Tab */}
           <TabsContent value="attendance">
-            <AttendanceManager />
+            <Card>
+              <CardHeader>
+                <CardTitle>Attendance Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AttendanceManager />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Discount Codes Tab */}
+          <TabsContent value="support">
+            <Card>
+              <CardHeader>
+                <CardTitle>Support Messages</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdminSupportMessages />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="discounts">
-            <DiscountCodeManager />
+            <Card>
+              <CardHeader>
+                <CardTitle>Discount Codes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <DiscountCodeManager />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Visitor Tracking Tab */}
           <TabsContent value="visitors">
-            <VisitorTrackingView />
+            <Card>
+              <CardHeader>
+                <CardTitle>Visitor Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <VisitorTrackingView />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

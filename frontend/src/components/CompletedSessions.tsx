@@ -1,9 +1,8 @@
 import React from 'react';
 import { CheckCircle, Calendar, BookOpen, User, ArrowLeft, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCompletedBookings } from '../hooks/useQueries';
+import { useGetCompletedBookings } from '../hooks/useQueries';
 import type { BookingRecord } from '../backend';
 
 interface CompletedSessionsProps {
@@ -54,7 +53,7 @@ function SessionCard({ record }: { record: BookingRecord }) {
 }
 
 export function CompletedSessions({ onBack }: CompletedSessionsProps) {
-  const { data: sessions, isLoading, error } = useCompletedBookings();
+  const { data: sessions, isLoading, error } = useGetCompletedBookings();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cream via-warm-light to-[oklch(0.98_0.01_80)]">

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Principal } from '@dfinity/principal';
-import { useGetBookingRecords } from '../hooks/useQueries';
-import { useGetAttendanceRecords, useGetAttendanceSummary, useMarkAttendance } from '../hooks/useQueries';
+import { useGetBookingRecords, useGetAttendanceRecords, useGetAttendanceSummary, useMarkAttendance } from '../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarDays, CheckCircle, XCircle, Plus, BookOpen } from 'lucide-react';
+import { CalendarDays, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 function dateToNanoseconds(dateStr: string): bigint {
@@ -35,11 +34,12 @@ export default function AttendanceManager() {
   // New session form
   const [newSessionDate, setNewSessionDate] = useState<string>('');
   const [newSessionPresent, setNewSessionPresent] = useState(true);
+  // Manual principal input (string) — the hook accepts string and converts internally
   const [manualPrincipal, setManualPrincipal] = useState<string>('');
 
   const selectedBooking = bookings?.find(b => b.paymentId === selectedBookingId);
 
-  // Parse principal from manual input
+  // Parse principal for query hooks (they need Principal | null)
   const studentPrincipal: Principal | null = (() => {
     if (!manualPrincipal.trim()) return null;
     try { return Principal.fromText(manualPrincipal.trim()); } catch { return null; }
@@ -80,270 +80,264 @@ export default function AttendanceManager() {
 
   const handleMarkSession = async () => {
     if (!newSessionDate || !selectedBooking) {
-      toast.error('Please select a session date');
+      toast.error('Please select a booking and session date');
       return;
     }
-    if (!studentPrincipal) {
-      toast.error('Please enter a valid student principal ID to mark attendance');
+    if (!manualPrincipal.trim()) {
+      toast.error('Please enter the student principal ID');
+      return;
+    }
+    // Validate principal
+    try {
+      Principal.fromText(manualPrincipal.trim());
+    } catch {
+      toast.error('Invalid principal ID format');
       return;
     }
 
     try {
       await markAttendance.mutateAsync({
-        student: studentPrincipal,
+        // Pass as string — the hook converts to Principal internally
+        student: manualPrincipal.trim(),
         bookingId: selectedBooking.paymentId,
         course: selectedBooking.service,
         sessionDate: dateToNanoseconds(newSessionDate),
         isPresent: newSessionPresent,
       });
-      toast.success('Attendance marked successfully');
+      toast.success(`Attendance marked as ${newSessionPresent ? 'Present' : 'Absent'}`);
       setNewSessionDate('');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to mark attendance';
-      toast.error(msg);
-    }
-  };
-
-  const handleToggleAttendance = async (
-    student: Principal,
-    bookingId: string,
-    course: string,
-    sessionDate: bigint,
-    currentPresent: boolean
-  ) => {
-    try {
-      await markAttendance.mutateAsync({
-        student,
-        bookingId,
-        course,
-        sessionDate,
-        isPresent: !currentPresent,
-      });
-      toast.success('Attendance updated');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to update attendance';
-      toast.error(msg);
+      setQueryEnabled(true);
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Failed to mark attendance');
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 mb-2">
         <CalendarDays className="w-5 h-5 text-gold" />
-        <h2 className="text-xl font-semibold text-navy">Attendance Management</h2>
+        <h2 className="text-lg font-semibold text-navy">Attendance Management</h2>
       </div>
 
-      {/* Filters */}
+      {/* Booking Selector */}
       <Card className="border-border-warm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base text-navy">Search Attendance Records</CardTitle>
+          <CardTitle className="text-base text-navy">Select Student Booking</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <Label className="text-warm-text text-sm">Student Booking</Label>
-              {bookingsLoading ? (
-                <Skeleton className="h-10 w-full" />
-              ) : (
-                <Select value={selectedBookingId} onValueChange={setSelectedBookingId}>
-                  <SelectTrigger className="border-border-warm">
-                    <SelectValue placeholder="Select a student..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {completedBookings.map(b => (
-                      <SelectItem key={b.paymentId} value={b.paymentId}>
-                        {b.name} — {b.service}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+          {bookingsLoading ? (
+            <Skeleton className="h-10 w-full" />
+          ) : (
+            <Select value={selectedBookingId} onValueChange={setSelectedBookingId}>
+              <SelectTrigger className="border-navy/20">
+                <SelectValue placeholder="Select a completed booking..." />
+              </SelectTrigger>
+              <SelectContent>
+                {completedBookings.length === 0 ? (
+                  <SelectItem value="none" disabled>No completed bookings</SelectItem>
+                ) : (
+                  completedBookings.map(b => (
+                    <SelectItem key={b.paymentId} value={b.paymentId}>
+                      {b.name} — {b.service} ({b.date})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          )}
+
+          {selectedBooking && (
+            <div className="text-sm text-warm-text bg-warm-light/50 rounded-lg p-3 space-y-1">
+              <p><span className="font-medium text-navy">Student:</span> {selectedBooking.name}</p>
+              <p><span className="font-medium text-navy">Course:</span> {selectedBooking.service}</p>
+              <p><span className="font-medium text-navy">Phone:</span> {selectedBooking.phone}</p>
+              <p><span className="font-medium text-navy">Classes:</span> {Number(selectedBooking.numberOfClasses)}</p>
             </div>
-            <div className="space-y-1">
-              <Label className="text-warm-text text-sm">Student Principal ID</Label>
-              <Input
-                placeholder="Enter student's principal ID..."
-                value={manualPrincipal}
-                onChange={e => setManualPrincipal(e.target.value)}
-                className="border-border-warm font-mono text-xs"
-              />
-              {manualPrincipal && !studentPrincipal && (
-                <p className="text-xs text-red-500">Invalid principal ID format</p>
-              )}
-            </div>
+          )}
+
+          {/* Manual Principal Input */}
+          <div className="space-y-1">
+            <Label className="text-xs text-warm-text">Student Principal ID</Label>
+            <Input
+              value={manualPrincipal}
+              onChange={e => setManualPrincipal(e.target.value)}
+              placeholder="e.g. aaaaa-bbbbb-ccccc-ddddd-eee"
+              className="border-navy/20 font-mono text-xs"
+            />
+            <p className="text-xs text-warm-text/60">
+              Enter the student's Internet Identity principal ID to look up their attendance.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Date Range */}
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-warm-text text-sm">Start Date</Label>
+              <Label className="text-xs text-warm-text">Start Date</Label>
               <Input
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="border-border-warm"
+                className="border-navy/20"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-warm-text text-sm">End Date</Label>
+              <Label className="text-xs text-warm-text">End Date</Label>
               <Input
                 type="date"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="border-border-warm"
+                className="border-navy/20"
               />
             </div>
           </div>
-          <Button onClick={handleSearch} className="bg-navy text-cream hover:bg-navy/90">
-            <BookOpen className="w-4 h-4 mr-2" />
-            Load Records
+
+          <Button
+            onClick={handleSearch}
+            disabled={!selectedBookingId || !studentPrincipal}
+            className="bg-navy hover:bg-navy/90 text-cream w-full"
+          >
+            View Attendance Records
           </Button>
         </CardContent>
       </Card>
 
-      {/* Summary */}
-      {summary && (
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="border-border-warm text-center">
-            <CardContent className="pt-4 pb-3">
-              <p className="text-2xl font-bold text-navy">{summary.totalSessions.toString()}</p>
-              <p className="text-xs text-warm-text mt-1">Total Sessions</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border-warm text-center">
-            <CardContent className="pt-4 pb-3">
-              <p className="text-2xl font-bold text-green-600">{summary.attendedSessions.toString()}</p>
-              <p className="text-xs text-warm-text mt-1">Attended</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border-warm text-center">
-            <CardContent className="pt-4 pb-3">
-              <p className="text-2xl font-bold text-gold">
-                {summary.totalSessions > 0
-                  ? Math.round((Number(summary.attendedSessions) / Number(summary.totalSessions)) * 100)
-                  : 0}%
-              </p>
-              <p className="text-xs text-warm-text mt-1">Attendance Rate</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Add New Session */}
+      {/* Mark New Session */}
       {selectedBooking && (
         <Card className="border-border-warm">
           <CardHeader className="pb-3">
             <CardTitle className="text-base text-navy flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Mark New Session for {selectedBooking.name}
+              Mark Session Attendance
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4 items-end">
-              <div className="space-y-1">
-                <Label className="text-warm-text text-sm">Session Date</Label>
-                <Input
-                  type="date"
-                  value={newSessionDate}
-                  onChange={e => setNewSessionDate(e.target.value)}
-                  className="border-border-warm w-48"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Label className="text-warm-text text-sm">Present</Label>
-                <Switch
-                  checked={newSessionPresent}
-                  onCheckedChange={setNewSessionPresent}
-                />
-              </div>
-              <Button
-                onClick={handleMarkSession}
-                disabled={markAttendance.isPending || !studentPrincipal}
-                className="bg-gold text-navy hover:bg-gold/90"
-              >
-                {markAttendance.isPending ? 'Saving...' : 'Mark Attendance'}
-              </Button>
+          <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <Label className="text-xs text-warm-text">Session Date</Label>
+              <Input
+                type="date"
+                value={newSessionDate}
+                onChange={e => setNewSessionDate(e.target.value)}
+                className="border-navy/20"
+              />
             </div>
-            {!studentPrincipal && (
-              <p className="text-xs text-amber-600 mt-2">
-                Enter the student's principal ID above to mark attendance.
-              </p>
+
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={newSessionPresent}
+                onCheckedChange={setNewSessionPresent}
+              />
+              <span className={`text-sm font-medium ${newSessionPresent ? 'text-green-600' : 'text-red-500'}`}>
+                {newSessionPresent ? 'Present' : 'Absent'}
+              </span>
+            </div>
+
+            <Button
+              onClick={handleMarkSession}
+              disabled={markAttendance.isPending || !newSessionDate || !manualPrincipal.trim()}
+              className="bg-gold hover:bg-gold/90 text-navy font-semibold w-full"
+            >
+              {markAttendance.isPending ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-navy/30 border-t-navy rounded-full animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4" />
+                  Mark Attendance
+                </span>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Attendance Summary */}
+      {queryEnabled && summary && (
+        <Card className="border-border-warm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base text-navy">Attendance Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="bg-warm-light/50 rounded-lg p-3">
+                <p className="text-2xl font-bold text-navy">{Number(summary.totalSessions)}</p>
+                <p className="text-xs text-warm-text">Total Sessions</p>
+              </div>
+              <div className="bg-green-50 rounded-lg p-3">
+                <p className="text-2xl font-bold text-green-600">{Number(summary.attendedSessions)}</p>
+                <p className="text-xs text-warm-text">Present</p>
+              </div>
+              <div className="bg-red-50 rounded-lg p-3">
+                <p className="text-2xl font-bold text-red-500">
+                  {Number(summary.totalSessions) - Number(summary.attendedSessions)}
+                </p>
+                <p className="text-xs text-warm-text">Absent</p>
+              </div>
+            </div>
+            {Number(summary.totalSessions) > 0 && (
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-warm-text mb-1">
+                  <span>Attendance Rate</span>
+                  <span className="font-semibold text-navy">
+                    {Math.round((Number(summary.attendedSessions) / Number(summary.totalSessions)) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-green-500 h-2 rounded-full transition-all"
+                    style={{ width: `${Math.round((Number(summary.attendedSessions) / Number(summary.totalSessions)) * 100)}%` }}
+                  />
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
       )}
 
-      {/* Records List */}
-      {queryEnabled && records && records.length > 0 && (
+      {/* Attendance Records */}
+      {queryEnabled && (
         <Card className="border-border-warm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base text-navy">Attendance Records</CardTitle>
+            <CardTitle className="text-base text-navy">Session Records</CardTitle>
           </CardHeader>
           <CardContent>
             {recordsLoading ? (
               <div className="space-y-2">
                 {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
               </div>
+            ) : !records || records.length === 0 ? (
+              <div className="text-center py-8 text-warm-text/50">
+                <CalendarDays className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                <p>No attendance records found for this period.</p>
+              </div>
             ) : (
               <div className="space-y-2">
-                {[...records]
-                  .sort((a, b) => Number(b.sessionDate - a.sessionDate))
-                  .map((record, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 rounded-lg border border-border-warm"
-                    >
-                      <div className="flex items-center gap-3">
-                        {record.isPresent ? (
-                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                        )}
-                        <span className="text-sm text-navy font-medium">
-                          {nanosecondsToDate(record.sessionDate)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          className={
-                            record.isPresent
-                              ? 'bg-green-100 text-green-700 border-green-200'
-                              : 'bg-red-100 text-red-700 border-red-200'
-                          }
-                          variant="outline"
-                        >
-                          {record.isPresent ? 'Present' : 'Absent'}
-                        </Badge>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() =>
-                            studentPrincipal &&
-                            handleToggleAttendance(
-                              studentPrincipal,
-                              record.bookingId,
-                              record.course,
-                              record.sessionDate,
-                              record.isPresent
-                            )
-                          }
-                          disabled={markAttendance.isPending || !studentPrincipal}
-                          className="text-xs h-7 text-navy hover:bg-navy/5"
-                        >
-                          Toggle
-                        </Button>
-                      </div>
+                {records.map((record, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-warm-light/40 border border-border-warm">
+                    <div className="flex items-center gap-2">
+                      {record.isPresent ? (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-400" />
+                      )}
+                      <span className="text-sm text-navy font-medium">
+                        {nanosecondsToDate(record.sessionDate)}
+                      </span>
                     </div>
-                  ))}
+                    <Badge
+                      variant="outline"
+                      className={record.isPresent
+                        ? 'bg-green-50 text-green-700 border-green-200'
+                        : 'bg-red-50 text-red-600 border-red-200'
+                      }
+                    >
+                      {record.isPresent ? 'Present' : 'Absent'}
+                    </Badge>
+                  </div>
+                ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
-
-      {queryEnabled && (!records || records.length === 0) && !recordsLoading && (
-        <Card className="border-border-warm">
-          <CardContent className="py-8 text-center text-warm-text">
-            <CalendarDays className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p>No attendance records found for the selected filters.</p>
           </CardContent>
         </Card>
       )}

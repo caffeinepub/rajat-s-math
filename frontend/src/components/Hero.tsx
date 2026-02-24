@@ -3,7 +3,7 @@ import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useIsCallerAdmin } from '../hooks/useQueries';
 import { LoginButton } from './LoginButton';
 import { BookingFlowManager } from './BookingFlowManager';
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, Shield } from 'lucide-react';
 
 interface HeroProps {
   onNavigate?: (path: string) => void;
@@ -12,7 +12,7 @@ interface HeroProps {
 export function Hero({ onNavigate }: HeroProps) {
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity;
-  const { data: isAdmin } = useIsCallerAdmin();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsCallerAdmin();
   const [showBooking, setShowBooking] = useState(false);
 
   return (
@@ -78,11 +78,13 @@ export function Hero({ onNavigate }: HeroProps) {
               Student Portal
             </button>
 
-            {isAdmin && (
+            {/* Admin Dashboard Button — only shown when admin is confirmed */}
+            {isAuthenticated && !isAdminLoading && isAdmin === true && (
               <button
                 onClick={() => onNavigate?.('/admin')}
-                className="px-6 py-3 bg-cream/10 border border-cream/20 text-cream font-medium rounded-lg hover:bg-cream/20 transition-colors"
+                className="px-6 py-3 bg-cream/10 border border-gold/40 text-gold font-medium rounded-lg hover:bg-cream/20 transition-colors flex items-center gap-2"
               >
+                <Shield className="w-4 h-4" />
                 Admin Dashboard
               </button>
             )}

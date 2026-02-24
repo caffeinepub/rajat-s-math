@@ -1,11 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Add two new discount codes (RAJAT50 and MATHS30) to the booking payment flow and admin panel.
+**Goal:** Add Login/Logout buttons to the navigation bar and fix admin dashboard access so that only the principal associated with rkj.jain2204@gmail.com can view and access the admin dashboard.
 
 **Planned changes:**
-- Add `RAJAT50` (50% discount) to the discount code validation logic in `UpiPaymentStep.tsx`
-- Add `MATHS30` (30% discount) to the discount code validation logic in `UpiPaymentStep.tsx`
-- Update the `DiscountCodeManager` admin UI to display all four active codes: `SAVE10`, `SUMMER20`, `RAJAT50`, and `MATHS30`
+- Add a Login button to the navigation bar (visible on all pages) when no user is authenticated, using Internet Identity.
+- Add a Logout button to the navigation bar when a user is authenticated; on logout, clear React Query cache and redirect to home page.
+- After login, automatically redirect admin (rkj.jain2204@gmail.com principal) to the admin dashboard (#admin) and all other users to the home page.
+- Hide the admin dashboard link/button from navigation and hero section for all non-admin users.
+- Redirect any non-admin user who attempts to navigate directly to #admin back to the home page.
+- Fix the admin dashboard not rendering/appearing for the admin user.
+- Ensure the backend's isAdmin check correctly identifies and returns true only for the principal associated with rkj.jain2204@gmail.com.
 
-**User-visible outcome:** Users can apply `RAJAT50` for 50% off or `MATHS30` for 30% off during checkout, and admins can see all four active discount codes listed in the admin panel.
+**User-visible outcome:** The navigation bar shows Login/Logout controls on every page. After logging in, the admin is automatically taken to the admin dashboard (which is now fully visible and functional), while all other users go to the home page. Non-admin users have no access to or visibility of the admin dashboard.

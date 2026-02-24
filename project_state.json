@@ -1,26 +1,29 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "E-commerce or shopping project with discount code functionality. Existing codes: SAVE10, SUMMER20. New codes: RAJAT50 (50% off), MATHS30 (30% off).",
+  "summary": "App with Internet Identity authentication, login/logout in navigation bar, and an admin dashboard restricted to rkj.jain2204@gmail.com. After login, admin users are redirected to the admin dashboard and regular users to the home page.",
   "architectural_notes": [
-    "Discount codes: SAVE10, SUMMER20, RAJAT50 (50%), MATHS30 (30%) — applied via Apply button"
+    "Authentication is handled via Internet Identity (supports passkeys, Google, Apple, Microsoft)",
+    "Admin access is gated by specific email address: rkj.jain2204@gmail.com"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Admin dashboard not appearing in navigation for rkj.jain2204@gmail.com (reported in Version 33)"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-two-new-discount-codes-to-the-discount-code-validation-logic-in-upipaymentstep-tsx-rajat50-50-discount-and-maths30-30-discount-these-must-work-alongside-the-existing-save10-10-and-summer20-20-codes",
-      "title": "Add two new discount codes to the discount code validation logic in UpiPaymentStep.tsx: RAJAT50 (50% discount) and MATHS30 (30% discount). These must work alongside the existing SAVE10 (10%) and SUMMER20 (20%) codes.",
+      "id": "feature-add-a-login-button-and-a-logout-button-to-the-navigation-bar-visible-on-all-pages-use-internet-identity-for-authentication-when-the-user-is-not-logged-in-show-the-login-button-when-logged-in-show-the-logout-button-alongside-the-user-s-identity-indicator-on-logout-clear-the-react-query-cache-and-return-the-user-to-the-home-page",
+      "title": "Add a Login button and a Logout button to the navigation bar (visible on all pages). Use Internet Identity for authentication. When the user is not logged in, show the Login button. When logged in, show the Logout button alongside the user's identity indicator. On logout, clear the React Query cache and return the user to the home page.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-discountcodemanager-admin-ui-to-display-rajat50-50-and-maths30-30-alongside-the-existing-discount-codes-so-admins-can-see-all-active-codes",
-      "title": "Update the DiscountCodeManager admin UI to display RAJAT50 (50%) and MATHS30 (30%) alongside the existing discount codes so admins can see all active codes.",
+      "id": "feature-the-admin-dashboard-admindashboard-component-hash-route-admin-must-be-completely-hidden-and-inaccessible-to-any-user-who-is-not-authenticated-as-the-admin-principal-associated-with-rkj-jain2204-gmail-com-any-attempt-to-navigate-to-admin-by-a-non-admin-user-must-redirect-them-to-the-home-page-the-admin-dashboard-link-button-must-not-appear-in-the-navigation-bar-or-hero-section-for-non-admin-users-fix-the-existing-issue-where-the-admin-dashboard-was-not-appearing-for-the-admin-user-in-version-33",
+      "title": "The admin dashboard (AdminDashboard component, hash route #admin) must be completely hidden and inaccessible to any user who is not authenticated as the admin principal associated with rkj.jain2204@gmail.com. Any attempt to navigate to #admin by a non-admin user must redirect them to the home page. The admin dashboard link/button must not appear in the navigation bar or hero section for non-admin users. Fix the existing issue where the admin dashboard was not appearing for the admin user in Version 33.",
       "reqIds": [
-        "REQ-2"
+        "REQ-3"
       ],
       "version": 1
     }
@@ -28,14 +31,36 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add discount code RAJAT50 for 50% discount",
+      "summary": "Add login/logout buttons to the navigation bar using Internet Identity authentication",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Add discount code MATHS30 for 30% discount",
+      "summary": "Admin dashboard restricted to rkj.jain2204@gmail.com only; hidden from all other users",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "After login, redirect admin (rkj.jain2204@gmail.com) to admin dashboard and regular users to home page",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "After a successful Internet Identity login, if the authenticated user's principal corresponds to the email rkj.jain2204@gmail.com (i.e., the admin), automatically redirect them to the admin dashboard page (hash route #admin). All other authenticated users should be redirected to the home page (hash route #home or root).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Ensure the backend's isAdmin function or authorization check correctly identifies the principal associated with rkj.jain2204@gmail.com and returns true only for that principal. Verify the admin principal ID stored in the backend matches the one produced by Internet Identity for rkj.jain2204@gmail.com.",
+      "reqIds": [
+        "REQ-4"
+      ],
       "status": "pending"
     }
   ],

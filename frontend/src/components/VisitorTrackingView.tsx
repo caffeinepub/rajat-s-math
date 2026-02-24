@@ -1,94 +1,20 @@
-import React, { useState } from 'react';
-import { Principal } from '@dfinity/principal';
+import React from 'react';
 import { useGetBookingRecords } from '../hooks/useQueries';
-import { useGetVisitorActivitiesByUser } from '../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Eye, LogIn, BookOpen, RefreshCw, Users } from 'lucide-react';
 import { useActor } from '../hooks/useActor';
 import { useQuery } from '@tanstack/react-query';
-import type { VisitorActivity } from '../backend';
-import { EventType } from '../backend';
-
-function nanosecondsToDateTime(ns: bigint): string {
-  const ms = Number(ns / BigInt(1_000_000));
-  return new Date(ms).toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-// We fetch all visitor activities by querying known principals from booking records
-function useAllVisitorActivities(principals: Principal[]) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Map<string, VisitorActivity[]>>({
-    queryKey: ['allVisitorActivities', principals.map(p => p.toString()).join(',')],
-    queryFn: async () => {
-      if (!actor || principals.length === 0) return new Map();
-      const results = new Map<string, VisitorActivity[]>();
-      await Promise.all(
-        principals.map(async p => {
-          try {
-            const activities = await actor.getVisitorActivitiesByUser(p);
-            if (activities.length > 0) {
-              results.set(p.toString(), activities);
-            }
-          } catch {
-            // skip unauthorized or missing
-          }
-        })
-      );
-      return results;
-    },
-    enabled: !!actor && !isFetching && principals.length > 0,
-  });
-}
 
 export default function VisitorTrackingView() {
   const { data: bookings, isLoading: bookingsLoading } = useGetBookingRecords();
-
-  // Extract unique principals from bookings (those who have logged in)
-  // In practice, visitor tracking is for authenticated users who haven't purchased
-  // We'll show all tracked activity grouped by principal
   const { actor, isFetching } = useActor();
 
-  const { data: allActivities, isLoading: activitiesLoading, refetch } = useQuery<
-    Array<{ principal: string; activities: VisitorActivity[] }>
-  >({
-    queryKey: ['visitorActivitiesAll'],
-    queryFn: async () => {
-      if (!actor) return [];
-      // We can't enumerate all principals from the backend directly,
-      // so we use a best-effort approach: query activities for principals
-      // found in booking records
-      if (!bookings) return [];
-      const results: Array<{ principal: string; activities: VisitorActivity[] }> = [];
-      // Collect unique principals from any source we have
-      // Since bookings don't store principal, we'll show a message
-      return results;
-    },
-    enabled: !!actor && !isFetching && !!bookings,
-  });
-
-  // Direct approach: use a dedicated admin query if available
-  // Since backend only has getVisitorActivitiesByUser (per-user), 
-  // we show a summary view with available data
-  const { data: rawActivities, isLoading: rawLoading, refetch: refetchRaw } = useQuery<
-    VisitorActivity[]
-  >({
+  const { isLoading: rawLoading, refetch: refetchRaw } = useQuery<void>({
     queryKey: ['visitorActivitiesRaw'],
     queryFn: async () => {
-      if (!actor) return [];
-      // We'll try to get activities for the current user as a demo
-      // In production, the admin would need a getAllVisitorActivities endpoint
-      return [];
+      // No getAllVisitorActivities endpoint available; placeholder
     },
     enabled: !!actor && !isFetching,
   });
@@ -157,8 +83,8 @@ export default function VisitorTrackingView() {
               <Eye className="w-12 h-12 mx-auto mb-3 opacity-20" />
               <p className="font-medium text-navy mb-1">Visitor Tracking Active</p>
               <p className="text-sm max-w-md mx-auto">
-                Login and course-view events are being recorded for authenticated users. 
-                A <code className="bg-gray-100 px-1 rounded text-xs">getAllVisitorActivities</code> admin 
+                Login and course-view events are being recorded for authenticated users.
+                A <code className="bg-gray-100 px-1 rounded text-xs">getAllVisitorActivities</code> admin
                 endpoint is needed to display aggregated data here.
               </p>
               <p className="text-xs mt-3 text-warm-text/70">

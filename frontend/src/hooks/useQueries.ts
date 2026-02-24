@@ -1,32 +1,60 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { Principal } from '@dfinity/principal';
-import type {
-  UserProfile,
+import { useInternetIdentity } from './useInternetIdentity';
+import {
   BookingRecord,
   CourseMaterial,
   ClassSession,
+  UserProfile,
   StudentSupportMessage,
   AttendanceRecord,
   AttendanceSummary,
-  ExtendedDiscountCode,
-  VisitorActivity,
+  CourseRoadmap,
+  ModuleStatus,
   EventType,
   DiscountCodeValidationResponse,
+  ExtendedDiscountCode,
 } from '../backend';
+import { Principal } from '@dfinity/principal';
+
+// ─── Admin Check ─────────────────────────────────────────────────────────────
+
+export function useIsCallerAdmin() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const principalStr = identity?.getPrincipal().toString() ?? null;
+
+  return useQuery<boolean>({
+    queryKey: ['isCallerAdmin', principalStr],
+    queryFn: async () => {
+      if (!actor) return false;
+      try {
+        const result = await actor.isCallerAdmin();
+        return result;
+      } catch {
+        return false;
+      }
+    },
+    enabled: !!actor && !actorFetching && !!identity,
+    staleTime: 0,
+    retry: 2,
+  });
+}
 
 // ─── User Profile ─────────────────────────────────────────────────────────────
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const principalStr = identity?.getPrincipal().toString() ?? null;
 
   const query = useQuery<UserProfile | null>({
-    queryKey: ['currentUserProfile'],
+    queryKey: ['currentUserProfile', principalStr],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       return actor.getCallerUserProfile();
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !actorFetching && !!identity,
     retry: false,
   });
 
@@ -40,82 +68,24 @@ export function useGetCallerUserProfile() {
 export function useSaveCallerUserProfile() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
 
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.saveCallerUserProfile(profile);
+      await actor.saveCallerUserProfile(profile);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      const principalStr = identity?.getPrincipal().toString() ?? null;
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile', principalStr] });
     },
-  });
-}
-
-// ─── Admin Check ──────────────────────────────────────────────────────────────
-
-export function useIsCallerAdmin() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['isCallerAdmin'],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.isCallerAdmin();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// ─── Course Details ───────────────────────────────────────────────────────────
-
-export function useGetCourseDetails() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery({
-    queryKey: ['courseDetails'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.getCourseDetails();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// ─── UPI Payment ──────────────────────────────────────────────────────────────
-
-export function useRecordUPIPayment() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.recordUPIPaymentSuccessful();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-    },
-  });
-}
-
-export function useHasPaidWithUPI(user: Principal | null) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['hasPaidWithUPI', user?.toString()],
-    queryFn: async () => {
-      if (!actor || !user) return false;
-      return actor.hasPaidWithUPI(user);
-    },
-    enabled: !!actor && !isFetching && !!user,
   });
 }
 
 // ─── Booking Records ──────────────────────────────────────────────────────────
 
 export function useGetBookingRecords() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<BookingRecord[]>({
     queryKey: ['bookingRecords'],
@@ -123,7 +93,20 @@ export function useGetBookingRecords() {
       if (!actor) return [];
       return actor.getBookingRecords();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useGetCompletedBookings() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<BookingRecord[]>({
+    queryKey: ['completedBookings'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getCompletedBookings();
+    },
+    enabled: !!actor && !actorFetching,
   });
 }
 
@@ -134,7 +117,7 @@ export function useAddBookingRecord() {
   return useMutation({
     mutationFn: async (record: BookingRecord) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addBookingRecord(record);
+      await actor.addBookingRecord(record);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookingRecords'] });
@@ -170,7 +153,6 @@ export function useConfirmPaymentAndGenerateAccessCode() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookingRecords'] });
-      queryClient.invalidateQueries({ queryKey: ['completedBookings'] });
     },
   });
 }
@@ -195,30 +177,49 @@ export function useFindBookingByAccessCode() {
   const { actor } = useActor();
 
   return useMutation({
-    mutationFn: async (accessCode: string): Promise<BookingRecord | null> => {
+    mutationFn: async (accessCode: string) => {
       if (!actor) throw new Error('Actor not available');
       return actor.findBookingByAccessCode(accessCode);
     },
   });
 }
 
-export function useCompletedBookings() {
-  const { actor, isFetching } = useActor();
+// ─── Course Details ───────────────────────────────────────────────────────────
 
-  return useQuery<BookingRecord[]>({
-    queryKey: ['completedBookings'],
+export function useGetCourseDetails() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['courseDetails'],
     queryFn: async () => {
-      if (!actor) return [];
-      return actor.getCompletedBookings();
+      if (!actor) throw new Error('Actor not available');
+      return actor.getCourseDetails();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useRecordUPIPayment() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.recordUPIPaymentSuccessful();
+    },
+    onSuccess: () => {
+      const principalStr = identity?.getPrincipal().toString() ?? null;
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile', principalStr] });
+    },
   });
 }
 
 // ─── Course Materials ─────────────────────────────────────────────────────────
 
 export function useGetCourseMaterials(courseName: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<CourseMaterial[]>({
     queryKey: ['courseMaterials', courseName],
@@ -226,7 +227,7 @@ export function useGetCourseMaterials(courseName: string) {
       if (!actor) return [];
       return actor.getCourseMaterials(courseName);
     },
-    enabled: !!actor && !isFetching && !!courseName,
+    enabled: !!actor && !actorFetching && !!courseName,
   });
 }
 
@@ -237,11 +238,10 @@ export function useAddCourseMaterial() {
   return useMutation({
     mutationFn: async (material: CourseMaterial) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addCourseMaterial(material);
+      await actor.addCourseMaterial(material);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['courseMaterials', variables.courseName] });
-      queryClient.invalidateQueries({ queryKey: ['studentCourseMaterials'] });
     },
   });
 }
@@ -253,11 +253,11 @@ export function useRemoveCourseMaterial() {
   return useMutation({
     mutationFn: async ({ title, courseName }: { title: string; courseName: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.removeCourseMaterial(title);
+      await actor.removeCourseMaterial(title);
+      return courseName;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['courseMaterials', variables.courseName] });
-      queryClient.invalidateQueries({ queryKey: ['studentCourseMaterials'] });
     },
   });
 }
@@ -265,7 +265,7 @@ export function useRemoveCourseMaterial() {
 // ─── Class Sessions ───────────────────────────────────────────────────────────
 
 export function useGetClassSessions(courseName: string) {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<ClassSession[]>({
     queryKey: ['classSessions', courseName],
@@ -273,7 +273,7 @@ export function useGetClassSessions(courseName: string) {
       if (!actor) return [];
       return actor.getClassSessions(courseName);
     },
-    enabled: !!actor && !isFetching && !!courseName,
+    enabled: !!actor && !actorFetching && !!courseName,
   });
 }
 
@@ -284,11 +284,10 @@ export function useAddClassSession() {
   return useMutation({
     mutationFn: async (session: ClassSession) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addClassSession(session);
+      await actor.addClassSession(session);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['classSessions', variables.courseName] });
-      queryClient.invalidateQueries({ queryKey: ['studentClassSessions'] });
     },
   });
 }
@@ -300,27 +299,57 @@ export function useRemoveClassSession() {
   return useMutation({
     mutationFn: async ({ sessionTitle, courseName }: { sessionTitle: string; courseName: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.removeClassSession(sessionTitle);
+      await actor.removeClassSession(sessionTitle);
+      return courseName;
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['classSessions', variables.courseName] });
-      queryClient.invalidateQueries({ queryKey: ['studentClassSessions'] });
     },
   });
 }
 
 // ─── Support Messages ─────────────────────────────────────────────────────────
 
-export function useGetAllSupportMessages() {
-  const { actor, isFetching } = useActor();
+export function useGetMySupportMessages(studentPrincipal: Principal | null) {
+  const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Array<[Principal, StudentSupportMessage[]]>>({
+  return useQuery<StudentSupportMessage[]>({
+    queryKey: ['supportMessages', studentPrincipal?.toString()],
+    queryFn: async () => {
+      if (!actor || !studentPrincipal) return [];
+      return actor.getSupportMessagesByUser(studentPrincipal);
+    },
+    enabled: !!actor && !actorFetching && !!studentPrincipal,
+  });
+}
+
+export function useGetAllSupportMessages() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<[Principal, StudentSupportMessage[]][]>({
     queryKey: ['allSupportMessages'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getAllSupportMessages() as Promise<Array<[Principal, StudentSupportMessage[]]>>;
+      return actor.getAllSupportMessages();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useSubmitSupportMessage() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  const { identity } = useInternetIdentity();
+
+  return useMutation({
+    mutationFn: async (message: string) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.submitSupportMessage(message);
+    },
+    onSuccess: () => {
+      const principalStr = identity?.getPrincipal().toString();
+      queryClient.invalidateQueries({ queryKey: ['supportMessages', principalStr] });
+    },
   });
 }
 
@@ -335,86 +364,19 @@ export function useReplyToSupportMessage() {
       reply,
     }: {
       studentId: Principal;
-      messageIndex: bigint;
+      messageIndex: number;
       reply: string;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.replyToSupportMessage(studentId, messageIndex, reply);
+      await actor.replyToSupportMessage(studentId, BigInt(messageIndex), reply);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['allSupportMessages'] });
-    },
-  });
-}
-
-export function useGetMySupportMessages(studentId: Principal | null) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<StudentSupportMessage[]>({
-    queryKey: ['mySupportMessages', studentId?.toString()],
-    queryFn: async () => {
-      if (!actor || !studentId) return [];
-      return actor.getSupportMessagesByUser(studentId);
-    },
-    enabled: !!actor && !isFetching && !!studentId,
-  });
-}
-
-export function useSubmitSupportMessage() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (message: string) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.submitSupportMessage(message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mySupportMessages'] });
       queryClient.invalidateQueries({ queryKey: ['allSupportMessages'] });
     },
   });
 }
 
 // ─── Attendance ───────────────────────────────────────────────────────────────
-
-export function useGetAttendanceRecords(
-  student: Principal | null,
-  course: string,
-  startDate: bigint,
-  endDate: bigint,
-  enabled: boolean = true
-) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<AttendanceRecord[]>({
-    queryKey: ['attendanceRecords', student?.toString(), course, startDate.toString(), endDate.toString()],
-    queryFn: async () => {
-      if (!actor || !student) return [];
-      return actor.getAttendanceRecords(student, course, startDate, endDate);
-    },
-    enabled: !!actor && !isFetching && !!student && !!course && enabled,
-  });
-}
-
-export function useGetAttendanceSummary(
-  student: Principal | null,
-  course: string,
-  startDate: bigint,
-  endDate: bigint,
-  enabled: boolean = true
-) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<AttendanceSummary | null>({
-    queryKey: ['attendanceSummary', student?.toString(), course, startDate.toString(), endDate.toString()],
-    queryFn: async () => {
-      if (!actor || !student) return null;
-      return actor.getAttendanceSummary(student, course, startDate, endDate);
-    },
-    enabled: !!actor && !isFetching && !!student && !!course && enabled,
-  });
-}
 
 export function useMarkAttendance() {
   const { actor } = useActor();
@@ -428,26 +390,155 @@ export function useMarkAttendance() {
       sessionDate,
       isPresent,
     }: {
-      student: Principal;
+      student: string;
       bookingId: string;
       course: string;
       sessionDate: bigint;
       isPresent: boolean;
     }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.markAttendance(student, bookingId, course, sessionDate, isPresent);
+      const principalObj = Principal.fromText(student);
+      await actor.markAttendance(principalObj, bookingId, course, sessionDate, isPresent);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendanceRecords'] });
-      queryClient.invalidateQueries({ queryKey: ['attendanceSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['attendance'] });
+    },
+  });
+}
+
+export function useGetAttendanceRecords(
+  student: Principal | null,
+  course: string,
+  startDate: bigint,
+  endDate: bigint,
+  enabled: boolean
+) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<AttendanceRecord[]>({
+    queryKey: ['attendance', student?.toString(), course, startDate.toString(), endDate.toString()],
+    queryFn: async () => {
+      if (!actor || !student) return [];
+      return actor.getAttendanceRecords(student, course, startDate, endDate);
+    },
+    enabled: !!actor && !actorFetching && !!student && enabled,
+  });
+}
+
+export function useGetAttendanceSummary(
+  student: Principal | null,
+  course: string,
+  startDate: bigint,
+  endDate: bigint,
+  enabled: boolean
+) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<AttendanceSummary | null>({
+    queryKey: ['attendanceSummary', student?.toString(), course, startDate.toString(), endDate.toString()],
+    queryFn: async () => {
+      if (!actor || !student) return null;
+      return actor.getAttendanceSummary(student, course, startDate, endDate);
+    },
+    enabled: !!actor && !actorFetching && !!student && enabled,
+  });
+}
+
+// ─── Roadmap ──────────────────────────────────────────────────────────────────
+
+export function useGetRoadmap(paymentId: string) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<CourseRoadmap | null>({
+    queryKey: ['roadmap', paymentId],
+    queryFn: async () => {
+      if (!actor || !paymentId) return null;
+      return actor.getRoadmap(paymentId);
+    },
+    enabled: !!actor && !actorFetching && !!paymentId,
+  });
+}
+
+export function useGetAllRoadmaps() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<[string, CourseRoadmap][]>({
+    queryKey: ['allRoadmaps'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllRoadmaps();
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useSetRoadmap() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ paymentId, roadmap }: { paymentId: string; roadmap: CourseRoadmap }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.setRoadmap(paymentId, roadmap);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allRoadmaps'] });
+    },
+  });
+}
+
+export function useUpdateModuleStatus() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      paymentId,
+      moduleIndex,
+      newStatus,
+    }: {
+      paymentId: string;
+      moduleIndex: number;
+      newStatus: ModuleStatus;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.updateModuleStatus(paymentId, BigInt(moduleIndex), newStatus);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['allRoadmaps'] });
+    },
+  });
+}
+
+// ─── Visitor Activity ─────────────────────────────────────────────────────────
+
+export function useTrackVisitorActivity() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async ({ eventType, courseId }: { eventType: EventType; courseId?: string }) => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.trackVisitorActivity(eventType, courseId ?? null);
     },
   });
 }
 
 // ─── Discount Codes ───────────────────────────────────────────────────────────
 
+export function useValidateDiscountCode() {
+  const { actor } = useActor();
+
+  return useMutation({
+    mutationFn: async (code: string): Promise<DiscountCodeValidationResponse> => {
+      if (!actor) throw new Error('Actor not available');
+      const result = await actor.validateDiscountCode(code);
+      return result;
+    },
+  });
+}
+
 export function useGetActiveDiscountCodes() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<ExtendedDiscountCode[]>({
     queryKey: ['activeDiscountCodes'],
@@ -455,7 +546,7 @@ export function useGetActiveDiscountCodes() {
       if (!actor) return [];
       return actor.getActiveDiscountCodes();
     },
-    enabled: !!actor && !isFetching,
+    enabled: !!actor && !actorFetching,
   });
 }
 
@@ -466,7 +557,7 @@ export function useSetDiscountCodeActiveState() {
   return useMutation({
     mutationFn: async ({ code, isActive }: { code: string; isActive: boolean }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.setDiscountCodeActiveState(code, isActive);
+      await actor.setDiscountCodeActiveState(code, isActive);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['activeDiscountCodes'] });
@@ -474,64 +565,31 @@ export function useSetDiscountCodeActiveState() {
   });
 }
 
-/**
- * Validates a discount code against the backend.
- * Returns { discountPercent, code } on success.
- * Throws an error with a user-friendly message if the code is invalid, used, or inactive.
- * NOTE: This does NOT mark the code as used — that happens only on booking confirmation.
- */
-export function useValidateDiscountCode() {
-  const { actor } = useActor();
+// ─── Progress ─────────────────────────────────────────────────────────────────
 
-  return useMutation({
-    mutationFn: async (code: string): Promise<{ discountPercent: number; code: string }> => {
-      if (!actor) throw new Error('Actor not available');
-      const result: DiscountCodeValidationResponse = await actor.validateDiscountCode(code);
-      if (!result.isValid) {
-        if (result.isUsed) {
-          throw new Error('This discount code has already been used');
-        }
-        if (!result.isActive) {
-          throw new Error('This discount code is no longer active');
-        }
-        throw new Error('Invalid discount code');
-      }
-      return {
-        discountPercent: Number(result.discountPercent),
-        code,
-      };
-    },
-  });
-}
+export function useGetProgressByTopic() {
+  const { actor, isFetching: actorFetching } = useActor();
+  const { identity } = useInternetIdentity();
 
-// ─── Visitor Tracking ─────────────────────────────────────────────────────────
-
-export function useTrackVisitorActivity() {
-  const { actor } = useActor();
-
-  return useMutation({
-    mutationFn: async ({
-      eventType,
-      courseId,
-    }: {
-      eventType: EventType;
-      courseId: string | null;
-    }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.trackVisitorActivity(eventType, courseId);
-    },
-  });
-}
-
-export function useGetVisitorActivitiesByUser(user: Principal | null) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<VisitorActivity[]>({
-    queryKey: ['visitorActivities', user?.toString()],
+  return useQuery({
+    queryKey: ['progressByTopic', identity?.getPrincipal().toString()],
     queryFn: async () => {
-      if (!actor || !user) return [];
-      return actor.getVisitorActivitiesByUser(user);
+      if (!actor) return [];
+      return actor.getProgressByTopic();
     },
-    enabled: !!actor && !isFetching && !!user,
+    enabled: !!actor && !actorFetching && !!identity,
+  });
+}
+
+export function useGetAllProblems() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['allProblems'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllProblems();
+    },
+    enabled: !!actor && !actorFetching,
   });
 }
