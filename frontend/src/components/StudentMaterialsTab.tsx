@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { CourseMaterialType } from '../backend';
-import { useGetCourseMaterials, useAddCourseMaterial, useRemoveCourseMaterial } from '../hooks/useQueries';
+import { useGetCourseMaterials, useAddCourseMaterial, useDeleteCourseMaterial } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,34 +15,40 @@ import {
 import { FileText, Video, Link, BookOpen, Trash2, Plus, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
-const MATERIAL_TYPE_ICONS: Record<string, React.ReactNode> = {
+type MaterialTypeKey = 'pdf' | 'video' | 'note' | 'link';
+
+const MATERIAL_TYPE_ICONS: Record<MaterialTypeKey, React.ReactNode> = {
   pdf: <FileText className="w-3.5 h-3.5" />,
   video: <Video className="w-3.5 h-3.5" />,
   note: <BookOpen className="w-3.5 h-3.5" />,
   link: <Link className="w-3.5 h-3.5" />,
 };
 
-const MATERIAL_TYPE_COLORS: Record<string, string> = {
+const MATERIAL_TYPE_COLORS: Record<MaterialTypeKey, string> = {
   pdf: 'bg-red-100 text-red-700 border-red-200',
   video: 'bg-blue-100 text-blue-700 border-blue-200',
   note: 'bg-green-100 text-green-700 border-green-200',
   link: 'bg-purple-100 text-purple-700 border-purple-200',
 };
 
+function getMaterialTypeKey(type: any): MaterialTypeKey {
+  if (typeof type === 'string') return type as MaterialTypeKey;
+  return (Object.keys(type ?? {})[0] ?? 'link') as MaterialTypeKey;
+}
+
 interface StudentMaterialsTabProps {
-  /** The service/course name for this student's booking */
   courseName: string;
 }
 
 export default function StudentMaterialsTab({ courseName }: StudentMaterialsTabProps) {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
-  const [materialType, setMaterialType] = useState<CourseMaterialType>(CourseMaterialType.pdf);
+  const [materialType, setMaterialType] = useState<MaterialTypeKey>('pdf');
   const [url, setUrl] = useState('');
 
   const { data: materials, isLoading } = useGetCourseMaterials(courseName);
   const addMaterial = useAddCourseMaterial();
-  const removeMaterial = useRemoveCourseMaterial();
+  const removeMaterial = useDeleteCourseMaterial();
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,14 +60,14 @@ export default function StudentMaterialsTab({ courseName }: StudentMaterialsTabP
       await addMaterial.mutateAsync({
         courseName,
         title: title.trim(),
-        materialType,
+        materialType: { [materialType]: null },
         url: url.trim(),
         createdAt: BigInt(Date.now()) * BigInt(1_000_000),
       });
       toast.success('Material added');
       setTitle('');
       setUrl('');
-      setMaterialType(CourseMaterialType.pdf);
+      setMaterialType('pdf');
       setShowForm(false);
     } catch {
       toast.error('Failed to add material');
@@ -71,7 +76,7 @@ export default function StudentMaterialsTab({ courseName }: StudentMaterialsTabP
 
   const handleRemove = async (materialTitle: string) => {
     try {
-      await removeMaterial.mutateAsync({ title: materialTitle, courseName });
+      await removeMaterial.mutateAsync(materialTitle);
       toast.success('Material removed');
     } catch {
       toast.error('Failed to remove material');
@@ -94,42 +99,45 @@ export default function StudentMaterialsTab({ courseName }: StudentMaterialsTabP
         </div>
       ) : (
         <div className="space-y-2">
-          {materials.map((material) => (
-            <div
-              key={material.title}
-              className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-navy/10 bg-warm-light/30 hover:bg-warm-light/60 transition-colors"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium border flex-shrink-0 ${MATERIAL_TYPE_COLORS[material.materialType]}`}
-                >
-                  {MATERIAL_TYPE_ICONS[material.materialType]}
-                  {material.materialType.toUpperCase()}
-                </span>
-                <span className="font-medium text-navy text-sm truncate">{material.title}</span>
+          {materials.map((material: any) => {
+            const typeKey = getMaterialTypeKey(material.materialType);
+            return (
+              <div
+                key={material.title}
+                className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-navy/10 bg-warm-light/30 hover:bg-warm-light/60 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium border flex-shrink-0 ${MATERIAL_TYPE_COLORS[typeKey] ?? 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                  >
+                    {MATERIAL_TYPE_ICONS[typeKey]}
+                    {typeKey.toUpperCase()}
+                  </span>
+                  <span className="font-medium text-navy text-sm truncate">{material.title}</span>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <a
+                    href={material.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 rounded hover:bg-gold/10 text-gold transition-colors"
+                    title="Open"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => handleRemove(material.title)}
+                    disabled={removeMaterial.isPending}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <a
-                  href={material.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1.5 rounded hover:bg-gold/10 text-gold transition-colors"
-                  title="Open"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => handleRemove(material.title)}
-                  disabled={removeMaterial.isPending}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -160,16 +168,16 @@ export default function StudentMaterialsTab({ courseName }: StudentMaterialsTabP
               <Label className="text-navy text-xs font-medium">Type *</Label>
               <Select
                 value={materialType}
-                onValueChange={(v) => setMaterialType(v as CourseMaterialType)}
+                onValueChange={(v) => setMaterialType(v as MaterialTypeKey)}
               >
                 <SelectTrigger className="border-navy/20 focus:ring-gold h-8 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={CourseMaterialType.pdf}>PDF</SelectItem>
-                  <SelectItem value={CourseMaterialType.video}>Video</SelectItem>
-                  <SelectItem value={CourseMaterialType.link}>Link</SelectItem>
-                  <SelectItem value={CourseMaterialType.note}>Note</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="link">Link</SelectItem>
+                  <SelectItem value="note">Note</SelectItem>
                 </SelectContent>
               </Select>
             </div>

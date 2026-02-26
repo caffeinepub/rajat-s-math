@@ -1,37 +1,89 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T20:52:57.416Z",
+  "generatedAt": "2026-02-26T06:57:37.935Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35.",
+        "summary": "Extend the backend session data type (CourseSession or equivalent) to include an optional meeting platform field (variant: #googleMeet, #zohoMeet, #zoom) and an optional meeting link URL string. Provide backend functions to add, update, and delete the meeting link on an existing session.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "In the Admin Dashboard → Booked Students → StudentDetailView (add/edit session form), add a meeting platform selector (Google Meet, Zoho Meet, Zoom) and a meeting link URL input field. When a session already has a meeting link, display it with Edit and Delete (clear) actions alongside the session entry.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Header.tsx",
-          "frontend/src/components/LoginButton.tsx"
+          "frontend/src/components/StudentDetailView.tsx",
+          "frontend/src/components/StudentScheduleTab.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/components/Header.tsx",
-          "frontend/src/components/LoginButton.tsx"
+          "frontend/src/components/StudentDetailView.tsx",
+          "frontend/src/components/StudentScheduleTab.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "In the Student Portal (StudentDashboard and/or StudentPortal schedule/sessions tab), for each session that has a meeting link, display a prominent clickable 'Join Class' button that opens the meeting URL in a new tab. Sessions without a meeting link should show no button.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/StudentDashboard.tsx",
+          "frontend/src/components/StudentScheduleTab.tsx",
+          "frontend/src/components/StudentPortal.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/StudentDashboard.tsx",
+          "frontend/src/components/StudentScheduleTab.tsx",
+          "frontend/src/components/StudentPortal.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/LoginButton.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AdminDashboard.tsx",
+    "frontend/src/components/AdminEnquiriesTab.tsx",
+    "frontend/src/components/AdminSupportMessages.tsx",
+    "frontend/src/components/AttendanceManager.tsx",
+    "frontend/src/components/BookedStudentsSection.tsx",
+    "frontend/src/components/BookingConfirmation.tsx",
+    "frontend/src/components/BookingFlowManager.tsx",
+    "frontend/src/components/BookingForm.tsx",
+    "frontend/src/components/ClassSessionsManager.tsx",
+    "frontend/src/components/CourseMaterialsManager.tsx",
+    "frontend/src/components/CourseOffering.tsx",
+    "frontend/src/components/QRCheckInView.tsx",
+    "frontend/src/components/StudentAttendanceView.tsx",
+    "frontend/src/components/StudentDashboard.tsx",
+    "frontend/src/components/StudentDetailView.tsx",
+    "frontend/src/components/StudentEnquiryPortal.tsx",
+    "frontend/src/components/StudentMaterialsTab.tsx",
+    "frontend/src/components/StudentPortal.tsx",
+    "frontend/src/components/StudentScheduleTab.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useBooking.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/types/booking.ts",
+    "frontend/src/utils/pricingCalculator.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

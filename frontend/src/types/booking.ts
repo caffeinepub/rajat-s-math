@@ -1,18 +1,16 @@
-import { ClassType } from '../backend';
-
-export interface BookingFormData {
+export type BookingFormData = {
   name: string;
   phone: string;
   date: string;
   time: string;
   serviceType: string;
-  classType: ClassType;
+  classType: string;
   numberOfClasses: number;
   discountPercent: number;
   finalAmount: number;
-}
+};
 
-export interface BookingRecord {
+export type BookingRecord = {
   name: string;
   phone: string;
   service: string;
@@ -20,9 +18,18 @@ export interface BookingRecord {
   time: string;
   paymentId: string;
   paymentStatus: string;
-}
+  status: any;
+  paymentConfirmedAt: any;
+  classType: any;
+  numberOfClasses: number;
+  discountApplied: number;
+  finalAmount: number;
+  accessCode: string | null;
+};
 
-export interface UpiPaymentParams {
+export type UpiPaymentParams = {
   amount: number;
-  transactionNote: string;
-}
+  name: string;
+  phone: string;
+  service: string;
+};

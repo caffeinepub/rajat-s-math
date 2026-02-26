@@ -1,22 +1,52 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Project includes an admin dashboard with booked students management and a student portal. Adding a meeting link feature to sessions.",
   "architectural_notes": [],
   "known_issues": [],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-revert-the-logout-button-styling-in-the-header-component-and-loginbutton-component-back-to-how-it-appeared-in-version-34-undoing-the-dark-color-change-that-was-applied-in-version-35",
-      "title": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35.",
+      "id": "feature-in-the-admin-dashboard-booked-students-studentdetailview-add-edit-session-form-add-a-meeting-platform-selector-google-meet-zoho-meet-zoom-and-a-meeting-link-url-input-field-when-a-session-already-has-a-meeting-link-display-it-with-edit-and-delete-clear-actions-alongside-the-session-entry",
+      "title": "In the Admin Dashboard → Booked Students → StudentDetailView (add/edit session form), add a meeting platform selector (Google Meet, Zoho Meet, Zoom) and a meeting link URL input field. When a session already has a meeting link, display it with Edit and Delete (clear) actions alongside the session entry.",
       "reqIds": [
-        "REQ-1"
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-student-portal-studentdashboard-and-or-studentportal-schedule-sessions-tab-for-each-session-that-has-a-meeting-link-display-a-prominent-clickable-join-class-button-that-opens-the-meeting-url-in-a-new-tab-sessions-without-a-meeting-link-should-show-no-button",
+      "title": "In the Student Portal (StudentDashboard and/or StudentPortal schedule/sessions tab), for each session that has a meeting link, display a prominent clickable 'Join Class' button that opens the meeting URL in a new tab. Sessions without a meeting link should show no button.",
+      "reqIds": [
+        "REQ-3"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Revert logout button color change (roll back to Version 34)",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Admin Dashboard -> Booked Students: Add meeting platform selector (Google Meet, Zoho Meet, Zoom) and meeting link field when adding/editing a session, with ability to add/edit/delete the meeting link after session creation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Student portal: Display meeting link as a clickable 'Join Class' button that opens the meeting link directly",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Extend the backend session data type (CourseSession or equivalent) to include an optional meeting platform field (variant: #googleMeet, #zohoMeet, #zoom) and an optional meeting link URL string. Provide backend functions to add, update, and delete the meeting link on an existing session.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Rajat's Equation",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

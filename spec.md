@@ -1,11 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Revert the logout button styling back to how it appeared in Version 34, undoing the dark color change introduced in Version 35.
+**Goal:** Allow admins to attach a Google Meet, Zoho Meet, or Zoom meeting link to any session, and display a "Join Class" button in the student portal for sessions that have a link.
 
 **Planned changes:**
-- Revert the logout button color/style in the desktop Header component to its Version 34 appearance
-- Revert the logout button color/style in the mobile navigation to its Version 34 appearance
-- Revert the LoginButton component styling to remove the darker color introduced in Version 35
+- Extend the session data type to include an optional meeting platform (Google Meet, Zoho Meet, Zoom) and an optional meeting link URL.
+- Add backend functions to set, update, and clear the meeting link on an existing session.
+- In the Admin Dashboard → Booked Students → add/edit session form, add a platform selector dropdown and a meeting link URL input field (both optional).
+- For sessions that already have a meeting link, display the platform name, the link, and Edit/Delete buttons in the admin session list; Edit opens an inline pre-filled form, Delete clears the link after confirmation.
+- In the Student Portal sessions view, show a prominent "Join Class" button on each session that has a meeting link; the button opens the URL in a new tab and indicates the platform via icon or label.
+- Sessions without a meeting link show no button and are otherwise unaffected.
+- Meeting link state in the student portal reflects admin changes in real time.
 
-**User-visible outcome:** The logout button appears with its original styling from Version 34, no longer showing the darker color applied in Version 35.
+**User-visible outcome:** Admins can add, edit, or remove a meeting link on any session from the admin dashboard, and students will see a clickable "Join Class" button on their session cards whenever a link has been set.

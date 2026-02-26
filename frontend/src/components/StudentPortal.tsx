@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Principal } from '@dfinity/principal';
-import { BookingRecord } from '../backend';
 import { useFindBookingByAccessCode } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,7 @@ interface StudentPortalProps {
 export default function StudentPortal({ onNavigate }: StudentPortalProps) {
   const { identity } = useInternetIdentity();
   const [accessCode, setAccessCode] = useState('');
-  const [booking, setBooking] = useState<BookingRecord | null>(null);
+  const [booking, setBooking] = useState<any | null>(null);
   const findBooking = useFindBookingByAccessCode();
 
   const studentPrincipal: Principal | null = identity?.getPrincipal() ?? null;
@@ -115,6 +114,14 @@ export default function StudentPortal({ onNavigate }: StudentPortalProps) {
     );
   }
 
+  const classTypeLabel = (() => {
+    const ct = booking.classType;
+    if (!ct) return '';
+    if (typeof ct === 'string') return ct === 'oneOnOne' ? '1-on-1' : 'Group';
+    if ('oneOnOne' in ct) return '1-on-1';
+    return 'Group';
+  })();
+
   return (
     <div className="min-h-screen bg-cream p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -130,11 +137,10 @@ export default function StudentPortal({ onNavigate }: StudentPortalProps) {
               variant="outline"
               className="bg-green-50 text-green-700 border-green-200"
             >
-              {booking.classType === 'oneOnOne' ? '1-on-1' : 'Group'} ·{' '}
-              {booking.numberOfClasses.toString()} classes
+              {classTypeLabel} · {String(booking.numberOfClasses)} classes
             </Badge>
             <Badge variant="outline" className="bg-navy/5 text-navy border-navy/20">
-              ₹{booking.finalAmount.toString()}
+              ₹{String(booking.finalAmount)}
             </Badge>
             <Button
               variant="ghost"
@@ -180,7 +186,19 @@ export default function StudentPortal({ onNavigate }: StudentPortalProps) {
           </TabsContent>
 
           <TabsContent value="schedule">
-            <StudentScheduleTab courseName={booking.service} />
+            {studentPrincipal ? (
+              <StudentScheduleTab
+                studentPrincipal={studentPrincipal}
+                courseName={booking.service}
+              />
+            ) : (
+              <Card className="border-border-warm">
+                <CardContent className="py-8 text-center text-warm-text">
+                  <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                  <p>Please log in to view your schedule.</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="support">
@@ -200,7 +218,7 @@ export default function StudentPortal({ onNavigate }: StudentPortalProps) {
             {studentPrincipal ? (
               <StudentAttendanceView
                 studentPrincipal={studentPrincipal}
-                courseName={booking.service}
+                course={booking.service}
               />
             ) : (
               <Card className="border-border-warm">

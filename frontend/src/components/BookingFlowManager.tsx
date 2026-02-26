@@ -1,157 +1,105 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { BookingForm } from './BookingForm';
-import UpiPaymentStep from './UpiPaymentStep';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import BookingForm from './BookingForm';
 import BookingConfirmation from './BookingConfirmation';
-import { useAddBookingRecord } from '../hooks/useBooking';
-import type { BookingFormData } from '../types/booking';
-import { BookingStatus, ClassType } from '../backend';
-import { toast } from 'sonner';
-
-type FlowStep = 'form' | 'payment' | 'confirmation';
+import UpiPaymentStep from './UpiPaymentStep';
 
 interface BookingFlowManagerProps {
   open: boolean;
   onClose: () => void;
+  defaultService?: string;
   preSelectedService?: string;
 }
 
-interface ConfirmationData {
-  name: string;
-  service: string;
-  date: string;
-  time: string;
-  phone: string;
-  paymentId: string;
-  classType: ClassType;
-  numberOfClasses: number;
-  discountPercent: number;
-  discountCode: string;
-  finalAmount: number;
-}
+type FlowStep = 'form' | 'payment' | 'confirmation';
 
-export function BookingFlowManager({ open, onClose, preSelectedService }: BookingFlowManagerProps) {
+// Named export for backward compatibility with existing imports
+export function BookingFlowManager({
+  open,
+  onClose,
+  defaultService,
+  preSelectedService,
+}: BookingFlowManagerProps) {
   const [step, setStep] = useState<FlowStep>('form');
-  const [bookingData, setBookingData] = useState<BookingFormData | null>(null);
-  const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null);
+  const [bookingData, setBookingData] = useState<any>(null);
+  const [discountInfo, setDiscountInfo] = useState<{
+    discountPercent: number;
+    finalAmount: number;
+    discountCode: string;
+  } | null>(null);
 
-  const addBookingRecord = useAddBookingRecord();
-
-  const handleClose = () => {
-    setStep('form');
-    setBookingData(null);
-    setConfirmationData(null);
-    onClose();
-  };
-
-  const handleFormSubmit = (data: BookingFormData) => {
+  const handleFormSubmit = (data: any) => {
     setBookingData(data);
     setStep('payment');
   };
 
-  const handlePaymentConfirmed = async (
+  const handlePaymentConfirm = (
     discountPercent: number,
     finalAmount: number,
-    discountCode: string = ''
+    discountCode?: string
   ) => {
-    if (!bookingData) return;
-
-    const upiRef = `UPI-${Date.now()}`;
-
-    try {
-      await addBookingRecord.mutateAsync({
-        name: bookingData.name,
-        phone: bookingData.phone,
-        service: bookingData.serviceType,
-        date: bookingData.date,
-        time: bookingData.time,
-        paymentId: upiRef,
-        paymentStatus: 'UPI_CONFIRMED',
-        status: BookingStatus.awaitingPayment,
-        classType: bookingData.classType,
-        numberOfClasses: BigInt(bookingData.numberOfClasses),
-        discountApplied: discountPercent,
-        finalAmount: BigInt(finalAmount),
-      });
-    } catch (error) {
-      console.error('Booking record save error:', error);
-      toast.error('Booking saved locally. Please contact us if you face any issues.');
-    }
-
-    setConfirmationData({
-      name: bookingData.name,
-      service: bookingData.serviceType,
-      date: bookingData.date,
-      time: bookingData.time,
-      phone: bookingData.phone,
-      paymentId: upiRef,
-      classType: bookingData.classType,
-      numberOfClasses: bookingData.numberOfClasses,
-      discountPercent,
-      discountCode,
-      finalAmount,
-    });
+    setDiscountInfo({ discountPercent, finalAmount, discountCode: discountCode ?? '' });
     setStep('confirmation');
   };
 
-  const getDialogTitle = () => {
-    switch (step) {
-      case 'form':
-        return 'Book Your Session';
-      case 'payment':
-        return 'Complete Payment';
-      case 'confirmation':
-        return 'Booking Received!';
-    }
+  const handleClose = () => {
+    setStep('form');
+    setBookingData(null);
+    setDiscountInfo(null);
+    onClose();
   };
 
-  if (!open) return null;
+  const resolvedService = defaultService ?? preSelectedService;
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
-      <DialogContent className="booking-dialog-content max-w-lg max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl text-primary">
-            {getDialogTitle()}
+          <DialogTitle>
+            {step === 'form'
+              ? 'Book a Session'
+              : step === 'payment'
+              ? 'Complete Payment'
+              : 'Booking Confirmed'}
           </DialogTitle>
         </DialogHeader>
 
         {step === 'form' && (
           <BookingForm
-            open={true}
-            onClose={handleClose}
+            defaultService={resolvedService}
             onSubmit={handleFormSubmit}
-            preSelectedService={preSelectedService}
-            isSubmitting={false}
-            inline
           />
         )}
 
         {step === 'payment' && bookingData && (
           <UpiPaymentStep
-            amount={bookingData.finalAmount}
-            bookingName={bookingData.name}
-            service={bookingData.serviceType}
-            classType={bookingData.classType === ClassType.oneOnOne ? 'oneOnOne' : 'group'}
-            numberOfClasses={bookingData.numberOfClasses}
-            onConfirm={handlePaymentConfirmed}
+            amount={bookingData.finalAmount ?? 0}
+            bookingName={bookingData.name ?? ''}
+            service={bookingData.serviceType ?? bookingData.service ?? ''}
+            classType={bookingData.classType === 'group' ? 'group' : 'oneOnOne'}
+            numberOfClasses={bookingData.numberOfClasses ?? 1}
+            onConfirm={handlePaymentConfirm}
             onBack={() => setStep('form')}
           />
         )}
 
-        {step === 'confirmation' && confirmationData && (
+        {step === 'confirmation' && bookingData && (
           <BookingConfirmation
-            name={confirmationData.name}
-            service={confirmationData.service}
-            date={confirmationData.date}
-            time={confirmationData.time}
-            phone={confirmationData.phone}
-            paymentId={confirmationData.paymentId}
-            classType={confirmationData.classType}
-            numberOfClasses={confirmationData.numberOfClasses}
-            discountPercent={confirmationData.discountPercent}
-            discountCode={confirmationData.discountCode}
-            finalAmount={confirmationData.finalAmount}
+            name={bookingData.name ?? ''}
+            phone={bookingData.phone ?? ''}
+            service={bookingData.serviceType ?? bookingData.service ?? ''}
+            date={bookingData.date ?? ''}
+            time={bookingData.time ?? ''}
+            classType={bookingData.classType ?? 'oneOnOne'}
+            numberOfClasses={bookingData.numberOfClasses ?? 1}
+            discountCode={discountInfo?.discountCode}
+            discountPercent={discountInfo?.discountPercent}
+            finalAmount={discountInfo?.finalAmount ?? bookingData.finalAmount ?? 0}
             onClose={handleClose}
           />
         )}
@@ -159,3 +107,6 @@ export function BookingFlowManager({ open, onClose, preSelectedService }: Bookin
     </Dialog>
   );
 }
+
+// Default export for components that use default import
+export default BookingFlowManager;

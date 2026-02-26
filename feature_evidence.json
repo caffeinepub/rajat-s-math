@@ -2,11 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-revert-the-logout-button-styling-in-the-header-component-and-loginbutton-component-back-to-how-it-appeared-in-version-34-undoing-the-dark-color-change-that-was-applied-in-version-35",
-      "featureTitle": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35.",
+      "featureId": "feature-in-the-admin-dashboard-booked-students-studentdetailview-add-edit-session-form-add-a-meeting-platform-selector-google-meet-zoho-meet-zoom-and-a-meeting-link-url-input-field-when-a-session-already-has-a-meeting-link-display-it-with-edit-and-delete-clear-actions-alongside-the-session-entry",
+      "featureTitle": "In the Admin Dashboard → Booked Students → StudentDetailView (add/edit session form), add a meeting platform selector (Google Meet, Zoho Meet, Zoom) and a meeting link URL input field. When a session already has a meeting link, display it with Edit and Delete (clear) actions alongside the session entry.",
       "files": [
-        "frontend/src/components/Header.tsx",
-        "frontend/src/components/LoginButton.tsx"
+        "frontend/src/components/StudentDetailView.tsx",
+        "frontend/src/components/StudentScheduleTab.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -22,7 +23,33 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-in-the-student-portal-studentdashboard-and-or-studentportal-schedule-sessions-tab-for-each-session-that-has-a-meeting-link-display-a-prominent-clickable-join-class-button-that-opens-the-meeting-url-in-a-new-tab-sessions-without-a-meeting-link-should-show-no-button",
+      "featureTitle": "In the Student Portal (StudentDashboard and/or StudentPortal schedule/sessions tab), for each session that has a meeting link, display a prominent clickable 'Join Class' button that opens the meeting URL in a new tab. Sessions without a meeting link should show no button.",
+      "files": [
+        "frontend/src/components/StudentDashboard.tsx",
+        "frontend/src/components/StudentPortal.tsx",
+        "frontend/src/components/StudentScheduleTab.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "blob-storage@4.0.0",
+        "qr-code@1.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

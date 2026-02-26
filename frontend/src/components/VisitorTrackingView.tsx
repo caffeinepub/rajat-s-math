@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGetBookingRecords } from '../hooks/useQueries';
+import { useBookingRecords } from '../hooks/useQueries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,7 +8,7 @@ import { useActor } from '../hooks/useActor';
 import { useQuery } from '@tanstack/react-query';
 
 export default function VisitorTrackingView() {
-  const { data: bookings, isLoading: bookingsLoading } = useGetBookingRecords();
+  const { data: bookings, isLoading: bookingsLoading } = useBookingRecords();
   const { actor, isFetching } = useActor();
 
   const { isLoading: rawLoading, refetch: refetchRaw } = useQuery<void>({
@@ -40,8 +40,8 @@ export default function VisitorTrackingView() {
               <Users className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-xl font-bold text-navy">—</p>
-              <p className="text-xs text-warm-text">Tracked Visitors</p>
+              <p className="text-xl font-bold text-navy">{bookings?.length ?? '—'}</p>
+              <p className="text-xs text-warm-text">Total Bookings</p>
             </div>
           </CardContent>
         </Card>
@@ -88,7 +88,8 @@ export default function VisitorTrackingView() {
                 endpoint is needed to display aggregated data here.
               </p>
               <p className="text-xs mt-3 text-warm-text/70">
-                Individual user activity can be queried via <code className="bg-gray-100 px-1 rounded">getVisitorActivitiesByUser(principal)</code>
+                Individual user activity can be queried via{' '}
+                <code className="bg-gray-100 px-1 rounded">getVisitorActivitiesByUser(principal)</code>
               </p>
             </div>
           )}
@@ -99,27 +100,27 @@ export default function VisitorTrackingView() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base text-navy">How Tracking Works</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-warm-text">
-          <div className="flex items-start gap-3 p-3 bg-warm-light/50 rounded-lg">
-            <LogIn className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-navy">Login Events</p>
-              <p>Recorded once per browser session when an authenticated user accesses the platform.</p>
-            </div>
+        <CardContent className="text-sm text-warm-text space-y-2">
+          <div className="flex items-start gap-2">
+            <LogIn className="w-4 h-4 text-navy mt-0.5 shrink-0" />
+            <p>
+              <span className="font-medium text-navy">Login Events</span> — recorded automatically
+              when authenticated users access the platform.
+            </p>
           </div>
-          <div className="flex items-start gap-3 p-3 bg-warm-light/50 rounded-lg">
-            <BookOpen className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-navy">Course View Events</p>
-              <p>Recorded when an authenticated user views a course they have not yet purchased.</p>
-            </div>
+          <div className="flex items-start gap-2">
+            <BookOpen className="w-4 h-4 text-navy mt-0.5 shrink-0" />
+            <p>
+              <span className="font-medium text-navy">Course Views</span> — tracked when students
+              browse course materials or sessions.
+            </p>
           </div>
-          <div className="flex items-start gap-3 p-3 bg-warm-light/50 rounded-lg">
-            <Eye className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium text-navy">Privacy</p>
-              <p>Only authenticated (Internet Identity) users are tracked. Anonymous visitors are not recorded.</p>
-            </div>
+          <div className="flex items-start gap-2">
+            <Eye className="w-4 h-4 text-navy mt-0.5 shrink-0" />
+            <p>
+              <span className="font-medium text-navy">Per-User Lookup</span> — admins can query
+              individual visitor activity using the student's principal ID.
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -19,69 +19,10 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const Time = IDL.Int;
-export const BookingStatus = IDL.Variant({
-  'pending' : IDL.Null,
-  'completed' : IDL.Null,
-  'awaitingPayment' : IDL.Null,
-});
-export const ClassType = IDL.Variant({
-  'group' : IDL.Null,
-  'oneOnOne' : IDL.Null,
-});
-export const BookingRecord = IDL.Record({
-  'paymentConfirmedAt' : IDL.Opt(Time),
-  'service' : IDL.Text,
-  'status' : BookingStatus,
-  'paymentStatus' : IDL.Text,
-  'finalAmount' : IDL.Nat,
-  'discountApplied' : IDL.Float64,
-  'date' : IDL.Text,
-  'name' : IDL.Text,
-  'time' : IDL.Text,
-  'accessCode' : IDL.Opt(IDL.Text),
-  'numberOfClasses' : IDL.Nat,
-  'paymentId' : IDL.Text,
-  'phone' : IDL.Text,
-  'classType' : ClassType,
-});
-export const ClassSession = IDL.Record({
-  'googleMeetLink' : IDL.Text,
-  'date' : IDL.Text,
-  'createdAt' : Time,
-  'time' : IDL.Text,
-  'sessionTitle' : IDL.Text,
-  'courseName' : IDL.Text,
-  'googleCalendarLink' : IDL.Text,
-});
-export const CourseMaterialType = IDL.Variant({
-  'pdf' : IDL.Null,
-  'video' : IDL.Null,
-  'link' : IDL.Null,
-  'note' : IDL.Null,
-});
-export const CourseMaterial = IDL.Record({
-  'url' : IDL.Text,
-  'title' : IDL.Text,
-  'createdAt' : Time,
-  'courseName' : IDL.Text,
-  'materialType' : CourseMaterialType,
-});
-export const Topic = IDL.Variant({
-  'probability' : IDL.Null,
-  'calculus' : IDL.Null,
-  'coordinateGeometry' : IDL.Null,
-  'algebra' : IDL.Null,
-  'vectors' : IDL.Null,
-  'trigonometry' : IDL.Null,
-});
-export const MathProblem = IDL.Record({
-  'id' : IDL.Nat,
-  'topic' : Topic,
-  'question' : IDL.Text,
-  'difficulty' : IDL.Nat,
-  'correctAnswer' : IDL.Int,
-  'solution' : IDL.Text,
+export const MeetingPlatform = IDL.Variant({
+  'zoom' : IDL.Null,
+  'googleMeet' : IDL.Null,
+  'zohoMeet' : IDL.Null,
 });
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
@@ -95,88 +36,12 @@ export const ShoppingItem = IDL.Record({
   'priceInCents' : IDL.Nat,
   'productDescription' : IDL.Text,
 });
-export const ExtendedDiscountCode = IDL.Record({
-  'code' : IDL.Text,
-  'usedBy' : IDL.Opt(IDL.Principal),
-  'createdAt' : Time,
-  'discountPercent' : IDL.Nat,
-  'isUsed' : IDL.Bool,
-  'isActive' : IDL.Bool,
-});
-export const ModuleStatus = IDL.Variant({
-  'notStarted' : IDL.Null,
-  'completed' : IDL.Null,
-  'inProgress' : IDL.Null,
-});
-export const RoadmapModule = IDL.Record({
-  'status' : ModuleStatus,
-  'title' : IDL.Text,
-  'dueDate' : IDL.Opt(Time),
-  'description' : IDL.Text,
-  'milestone' : IDL.Opt(IDL.Text),
-});
-export const CourseRoadmap = IDL.Record({ 'modules' : IDL.Vec(RoadmapModule) });
-export const StudentSupportMessage = IDL.Record({
-  'studentId' : IDL.Principal,
-  'repliedAt' : IDL.Opt(Time),
-  'message' : IDL.Text,
-  'timestamp' : Time,
-  'reply' : IDL.Opt(IDL.Text),
-});
-export const AttendanceRecord = IDL.Record({
-  'bookingId' : IDL.Text,
-  'sessionDate' : Time,
-  'isPresent' : IDL.Bool,
-  'markedAt' : Time,
-  'student' : IDL.Principal,
-  'course' : IDL.Text,
-});
-export const AttendanceSummary = IDL.Record({
-  'student' : IDL.Principal,
-  'totalSessions' : IDL.Nat,
-  'course' : IDL.Text,
-  'attendedSessions' : IDL.Nat,
-});
-export const UserProfile = IDL.Record({
-  'name' : IDL.Text,
-  'hasPurchasedCourse' : IDL.Bool,
-});
-export const Course = IDL.Record({
-  'title' : IDL.Text,
-  'description' : IDL.Text,
-  'isPaid' : IDL.Bool,
-  'priceRupees' : IDL.Nat,
-});
-export const ProgressStats = IDL.Record({
-  'topic' : Topic,
-  'attempted' : IDL.Nat,
-  'correct' : IDL.Nat,
-  'accuracy' : IDL.Float64,
-});
 export const StripeSessionStatus = IDL.Variant({
   'completed' : IDL.Record({
     'userPrincipal' : IDL.Opt(IDL.Text),
     'response' : IDL.Text,
   }),
   'failed' : IDL.Record({ 'error' : IDL.Text }),
-});
-export const Submission = IDL.Record({
-  'user' : IDL.Principal,
-  'attempts' : IDL.Nat,
-  'isCorrect' : IDL.Bool,
-  'answer' : IDL.Int,
-  'problemId' : IDL.Nat,
-  'timestamp' : Time,
-});
-export const EventType = IDL.Variant({
-  'login' : IDL.Null,
-  'courseView' : IDL.Null,
-});
-export const VisitorActivity = IDL.Record({
-  'principal' : IDL.Principal,
-  'timestamp' : Time,
-  'courseId' : IDL.Opt(IDL.Text),
-  'eventType' : EventType,
 });
 export const StripeConfiguration = IDL.Record({
   'allowedCountries' : IDL.Vec(IDL.Text),
@@ -199,17 +64,6 @@ export const TransformationOutput = IDL.Record({
   'status' : IDL.Nat,
   'body' : IDL.Vec(IDL.Nat8),
   'headers' : IDL.Vec(http_header),
-});
-export const ValidationResult = IDL.Record({
-  'correctAnswer' : IDL.Int,
-  'feedback' : IDL.Text,
-  'isCorrect' : IDL.Bool,
-});
-export const DiscountCodeValidationResponse = IDL.Record({
-  'discountPercent' : IDL.Nat,
-  'isUsed' : IDL.Bool,
-  'isActive' : IDL.Bool,
-  'isValid' : IDL.Bool,
 });
 
 export const idlService = IDL.Service({
@@ -240,125 +94,26 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addBookingRecord' : IDL.Func([BookingRecord], [], []),
-  'addClassSession' : IDL.Func([ClassSession], [], []),
-  'addCourseMaterial' : IDL.Func([CourseMaterial], [], []),
-  'addMathProblem' : IDL.Func([MathProblem], [], []),
-  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'confirmPaymentAndGenerateAccessCode' : IDL.Func(
-      [IDL.Text],
-      [IDL.Opt(IDL.Text)],
+  'addOrUpdateMeetingLink' : IDL.Func(
+      [IDL.Text, MeetingPlatform, IDL.Text],
+      [],
       [],
     ),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createCheckoutSession' : IDL.Func(
       [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
       [IDL.Text],
       [],
     ),
-  'deleteBooking' : IDL.Func([IDL.Text], [IDL.Bool], []),
-  'findBookingByAccessCode' : IDL.Func(
-      [IDL.Text],
-      [IDL.Opt(BookingRecord)],
-      ['query'],
-    ),
-  'getActiveDiscountCodes' : IDL.Func(
-      [],
-      [IDL.Vec(ExtendedDiscountCode)],
-      ['query'],
-    ),
-  'getAllProblems' : IDL.Func([], [IDL.Vec(MathProblem)], ['query']),
-  'getAllRoadmaps' : IDL.Func(
-      [],
-      [IDL.Vec(IDL.Tuple(IDL.Text, CourseRoadmap))],
-      ['query'],
-    ),
-  'getAllSupportMessages' : IDL.Func(
-      [],
-      [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(StudentSupportMessage)))],
-      ['query'],
-    ),
-  'getAttendanceRecords' : IDL.Func(
-      [IDL.Principal, IDL.Text, Time, Time],
-      [IDL.Vec(AttendanceRecord)],
-      ['query'],
-    ),
-  'getAttendanceSummary' : IDL.Func(
-      [IDL.Principal, IDL.Text, Time, Time],
-      [IDL.Opt(AttendanceSummary)],
-      ['query'],
-    ),
-  'getBookingRecords' : IDL.Func([], [IDL.Vec(BookingRecord)], ['query']),
-  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getClassSessions' : IDL.Func([IDL.Text], [IDL.Vec(ClassSession)], ['query']),
-  'getCompletedBookings' : IDL.Func([], [IDL.Vec(BookingRecord)], ['query']),
-  'getCourseDetails' : IDL.Func([], [Course], ['query']),
-  'getCourseMaterials' : IDL.Func(
-      [IDL.Text],
-      [IDL.Vec(CourseMaterial)],
-      ['query'],
-    ),
-  'getProgressByTopic' : IDL.Func([], [IDL.Vec(ProgressStats)], ['query']),
-  'getRoadmap' : IDL.Func([IDL.Text], [IDL.Opt(CourseRoadmap)], ['query']),
   'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
-  'getSupportMessagesByUser' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Vec(StudentSupportMessage)],
-      ['query'],
-    ),
-  'getUserProfile' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Opt(UserProfile)],
-      ['query'],
-    ),
-  'getUserSubmissions' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Vec(Submission)],
-      ['query'],
-    ),
-  'getVisitorActivitiesByUser' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Vec(VisitorActivity)],
-      ['query'],
-    ),
-  'hasPaidWithUPI' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
-  'markAsPaid' : IDL.Func([IDL.Text], [IDL.Bool], []),
-  'markAttendance' : IDL.Func(
-      [IDL.Principal, IDL.Text, IDL.Text, Time, IDL.Bool],
-      [],
-      [],
-    ),
-  'purchaseCourse' : IDL.Func([], [], []),
-  'recordUPIPaymentSuccessful' : IDL.Func([], [], []),
-  'removeClassSession' : IDL.Func([IDL.Text], [], []),
-  'removeCourseMaterial' : IDL.Func([IDL.Text], [], []),
-  'replyToSupportMessage' : IDL.Func(
-      [IDL.Principal, IDL.Nat, IDL.Text],
-      [],
-      [],
-    ),
-  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'setDiscountCodeActiveState' : IDL.Func([IDL.Text, IDL.Bool], [], []),
-  'setRoadmap' : IDL.Func([IDL.Text, CourseRoadmap], [], []),
+  'removeMeetingLink' : IDL.Func([IDL.Text], [], []),
   'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
-  'submitSupportMessage' : IDL.Func([IDL.Text], [], []),
-  'trackVisitorActivity' : IDL.Func([EventType, IDL.Opt(IDL.Text)], [], []),
   'transform' : IDL.Func(
       [TransformationInput],
       [TransformationOutput],
-      ['query'],
-    ),
-  'updateModuleStatus' : IDL.Func(
-      [IDL.Text, IDL.Nat, ModuleStatus],
-      [IDL.Bool],
-      [],
-    ),
-  'validateAnswer' : IDL.Func([IDL.Nat, IDL.Int], [ValidationResult], []),
-  'validateDiscountCode' : IDL.Func(
-      [IDL.Text],
-      [DiscountCodeValidationResponse],
       ['query'],
     ),
 });
@@ -377,66 +132,10 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const Time = IDL.Int;
-  const BookingStatus = IDL.Variant({
-    'pending' : IDL.Null,
-    'completed' : IDL.Null,
-    'awaitingPayment' : IDL.Null,
-  });
-  const ClassType = IDL.Variant({ 'group' : IDL.Null, 'oneOnOne' : IDL.Null });
-  const BookingRecord = IDL.Record({
-    'paymentConfirmedAt' : IDL.Opt(Time),
-    'service' : IDL.Text,
-    'status' : BookingStatus,
-    'paymentStatus' : IDL.Text,
-    'finalAmount' : IDL.Nat,
-    'discountApplied' : IDL.Float64,
-    'date' : IDL.Text,
-    'name' : IDL.Text,
-    'time' : IDL.Text,
-    'accessCode' : IDL.Opt(IDL.Text),
-    'numberOfClasses' : IDL.Nat,
-    'paymentId' : IDL.Text,
-    'phone' : IDL.Text,
-    'classType' : ClassType,
-  });
-  const ClassSession = IDL.Record({
-    'googleMeetLink' : IDL.Text,
-    'date' : IDL.Text,
-    'createdAt' : Time,
-    'time' : IDL.Text,
-    'sessionTitle' : IDL.Text,
-    'courseName' : IDL.Text,
-    'googleCalendarLink' : IDL.Text,
-  });
-  const CourseMaterialType = IDL.Variant({
-    'pdf' : IDL.Null,
-    'video' : IDL.Null,
-    'link' : IDL.Null,
-    'note' : IDL.Null,
-  });
-  const CourseMaterial = IDL.Record({
-    'url' : IDL.Text,
-    'title' : IDL.Text,
-    'createdAt' : Time,
-    'courseName' : IDL.Text,
-    'materialType' : CourseMaterialType,
-  });
-  const Topic = IDL.Variant({
-    'probability' : IDL.Null,
-    'calculus' : IDL.Null,
-    'coordinateGeometry' : IDL.Null,
-    'algebra' : IDL.Null,
-    'vectors' : IDL.Null,
-    'trigonometry' : IDL.Null,
-  });
-  const MathProblem = IDL.Record({
-    'id' : IDL.Nat,
-    'topic' : Topic,
-    'question' : IDL.Text,
-    'difficulty' : IDL.Nat,
-    'correctAnswer' : IDL.Int,
-    'solution' : IDL.Text,
+  const MeetingPlatform = IDL.Variant({
+    'zoom' : IDL.Null,
+    'googleMeet' : IDL.Null,
+    'zohoMeet' : IDL.Null,
   });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
@@ -450,88 +149,12 @@ export const idlFactory = ({ IDL }) => {
     'priceInCents' : IDL.Nat,
     'productDescription' : IDL.Text,
   });
-  const ExtendedDiscountCode = IDL.Record({
-    'code' : IDL.Text,
-    'usedBy' : IDL.Opt(IDL.Principal),
-    'createdAt' : Time,
-    'discountPercent' : IDL.Nat,
-    'isUsed' : IDL.Bool,
-    'isActive' : IDL.Bool,
-  });
-  const ModuleStatus = IDL.Variant({
-    'notStarted' : IDL.Null,
-    'completed' : IDL.Null,
-    'inProgress' : IDL.Null,
-  });
-  const RoadmapModule = IDL.Record({
-    'status' : ModuleStatus,
-    'title' : IDL.Text,
-    'dueDate' : IDL.Opt(Time),
-    'description' : IDL.Text,
-    'milestone' : IDL.Opt(IDL.Text),
-  });
-  const CourseRoadmap = IDL.Record({ 'modules' : IDL.Vec(RoadmapModule) });
-  const StudentSupportMessage = IDL.Record({
-    'studentId' : IDL.Principal,
-    'repliedAt' : IDL.Opt(Time),
-    'message' : IDL.Text,
-    'timestamp' : Time,
-    'reply' : IDL.Opt(IDL.Text),
-  });
-  const AttendanceRecord = IDL.Record({
-    'bookingId' : IDL.Text,
-    'sessionDate' : Time,
-    'isPresent' : IDL.Bool,
-    'markedAt' : Time,
-    'student' : IDL.Principal,
-    'course' : IDL.Text,
-  });
-  const AttendanceSummary = IDL.Record({
-    'student' : IDL.Principal,
-    'totalSessions' : IDL.Nat,
-    'course' : IDL.Text,
-    'attendedSessions' : IDL.Nat,
-  });
-  const UserProfile = IDL.Record({
-    'name' : IDL.Text,
-    'hasPurchasedCourse' : IDL.Bool,
-  });
-  const Course = IDL.Record({
-    'title' : IDL.Text,
-    'description' : IDL.Text,
-    'isPaid' : IDL.Bool,
-    'priceRupees' : IDL.Nat,
-  });
-  const ProgressStats = IDL.Record({
-    'topic' : Topic,
-    'attempted' : IDL.Nat,
-    'correct' : IDL.Nat,
-    'accuracy' : IDL.Float64,
-  });
   const StripeSessionStatus = IDL.Variant({
     'completed' : IDL.Record({
       'userPrincipal' : IDL.Opt(IDL.Text),
       'response' : IDL.Text,
     }),
     'failed' : IDL.Record({ 'error' : IDL.Text }),
-  });
-  const Submission = IDL.Record({
-    'user' : IDL.Principal,
-    'attempts' : IDL.Nat,
-    'isCorrect' : IDL.Bool,
-    'answer' : IDL.Int,
-    'problemId' : IDL.Nat,
-    'timestamp' : Time,
-  });
-  const EventType = IDL.Variant({
-    'login' : IDL.Null,
-    'courseView' : IDL.Null,
-  });
-  const VisitorActivity = IDL.Record({
-    'principal' : IDL.Principal,
-    'timestamp' : Time,
-    'courseId' : IDL.Opt(IDL.Text),
-    'eventType' : EventType,
   });
   const StripeConfiguration = IDL.Record({
     'allowedCountries' : IDL.Vec(IDL.Text),
@@ -551,17 +174,6 @@ export const idlFactory = ({ IDL }) => {
     'status' : IDL.Nat,
     'body' : IDL.Vec(IDL.Nat8),
     'headers' : IDL.Vec(http_header),
-  });
-  const ValidationResult = IDL.Record({
-    'correctAnswer' : IDL.Int,
-    'feedback' : IDL.Text,
-    'isCorrect' : IDL.Bool,
-  });
-  const DiscountCodeValidationResponse = IDL.Record({
-    'discountPercent' : IDL.Nat,
-    'isUsed' : IDL.Bool,
-    'isActive' : IDL.Bool,
-    'isValid' : IDL.Bool,
   });
   
   return IDL.Service({
@@ -592,129 +204,26 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addBookingRecord' : IDL.Func([BookingRecord], [], []),
-    'addClassSession' : IDL.Func([ClassSession], [], []),
-    'addCourseMaterial' : IDL.Func([CourseMaterial], [], []),
-    'addMathProblem' : IDL.Func([MathProblem], [], []),
-    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'confirmPaymentAndGenerateAccessCode' : IDL.Func(
-        [IDL.Text],
-        [IDL.Opt(IDL.Text)],
+    'addOrUpdateMeetingLink' : IDL.Func(
+        [IDL.Text, MeetingPlatform, IDL.Text],
+        [],
         [],
       ),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createCheckoutSession' : IDL.Func(
         [IDL.Vec(ShoppingItem), IDL.Text, IDL.Text],
         [IDL.Text],
         [],
       ),
-    'deleteBooking' : IDL.Func([IDL.Text], [IDL.Bool], []),
-    'findBookingByAccessCode' : IDL.Func(
-        [IDL.Text],
-        [IDL.Opt(BookingRecord)],
-        ['query'],
-      ),
-    'getActiveDiscountCodes' : IDL.Func(
-        [],
-        [IDL.Vec(ExtendedDiscountCode)],
-        ['query'],
-      ),
-    'getAllProblems' : IDL.Func([], [IDL.Vec(MathProblem)], ['query']),
-    'getAllRoadmaps' : IDL.Func(
-        [],
-        [IDL.Vec(IDL.Tuple(IDL.Text, CourseRoadmap))],
-        ['query'],
-      ),
-    'getAllSupportMessages' : IDL.Func(
-        [],
-        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(StudentSupportMessage)))],
-        ['query'],
-      ),
-    'getAttendanceRecords' : IDL.Func(
-        [IDL.Principal, IDL.Text, Time, Time],
-        [IDL.Vec(AttendanceRecord)],
-        ['query'],
-      ),
-    'getAttendanceSummary' : IDL.Func(
-        [IDL.Principal, IDL.Text, Time, Time],
-        [IDL.Opt(AttendanceSummary)],
-        ['query'],
-      ),
-    'getBookingRecords' : IDL.Func([], [IDL.Vec(BookingRecord)], ['query']),
-    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getClassSessions' : IDL.Func(
-        [IDL.Text],
-        [IDL.Vec(ClassSession)],
-        ['query'],
-      ),
-    'getCompletedBookings' : IDL.Func([], [IDL.Vec(BookingRecord)], ['query']),
-    'getCourseDetails' : IDL.Func([], [Course], ['query']),
-    'getCourseMaterials' : IDL.Func(
-        [IDL.Text],
-        [IDL.Vec(CourseMaterial)],
-        ['query'],
-      ),
-    'getProgressByTopic' : IDL.Func([], [IDL.Vec(ProgressStats)], ['query']),
-    'getRoadmap' : IDL.Func([IDL.Text], [IDL.Opt(CourseRoadmap)], ['query']),
     'getStripeSessionStatus' : IDL.Func([IDL.Text], [StripeSessionStatus], []),
-    'getSupportMessagesByUser' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Vec(StudentSupportMessage)],
-        ['query'],
-      ),
-    'getUserProfile' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Opt(UserProfile)],
-        ['query'],
-      ),
-    'getUserSubmissions' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Vec(Submission)],
-        ['query'],
-      ),
-    'getVisitorActivitiesByUser' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Vec(VisitorActivity)],
-        ['query'],
-      ),
-    'hasPaidWithUPI' : IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isStripeConfigured' : IDL.Func([], [IDL.Bool], ['query']),
-    'markAsPaid' : IDL.Func([IDL.Text], [IDL.Bool], []),
-    'markAttendance' : IDL.Func(
-        [IDL.Principal, IDL.Text, IDL.Text, Time, IDL.Bool],
-        [],
-        [],
-      ),
-    'purchaseCourse' : IDL.Func([], [], []),
-    'recordUPIPaymentSuccessful' : IDL.Func([], [], []),
-    'removeClassSession' : IDL.Func([IDL.Text], [], []),
-    'removeCourseMaterial' : IDL.Func([IDL.Text], [], []),
-    'replyToSupportMessage' : IDL.Func(
-        [IDL.Principal, IDL.Nat, IDL.Text],
-        [],
-        [],
-      ),
-    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'setDiscountCodeActiveState' : IDL.Func([IDL.Text, IDL.Bool], [], []),
-    'setRoadmap' : IDL.Func([IDL.Text, CourseRoadmap], [], []),
+    'removeMeetingLink' : IDL.Func([IDL.Text], [], []),
     'setStripeConfiguration' : IDL.Func([StripeConfiguration], [], []),
-    'submitSupportMessage' : IDL.Func([IDL.Text], [], []),
-    'trackVisitorActivity' : IDL.Func([EventType, IDL.Opt(IDL.Text)], [], []),
     'transform' : IDL.Func(
         [TransformationInput],
         [TransformationOutput],
-        ['query'],
-      ),
-    'updateModuleStatus' : IDL.Func(
-        [IDL.Text, IDL.Nat, ModuleStatus],
-        [IDL.Bool],
-        [],
-      ),
-    'validateAnswer' : IDL.Func([IDL.Nat, IDL.Int], [ValidationResult], []),
-    'validateDiscountCode' : IDL.Func(
-        [IDL.Text],
-        [DiscountCodeValidationResponse],
         ['query'],
       ),
   });

@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { MessageCircle, CreditCard, Users, User } from 'lucide-react';
+import { MessageCircle, CreditCard, Users, User, FileText, BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { AuthGate } from './AuthGate';
 import { BookingFlowManager } from './BookingFlowManager';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import PaymentEnquiryForm from './PaymentEnquiryForm';
 
 const WA_NUMBER = '919424135055';
 
@@ -67,6 +69,7 @@ const courses: Course[] = [
 export function Services() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<string | undefined>();
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
 
   const openBooking = (serviceName: string) => {
     setSelectedService(serviceName);
@@ -124,12 +127,25 @@ export function Services() {
                   </div>
                 </div>
 
-                {/* Action Buttons — auth gated */}
-                <div className="flex flex-col gap-3 mt-auto pt-2">
+                {/* Book a Session — Primary CTA, clearly visible */}
+                <div className="mt-auto pt-2">
+                  <AuthGate onAction={() => openBooking(course.title)}>
+                    <button
+                      type="button"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 rounded-lg bg-navy hover:bg-navy/90 text-cream font-bold transition-colors shadow-lg text-base border-2 border-navy hover:border-navy/90"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      Book a Session
+                    </button>
+                  </AuthGate>
+                </div>
+
+                {/* Secondary Action Buttons */}
+                <div className="flex flex-col gap-2">
                   <AuthGate onAction={() => window.open(buildWhatsAppLink(course.title), '_blank', 'noopener,noreferrer')}>
                     <button
                       type="button"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-[oklch(0.45_0.15_145)] hover:bg-[oklch(0.40_0.15_145)] text-white font-semibold transition-colors shadow-md text-sm"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-[oklch(0.45_0.15_145)] hover:bg-[oklch(0.40_0.15_145)] text-white font-semibold transition-colors shadow-md text-sm"
                     >
                       <MessageCircle className="w-4 h-4" />
                       📲 Book Demo on WhatsApp
@@ -138,7 +154,7 @@ export function Services() {
                   <AuthGate onAction={() => openBooking(course.title)}>
                     <button
                       type="button"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-gold hover:bg-gold-dark text-white font-semibold transition-colors shadow-md text-sm"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-gold hover:bg-gold-dark text-white font-semibold transition-colors shadow-md text-sm"
                     >
                       <CreditCard className="w-4 h-4" />
                       💳 Book &amp; Pay Now
@@ -153,14 +169,50 @@ export function Services() {
         <p className="text-center text-sm text-warm-text mt-10 opacity-70">
           Secure payments via UPI — Google Pay, PhonePe, Paytm &amp; all UPI apps
         </p>
+
+        {/* Payment Enquiry CTA */}
+        <div className="mt-12 max-w-2xl mx-auto">
+          <div className="rounded-2xl border-2 border-navy/20 bg-white shadow-lg p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-navy/10 flex items-center justify-center">
+                <FileText className="w-7 h-7 text-navy" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-navy font-serif mb-2">Payment Enquiry</h3>
+            <p className="text-warm-text mb-6 text-sm leading-relaxed">
+              Have a question about your fee payment? Submit a payment enquiry with your details and the duration you're paying for — our team will get back to you promptly.
+            </p>
+            <button
+              type="button"
+              onClick={() => setEnquiryOpen(true)}
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-navy text-cream font-semibold hover:bg-navy/90 transition-colors shadow-md"
+            >
+              <FileText className="w-4 h-4" />
+              Submit Payment Enquiry
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Booking flow modal — rendered once at section level */}
+      {/* Booking flow modal */}
       <BookingFlowManager
         open={bookingOpen}
         onClose={() => setBookingOpen(false)}
         preSelectedService={selectedService}
       />
+
+      {/* Payment Enquiry Dialog */}
+      <Dialog open={enquiryOpen} onOpenChange={setEnquiryOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">Payment Enquiry Form</DialogTitle>
+            <DialogDescription>
+              Fill in your details and the payment duration. No login required.
+            </DialogDescription>
+          </DialogHeader>
+          <PaymentEnquiryForm onClose={() => setEnquiryOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

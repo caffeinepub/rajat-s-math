@@ -1,27 +1,62 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Revert logout button color change (roll back to Version 34)",
+  "title": "Add meeting link (Google Meet / Zoho / Zoom) to sessions with student portal display",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Revert the logout button styling in the Header component and LoginButton component back to how it appeared in Version 34, undoing the dark color change that was applied in Version 35",
+      "id": "REQ-2",
+      "summary": "Add meeting platform selector and URL input to Admin Dashboard session management with edit and delete actions for existing links",
       "acceptanceCriteria": [
-        "The logout button in the desktop header navigation displays the same color/style as it did before the Version 35 dark color change.",
-        "The logout button in the mobile navigation displays the same color/style as it did before the Version 35 dark color change.",
-        "The LoginButton component no longer has the darker color styling introduced in Version 35.",
-        "No other UI elements are affected by this revert."
+        "The add-session form includes a dropdown/selector for platform (Google Meet, Zoho Meet, Zoom) and a text input for the meeting URL.",
+        "Platform and link fields are optional; the session can be saved without them.",
+        "Sessions that have a meeting link display the platform name and link alongside an Edit button and a Delete (clear) button.",
+        "Clicking Edit opens an inline form pre-filled with the existing platform and URL.",
+        "Clicking Delete removes the meeting link from the session after confirmation.",
+        "Changes persist to the backend and the session list refreshes after each operation."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Header.tsx",
+          "path": "frontend/src/components/StudentDetailView.tsx",
           "operation": "modify",
-          "description": "Revert the logout button styling in both desktop and mobile navigation sections to match Version 34. Remove any dark color classes (e.g., bg-gray-800, bg-gray-700, text-gray-200) applied in Version 35 and restore the original lighter styling that was present in Version 34. Ensure both the desktop nav link and mobile nav button for logout are reverted."
+          "description": "Add meeting platform selector (dropdown with options: Google Meet, Zoho Meet, Zoom) and meeting link URL input field to the add-session form. Display existing meeting links with Edit and Delete buttons alongside each session entry. Implement inline editing form that pre-fills platform and URL. Add confirmation dialog for delete action. Wire up backend mutation calls for adding, updating, and removing meeting links using the backend functions addOrUpdateMeetingLink and removeMeetingLink."
         },
         {
-          "path": "frontend/src/components/LoginButton.tsx",
+          "path": "frontend/src/components/StudentScheduleTab.tsx",
           "operation": "modify",
-          "description": "Revert the logout button styling to match Version 34. Remove the darker color scheme (likely bg-gray-800/700 or similar dark classes) introduced in Version 35 from the logout button state. Restore the original Version 34 styling which likely used lighter colors such as bg-gray-200 with hover:bg-gray-300 and text-gray-800 for the logout state."
+          "description": "Update the session add/edit form to include meeting platform selector and URL input fields. Display meeting platform badge and link info for sessions that have them. Add Edit and Delete action buttons next to sessions with meeting links. Implement edit flow with pre-filled form and delete flow with confirmation. Ensure backend mutations refresh the session list after operations complete."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add mutation hooks for meeting link operations: useAddOrUpdateMeetingLink (calls backend.addOrUpdateMeetingLink with sessionTitle, platform enum, and meetingLink string) and useRemoveMeetingLink (calls backend.removeMeetingLink with sessionTitle). Both mutations should invalidate relevant session queries on success to trigger UI refresh."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Display prominent 'Join Class' button in Student Portal for sessions with meeting links",
+      "acceptanceCriteria": [
+        "Each session card/row in the student portal that has a meeting link shows a 'Join Class' button.",
+        "Clicking 'Join Class' opens the meeting URL in a new browser tab.",
+        "The button is styled prominently and indicates the platform (e.g., a small Google Meet / Zoom / Zoho icon or label) if possible.",
+        "Sessions without a meeting link do not show the button.",
+        "The meeting link updates in real time when the admin adds, edits, or deletes it."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/StudentDashboard.tsx",
+          "operation": "modify",
+          "description": "Update session card rendering to conditionally display a 'Join Class' button when a session has a meeting link. The button should open the meeting URL in a new tab (target='_blank' rel='noopener noreferrer'). Style the button prominently using Tailwind classes and include a platform badge/icon (Google Meet, Zoom, Zoho Meet) next to the button text. Sessions without a meeting link should not render the button. Ensure the component refetches session data to reflect real-time admin changes."
+        },
+        {
+          "path": "frontend/src/components/StudentScheduleTab.tsx",
+          "operation": "modify",
+          "description": "Add 'Join Class' button rendering to each session entry that has a meeting link. Display the platform name or icon alongside the button. Ensure the button opens the link in a new tab with proper security attributes (target='_blank' rel='noopener noreferrer'). Hide the button for sessions without meeting links. Style the button prominently to match the design system."
+        },
+        {
+          "path": "frontend/src/components/StudentPortal.tsx",
+          "operation": "modify",
+          "description": "Ensure the schedule tab receives and displays meeting link data for each session. Pass session data including meeting platform and link to the StudentScheduleTab component. Verify that real-time updates from admin changes are reflected via query invalidation."
         }
       ]
     }

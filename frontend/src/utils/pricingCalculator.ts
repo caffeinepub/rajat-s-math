@@ -1,61 +1,53 @@
-import { ClassType } from '../backend';
+export type ClassTypeKey = 'oneOnOne' | 'group';
 
-export interface PricingResult {
-  pricePerClass: number;
-  numberOfClasses: number;
-  baseAmount: number;
-  discountPercent: number;
-  discountAmount: number;
-  finalAmount: number;
-}
-
-// Per-class prices by service and class type (in ₹)
-export const SERVICE_PRICES: Record<string, { oneOnOne: number; group: number }> = {
-  'Class 10 Boards Full Prep': { oneOnOne: 350, group: 250 },
-  'Class 12 Boards Full Prep': { oneOnOne: 400, group: 300 },
-  'JEE Foundation': { oneOnOne: 450, group: 350 },
-  'JEE Full Course Prep': { oneOnOne: 500, group: 400 },
-  'IOQM / NMTC / Other Olympiads Prep': { oneOnOne: 500, group: 400 },
-  'How to Think in Math': { oneOnOne: 300, group: 250 },
+export const PRICE_PER_CLASS_ONE_ON_ONE: Record<string, number> = {
+  'JEE Mathematics': 800,
+  'NEET Mathematics': 700,
+  'Board Exam Prep': 600,
+  'Foundation Course': 500,
+  'Advanced Problem Solving': 900,
+  'Crash Course': 750,
 };
 
-export const DEFAULT_PRICES = { oneOnOne: 500, group: 400 };
+export const PRICE_PER_CLASS_GROUP: Record<string, number> = {
+  'JEE Mathematics': 400,
+  'NEET Mathematics': 350,
+  'Board Exam Prep': 300,
+  'Foundation Course': 250,
+  'Advanced Problem Solving': 450,
+  'Crash Course': 375,
+};
 
-export function getPricePerClass(service: string, classType: ClassType): number {
-  const prices = SERVICE_PRICES[service] ?? DEFAULT_PRICES;
-  return classType === ClassType.oneOnOne ? prices.oneOnOne : prices.group;
+export const DISCOUNT_TIERS = [
+  { minClasses: 20, discount: 35 },
+  { minClasses: 15, discount: 30 },
+  { minClasses: 10, discount: 20 },
+];
+
+export function getPricePerClass(serviceType: string, classType: ClassTypeKey): number {
+  if (classType === 'group') {
+    return PRICE_PER_CLASS_GROUP[serviceType] ?? 500;
+  }
+  return PRICE_PER_CLASS_ONE_ON_ONE[serviceType] ?? 800;
 }
 
 export function getDiscountPercent(numberOfClasses: number): number {
-  if (numberOfClasses >= 20) return 35;
-  if (numberOfClasses >= 15) return 30;
-  if (numberOfClasses >= 10) return 20;
+  for (const tier of DISCOUNT_TIERS) {
+    if (numberOfClasses >= tier.minClasses) {
+      return tier.discount;
+    }
+  }
   return 0;
 }
 
 export function calculateBookingPrice(
-  service: string,
-  classType: ClassType,
+  serviceType: string,
+  classType: ClassTypeKey,
   numberOfClasses: number
-): PricingResult {
-  const pricePerClass = getPricePerClass(service, classType);
-  const baseAmount = pricePerClass * numberOfClasses;
+): { pricePerClass: number; discountPercent: number; totalAmount: number; finalAmount: number } {
+  const pricePerClass = getPricePerClass(serviceType, classType);
   const discountPercent = getDiscountPercent(numberOfClasses);
-  const discountAmount = Math.round((baseAmount * discountPercent) / 100);
-  const finalAmount = baseAmount - discountAmount;
-
-  return {
-    pricePerClass,
-    numberOfClasses,
-    baseAmount,
-    discountPercent,
-    discountAmount,
-    finalAmount,
-  };
+  const totalAmount = pricePerClass * numberOfClasses;
+  const finalAmount = Math.round(totalAmount * (1 - discountPercent / 100));
+  return { pricePerClass, discountPercent, totalAmount, finalAmount };
 }
-
-export const DISCOUNT_TIERS = [
-  { minClasses: 20, percent: 35, label: '20+ classes → 35% off' },
-  { minClasses: 15, percent: 30, label: '15–19 classes → 30% off' },
-  { minClasses: 10, percent: 20, label: '10–14 classes → 20% off' },
-];

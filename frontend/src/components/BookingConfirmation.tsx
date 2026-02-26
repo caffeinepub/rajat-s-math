@@ -1,185 +1,113 @@
 import React from 'react';
-import { Clock, Calendar, Phone, BookOpen, Hash, AlertCircle, Users, UserCheck, Tag, IndianRupee } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CheckCircle, Calendar, Clock, User, Phone, BookOpen, Tag, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { ClassType } from '../backend';
+import { Button } from '@/components/ui/button';
 
 interface BookingConfirmationProps {
   name: string;
+  phone: string;
   service: string;
   date: string;
   time: string;
-  phone: string;
-  paymentId: string;
-  classType?: ClassType;
-  numberOfClasses?: number;
-  discountPercent?: number;
+  classType: string;
+  numberOfClasses: number;
   discountCode?: string;
-  finalAmount?: number;
-  onClose: () => void;
+  discountPercent?: number;
+  finalAmount: number;
+  onClose?: () => void;
 }
 
 export default function BookingConfirmation({
   name,
+  phone,
   service,
   date,
   time,
-  phone,
-  paymentId,
   classType,
   numberOfClasses,
-  discountPercent,
   discountCode,
+  discountPercent,
   finalAmount,
   onClose,
 }: BookingConfirmationProps) {
   return (
-    <div className="flex flex-col items-center gap-6 py-4">
-      {/* Status Icon */}
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-16 h-16 rounded-full bg-gold/20 flex items-center justify-center">
-          <Clock className="w-10 h-10 text-gold-dark" />
+    <div className="space-y-6 text-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <CheckCircle className="w-9 h-9 text-green-600" />
         </div>
-        <h3 className="text-xl font-bold text-foreground font-serif">
-          Awaiting Payment Confirmation
-        </h3>
-        <p className="text-sm text-muted-foreground text-center">
-          Thank you, <span className="font-semibold text-primary">{name}</span>! Your booking request has been received. It will be marked as <strong>Completed</strong> once your UPI payment is verified by our team.
-        </p>
-      </div>
-
-      {/* Status Badge */}
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-200">
-        <AlertCircle className="w-4 h-4 text-amber-600" />
-        <span className="text-sm font-semibold text-amber-700">Status: Awaiting Payment Verification</span>
-      </div>
-
-      {/* Booking Details */}
-      <div className="w-full bg-muted/30 border border-border-warm rounded-xl p-4 space-y-3">
-        <h4 className="text-sm font-semibold text-foreground mb-3">Booking Details</h4>
-
-        <div className="flex items-center gap-3">
-          <BookOpen className="w-4 h-4 text-primary flex-shrink-0" />
-          <div>
-            <p className="text-xs text-muted-foreground">Service</p>
-            <p className="text-sm font-medium text-foreground">{service}</p>
-          </div>
-        </div>
-
-        {/* Class Type */}
-        {classType && (
-          <div className="flex items-center gap-3">
-            {classType === ClassType.oneOnOne ? (
-              <UserCheck className="w-4 h-4 text-gold-dark flex-shrink-0" />
-            ) : (
-              <Users className="w-4 h-4 text-primary flex-shrink-0" />
-            )}
-            <div>
-              <p className="text-xs text-muted-foreground">Class Type</p>
-              <p className="text-sm font-medium text-foreground">
-                {classType === ClassType.oneOnOne ? 'One-on-One' : 'Group Classes'}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Number of Classes */}
-        {numberOfClasses !== undefined && (
-          <div className="flex items-center gap-3">
-            <Hash className="w-4 h-4 text-primary flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">Number of Classes</p>
-              <p className="text-sm font-medium text-foreground">{numberOfClasses} classes</p>
-            </div>
-          </div>
-        )}
-
-        {/* Discount Code */}
-        {discountCode && discountCode.length > 0 && (
-          <div className="flex items-center gap-3">
-            <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">Discount Code</p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-green-400 text-green-700 text-xs font-mono">
-                  {discountCode}
-                </Badge>
-                {discountPercent !== undefined && discountPercent > 0 && (
-                  <span className="text-xs text-green-600 font-medium">{discountPercent}% off</span>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Discount (no code) */}
-        {(!discountCode || discountCode.length === 0) && discountPercent !== undefined && discountPercent > 0 && (
-          <div className="flex items-center gap-3">
-            <Tag className="w-4 h-4 text-green-600 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">Discount Applied</p>
-              <p className="text-sm font-medium text-green-700">{discountPercent}% off</p>
-            </div>
-          </div>
-        )}
-
-        {/* Total Amount */}
-        {finalAmount !== undefined && (
-          <div className="flex items-center gap-3">
-            <IndianRupee className="w-4 h-4 text-gold-dark flex-shrink-0" />
-            <div>
-              <p className="text-xs text-muted-foreground">Total Amount</p>
-              <p className="text-base font-bold text-gold-dark">₹{finalAmount.toLocaleString('en-IN')}</p>
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center gap-3">
-          <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-          <div>
-            <p className="text-xs text-muted-foreground">Date</p>
-            <p className="text-sm font-medium text-foreground">{date}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-          <div>
-            <p className="text-xs text-muted-foreground">Time</p>
-            <p className="text-sm font-medium text-foreground">{time}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-          <div>
-            <p className="text-xs text-muted-foreground">Contact</p>
-            <p className="text-sm font-medium text-foreground">{phone}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Hash className="w-4 h-4 text-primary flex-shrink-0" />
-          <div>
-            <p className="text-xs text-muted-foreground">Payment Reference</p>
-            <p className="text-sm font-mono font-medium text-foreground">{paymentId}</p>
-          </div>
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Booking Confirmed!</h2>
+          <p className="text-muted-foreground mt-1">
+            Your session has been successfully booked.
+          </p>
         </div>
       </div>
 
-      {/* Payment Note */}
-      <div className="w-full bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-        <p className="text-xs text-blue-800 dark:text-blue-200 text-center">
-          💳 UPI payment submitted. Our team will verify your payment and confirm your session shortly. Please save your UPI transaction ID for reference.
-        </p>
+      <div className="bg-muted/30 rounded-xl p-4 text-left space-y-3">
+        <div className="flex items-center gap-2 text-sm">
+          <User className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">Name:</span>
+          <span className="font-medium text-foreground">{name}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">Phone:</span>
+          <span className="font-medium text-foreground">{phone}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <BookOpen className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">Service:</span>
+          <span className="font-medium text-foreground">{service}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">Date:</span>
+          <span className="font-medium text-foreground">{date}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">Time:</span>
+          <span className="font-medium text-foreground">{time}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Class Type:</span>
+          <span className="font-medium text-foreground capitalize">
+            {classType === 'oneOnOne' ? '1-on-1' : classType}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted-foreground">Classes:</span>
+          <span className="font-medium text-foreground">{numberOfClasses}</span>
+        </div>
+        {discountCode && discountPercent && discountPercent > 0 && (
+          <div className="flex items-center gap-2 text-sm">
+            <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-muted-foreground">Discount:</span>
+            <Badge variant="secondary" className="text-xs">
+              {discountCode} ({discountPercent}% off)
+            </Badge>
+          </div>
+        )}
+        <div className="flex items-center gap-2 text-sm border-t border-border pt-2 mt-2">
+          <DollarSign className="w-4 h-4 text-muted-foreground shrink-0" />
+          <span className="text-muted-foreground">Total Amount:</span>
+          <span className="font-bold text-foreground text-base">₹{finalAmount}</span>
+        </div>
       </div>
 
-      <Button
-        onClick={onClose}
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-xl"
-      >
-        Done
-      </Button>
+      <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-4 text-sm text-left space-y-1 border border-blue-200 dark:border-blue-800">
+        <p className="font-semibold text-foreground">Next Steps:</p>
+        <p className="text-muted-foreground">1. Complete payment via UPI or the provided link.</p>
+        <p className="text-muted-foreground">2. You'll receive a confirmation once payment is verified.</p>
+        <p className="text-muted-foreground">3. An access code will be sent to join the student portal.</p>
+      </div>
+
+      {onClose && (
+        <Button onClick={onClose} className="w-full">
+          Done
+        </Button>
+      )}
     </div>
   );
 }

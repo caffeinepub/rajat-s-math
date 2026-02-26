@@ -1,24 +1,62 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T20:52:57.414Z",
-  "summary": "The diff modifies Header.tsx and LoginButton.tsx to revert logout button styling. LoginButton.tsx explicitly reverts to lighter gray styling (bg-gray-200 hover:bg-gray-300 text-gray-800) as required. Header.tsx is modified but truncated, so the desktop and mobile logout button styling changes cannot be fully verified. The file summaries confirm the intent aligns with REQ-1. No hallucinated features are evident.",
+  "generatedAt": "2026-02-26T06:57:37.931Z",
+  "summary": "The diff implements most of the requested meeting link functionality. REQ-1 backend types and migration are present. REQ-2 admin UI in StudentDetailView includes the meeting platform selector, URL input, edit/delete actions. REQ-3 student-facing 'Join Class' button appears in StudentDashboard. However, several specific acceptance criteria require closer examination — notably the confirmation dialog before deleting a meeting link, backend functions being explicitly visible, and whether StudentScheduleTab also shows the 'Join Class' button.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "The logout button in the desktop header navigation and mobile navigation displays the same color/style as it did before the Version 35 dark color change.",
-      "reason": "Header.tsx is truncated in the diff, so the logout button styling for both desktop and mobile nav cannot be fully verified as reverted. The visible portion does not show the logout button rendering section.",
+      "requirement": "Backend public functions to add, update, and delete the meeting link on an existing session must be exposed. The hooks useAddOrUpdateMeetingLink and useRemoveMeetingLink are imported in StudentDetailView, but the actual backend actor functions are not visible in the truncated backend/main.mo.",
+      "reason": "backend/main.mo is truncated before the meeting link CRUD functions would appear, so their presence cannot be confirmed.",
       "evidence": [
-        "frontend/src/components/Header.tsx"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "requirement": "REQ-2 AC: Clicking Delete removes the meeting link from the session after confirmation (a confirmation dialog is required before the delete action).",
+      "reason": "StudentDetailView.tsx is truncated and it is unclear whether a confirmation dialog is shown before removing a meeting link. AlertDialog is imported but its use for meeting link deletion is not confirmed in the visible portion.",
+      "evidence": [
+        "frontend/src/components/StudentDetailView.tsx"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "In the Student Portal (StudentPortal and/or StudentScheduleTab), for each session that has a meeting link, display a prominent 'Join Class' button. StudentDashboard shows this, but StudentPortal uses StudentScheduleTab whose diff was omitted.",
+      "reason": "StudentScheduleTab is listed as a modified file but its diff was omitted due to file limits. It is unknown whether the 'Join Class' button was added there.",
+      "evidence": [
+        "frontend/src/components/StudentPortal.tsx"
       ]
     }
   ],
   "hallucinated_features": [],
-  "confidence": 0.65,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/Header.tsx",
-    "frontend/src/components/LoginButton.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AdminDashboard.tsx",
+    "frontend/src/components/AdminEnquiriesTab.tsx",
+    "frontend/src/components/AdminSupportMessages.tsx",
+    "frontend/src/components/AttendanceManager.tsx",
+    "frontend/src/components/BookedStudentsSection.tsx",
+    "frontend/src/components/BookingConfirmation.tsx",
+    "frontend/src/components/BookingFlowManager.tsx",
+    "frontend/src/components/BookingForm.tsx",
+    "frontend/src/components/ClassSessionsManager.tsx",
+    "frontend/src/components/CourseMaterialsManager.tsx",
+    "frontend/src/components/CourseOffering.tsx",
+    "frontend/src/components/QRCheckInView.tsx",
+    "frontend/src/components/StudentAttendanceView.tsx",
+    "frontend/src/components/StudentDashboard.tsx",
+    "frontend/src/components/StudentDetailView.tsx",
+    "frontend/src/components/StudentEnquiryPortal.tsx",
+    "frontend/src/components/StudentMaterialsTab.tsx",
+    "frontend/src/components/StudentPortal.tsx",
+    "frontend/src/components/StudentScheduleTab.tsx",
+    "frontend/src/hooks/useBooking.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/types/booking.ts",
+    "frontend/src/utils/pricingCalculator.ts",
     "project_state.json"
   ]
 }

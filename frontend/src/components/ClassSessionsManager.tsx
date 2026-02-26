@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { ClassSession } from '../backend';
 import {
-  useGetClassSessions,
-  useAddClassSession,
-  useRemoveClassSession,
+  useGetCourseSessions,
+  useAddCourseSession,
+  useDeleteCourseSession,
 } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -16,269 +14,228 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, Video, CalendarPlus, Trash2, Plus } from 'lucide-react';
-import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Calendar, Trash2, Plus, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 
-const COURSE_NAMES = [
-  'One-on-One Mathematics Tutoring',
-  'Group Mathematics Classes',
-  'Intensive Problem Solving Workshop',
-  'Foundation Mathematics Course',
-  'Advanced Mathematics Program',
+const COURSES = [
+  'JEE Mathematics',
+  'NEET Mathematics',
+  'Board Exam Prep',
+  'Foundation Course',
+  'Advanced Problem Solving',
+  'Crash Course',
 ];
 
 export default function ClassSessionsManager() {
-  const [selectedCourse, setSelectedCourse] = useState(COURSE_NAMES[0]);
+  const [selectedCourse, setSelectedCourse] = useState(COURSES[0]);
+  const { data: sessions = [], isLoading } = useGetCourseSessions(selectedCourse);
+  const addMutation = useAddCourseSession();
+  const deleteMutation = useDeleteCourseSession();
+
+  const [showForm, setShowForm] = useState(false);
   const [sessionTitle, setSessionTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [googleMeetLink, setGoogleMeetLink] = useState('');
-  const [googleCalendarLink, setGoogleCalendarLink] = useState('');
+  const [meetLink, setMeetLink] = useState('');
+  const [calendarLink, setCalendarLink] = useState('');
 
-  const { data: sessions, isLoading } = useGetClassSessions(selectedCourse);
-  const addSession = useAddClassSession();
-  const removeSession = useRemoveClassSession();
-
-  const sortedSessions = sessions
-    ? [...sessions].sort((a, b) => {
-        const dateA = new Date(`${a.date} ${a.time}`).getTime();
-        const dateB = new Date(`${b.date} ${b.time}`).getTime();
-        return dateA - dateB;
-      })
-    : [];
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sessionTitle.trim() || !date || !time || !googleMeetLink.trim()) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
+  const handleAdd = async () => {
+    if (!sessionTitle || !date || !time) return;
     try {
-      await addSession.mutateAsync({
+      await addMutation.mutateAsync({
         courseName: selectedCourse,
-        sessionTitle: sessionTitle.trim(),
+        sessionTitle,
         date,
         time,
-        googleMeetLink: googleMeetLink.trim(),
-        googleCalendarLink: googleCalendarLink.trim(),
+        googleMeetLink: meetLink,
+        googleCalendarLink: calendarLink,
         createdAt: BigInt(Date.now()) * BigInt(1_000_000),
+        meetingPlatform: null,
+        meetingLink: null,
       });
-      toast.success('Session added successfully');
       setSessionTitle('');
       setDate('');
       setTime('');
-      setGoogleMeetLink('');
-      setGoogleCalendarLink('');
+      setMeetLink('');
+      setCalendarLink('');
+      setShowForm(false);
     } catch (err) {
-      toast.error('Failed to add session');
+      console.error('Failed to add session:', err);
     }
   };
 
-  const handleRemove = async (title: string) => {
+  const handleDelete = async (title: string) => {
     try {
-      await removeSession.mutateAsync({ sessionTitle: title, courseName: selectedCourse });
-      toast.success('Session removed');
+      await deleteMutation.mutateAsync(title);
     } catch (err) {
-      toast.error('Failed to remove session');
+      console.error('Failed to delete session:', err);
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString('en-IN', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
+  const sorted = [...sessions].sort((a: any, b: any) => {
+    const da = new Date(`${a.date} ${a.time}`).getTime();
+    const db = new Date(`${b.date} ${b.time}`).getTime();
+    return db - da;
+  });
 
   return (
-    <div className="space-y-6">
-      {/* Course Selector */}
-      <div className="space-y-2">
-        <Label className="text-navy font-semibold">Select Course</Label>
+    <div className="space-y-4">
+      {/* Course selector */}
+      <div>
+        <Label className="text-sm">Course</Label>
         <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-          <SelectTrigger className="border-navy/20 focus:ring-gold">
+          <SelectTrigger className="mt-1">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {COURSE_NAMES.map((name) => (
-              <SelectItem key={name} value={name}>
-                {name}
+            {COURSES.map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Sessions List */}
-      <Card className="border-navy/10">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-navy text-base font-semibold">
-            Class Schedule
-            {sessions && (
-              <span className="ml-2 text-sm font-normal text-warm-text/60">
-                ({sessions.length} sessions)
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          ) : sortedSessions.length === 0 ? (
-            <div className="text-center py-8 text-warm-text/50">
-              <Calendar className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No sessions scheduled for this course.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {sortedSessions.map((session) => (
-                <div
-                  key={session.sessionTitle}
-                  className="p-4 rounded-lg border border-navy/10 bg-warm-light/30 hover:bg-warm-light/60 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-navy text-sm mb-2">{session.sessionTitle}</p>
-                      <div className="flex flex-wrap gap-3 text-xs text-warm-text/70">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5 text-gold" />
-                          {formatDate(session.date)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-gold" />
-                          {session.time}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {session.googleMeetLink && (
-                          <a
-                            href={session.googleMeetLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 underline"
-                          >
-                            <Video className="w-3 h-3" />
-                            Meet Link
-                          </a>
-                        )}
-                        {session.googleCalendarLink && (
-                          <a
-                            href={session.googleCalendarLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 underline"
-                          >
-                            <CalendarPlus className="w-3 h-3" />
-                            Calendar Link
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
-                      onClick={() => handleRemove(session.sessionTitle)}
-                      disabled={removeSession.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Add button */}
+      <div className="flex justify-end">
+        <Button size="sm" variant="outline" onClick={() => setShowForm(!showForm)} className="gap-1">
+          {showForm ? <ChevronUp className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          Add Session
+        </Button>
+      </div>
 
-      {/* Add Session Form */}
-      <Card className="border-gold/30 bg-gold/5">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-navy text-base font-semibold flex items-center gap-2">
-            <Plus className="w-4 h-4 text-gold" />
-            Add New Session
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleAdd} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label className="text-navy text-sm">Session Title *</Label>
-              <Input
-                value={sessionTitle}
-                onChange={(e) => setSessionTitle(e.target.value)}
-                placeholder="e.g. Introduction to Calculus"
-                className="border-navy/20 focus:ring-gold"
-              />
+      {/* Add form */}
+      {showForm && (
+        <div className="bg-muted/30 rounded-lg p-4 border border-border space-y-3">
+          <div>
+            <Label className="text-xs">Session Title</Label>
+            <Input
+              placeholder="e.g. Calculus - Limits"
+              value={sessionTitle}
+              onChange={(e) => setSessionTitle(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Date</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-navy text-sm">Date *</Label>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="border-navy/20 focus:ring-gold"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-navy text-sm">Time *</Label>
-                <Input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="border-navy/20 focus:ring-gold"
-                />
-              </div>
+            <div>
+              <Label className="text-xs">Time</Label>
+              <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1" />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-navy text-sm">Google Meet Link *</Label>
-              <Input
-                value={googleMeetLink}
-                onChange={(e) => setGoogleMeetLink(e.target.value)}
-                placeholder="https://meet.google.com/..."
-                className="border-navy/20 focus:ring-gold"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-navy text-sm">Google Calendar Link (optional)</Label>
-              <Input
-                value={googleCalendarLink}
-                onChange={(e) => setGoogleCalendarLink(e.target.value)}
-                placeholder="https://calendar.google.com/..."
-                className="border-navy/20 focus:ring-gold"
-              />
-            </div>
+          </div>
+          <div>
+            <Label className="text-xs">Google Meet Link (optional)</Label>
+            <Input
+              placeholder="https://meet.google.com/..."
+              value={meetLink}
+              onChange={(e) => setMeetLink(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Google Calendar Link (optional)</Label>
+            <Input
+              placeholder="https://calendar.google.com/..."
+              value={calendarLink}
+              onChange={(e) => setCalendarLink(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <div className="flex gap-2">
             <Button
-              type="submit"
-              disabled={addSession.isPending}
-              className="bg-navy hover:bg-navy/90 text-cream"
+              size="sm"
+              onClick={handleAdd}
+              disabled={addMutation.isPending || !sessionTitle || !date || !time}
+              className="flex-1"
             >
-              {addSession.isPending ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-cream/30 border-t-cream rounded-full animate-spin" />
-                  Adding...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  Add Session
-                </span>
-              )}
+              {addMutation.isPending ? 'Adding...' : 'Add Session'}
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Sessions list */}
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading sessions...</p>
+      ) : sorted.length === 0 ? (
+        <p className="text-sm text-muted-foreground italic">No sessions for this course.</p>
+      ) : (
+        <div className="space-y-2">
+          {sorted.map((session: any, index: number) => (
+            <div key={index} className="bg-card rounded-lg p-3 border border-border flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm text-foreground">{session.sessionTitle}</p>
+                <p className="text-xs text-muted-foreground">
+                  {session.date} at {session.time}
+                </p>
+                <div className="flex gap-2 mt-1 flex-wrap">
+                  {session.googleMeetLink && (
+                    <a
+                      href={session.googleMeetLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary underline flex items-center gap-0.5"
+                    >
+                      Meet <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                  {session.googleCalendarLink && (
+                    <a
+                      href={session.googleCalendarLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary underline flex items-center gap-0.5"
+                    >
+                      Calendar <ExternalLink className="w-2.5 h-2.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0 text-destructive hover:text-destructive">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Session?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete "{session.sessionTitle}".
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(session.sessionTitle)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

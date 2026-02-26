@@ -1,271 +1,436 @@
 import React, { useState } from 'react';
-import { useGetClassSessions, useAddClassSession, useRemoveClassSession } from '../hooks/useQueries';
+import { Principal } from '@dfinity/principal';
+import { MeetingPlatform } from '../backend';
+import {
+  useGetStudentSessions,
+  useAddStudentSession,
+  useDeleteStudentSession,
+  useAddOrUpdateMeetingLink,
+  useRemoveMeetingLink,
+} from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Calendar, Clock, Video, CalendarPlus, Trash2, Plus } from 'lucide-react';
-import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Calendar,
+  Clock,
+  Trash2,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Video,
+  Edit2,
+  X,
+  ExternalLink,
+} from 'lucide-react';
 
 interface StudentScheduleTabProps {
-  /** The service/course name for this student's booking */
-  courseName: string;
+  studentPrincipal: Principal;
+  courseName?: string;
 }
 
-export default function StudentScheduleTab({ courseName }: StudentScheduleTabProps) {
+const PLATFORM_LABELS: Record<string, string> = {
+  googleMeet: 'Google Meet',
+  zohoMeet: 'Zoho Meet',
+  zoom: 'Zoom',
+};
+
+const PLATFORM_COLORS: Record<string, string> = {
+  googleMeet: 'bg-blue-100 text-blue-800 border-blue-200',
+  zohoMeet: 'bg-green-100 text-green-800 border-green-200',
+  zoom: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+};
+
+function getPlatformKey(platform: any): string {
+  if (!platform) return '';
+  if (typeof platform === 'string') return platform;
+  if (platform.__kind__) return platform.__kind__;
+  return Object.keys(platform)[0] ?? '';
+}
+
+export default function StudentScheduleTab({
+  studentPrincipal,
+  courseName,
+}: StudentScheduleTabProps) {
+  const { data: sessions = [], isLoading } = useGetStudentSessions(studentPrincipal);
+  const addSessionMutation = useAddStudentSession();
+  const deleteSessionMutation = useDeleteStudentSession();
+  const addOrUpdateMeetingLinkMutation = useAddOrUpdateMeetingLink();
+  const removeMeetingLinkMutation = useRemoveMeetingLink();
+
   const [showForm, setShowForm] = useState(false);
-  const [sessionTitle, setSessionTitle] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [googleMeetLink, setGoogleMeetLink] = useState('');
-  const [googleCalendarLink, setGoogleCalendarLink] = useState('');
+  const [topic, setTopic] = useState('');
+  const [duration, setDuration] = useState('60');
+  const [meetingPlatform, setMeetingPlatform] = useState('');
+  const [meetingLink, setMeetingLink] = useState('');
 
-  const { data: sessions, isLoading } = useGetClassSessions(courseName);
-  const addSession = useAddClassSession();
-  const removeSession = useRemoveClassSession();
+  // Inline meeting link edit state
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editPlatform, setEditPlatform] = useState('');
+  const [editLink, setEditLink] = useState('');
 
-  const sortedSessions = sessions
-    ? [...sessions].sort((a, b) => {
-        const dateA = new Date(`${a.date} ${a.time}`).getTime();
-        const dateB = new Date(`${b.date} ${b.time}`).getTime();
-        return dateA - dateB;
-      })
-    : [];
-
-  const formatDate = (dateStr: string) => {
+  const handleAdd = async () => {
+    if (!date || !time || !topic) return;
     try {
-      return new Date(dateStr).toLocaleDateString('en-IN', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const handleAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sessionTitle.trim() || !date || !time) {
-      toast.error('Please fill in session title, date, and time');
-      return;
-    }
-    try {
-      await addSession.mutateAsync({
-        courseName,
-        sessionTitle: sessionTitle.trim(),
+      await addSessionMutation.mutateAsync({
+        studentPrincipal,
         date,
         time,
-        googleMeetLink: googleMeetLink.trim(),
-        googleCalendarLink: googleCalendarLink.trim(),
-        createdAt: BigInt(Date.now()) * BigInt(1_000_000),
+        topic,
+        duration: parseInt(duration),
       });
-      toast.success('Session added');
-      setSessionTitle('');
       setDate('');
       setTime('');
-      setGoogleMeetLink('');
-      setGoogleCalendarLink('');
+      setTopic('');
+      setDuration('60');
+      setMeetingPlatform('');
+      setMeetingLink('');
       setShowForm(false);
-    } catch {
-      toast.error('Failed to add session');
+    } catch (err) {
+      console.error('Failed to add session:', err);
     }
   };
 
-  const handleRemove = async (title: string) => {
+  const handleDelete = async (index: number) => {
     try {
-      await removeSession.mutateAsync({ sessionTitle: title, courseName });
-      toast.success('Session removed');
-    } catch {
-      toast.error('Failed to remove session');
+      await deleteSessionMutation.mutateAsync({ studentPrincipal, index });
+    } catch (err) {
+      console.error('Failed to delete session:', err);
+    }
+  };
+
+  const startEditMeetingLink = (index: number, session: any) => {
+    setEditingIndex(index);
+    const platformKey = getPlatformKey(session.meetingPlatform);
+    setEditPlatform(platformKey || 'googleMeet');
+    setEditLink(session.meetingLink ?? '');
+  };
+
+  const handleSaveMeetingLink = async (sessionTopic: string) => {
+    if (!editPlatform || !editLink) return;
+    const platformMap: Record<string, MeetingPlatform> = {
+      googleMeet: MeetingPlatform.googleMeet,
+      zohoMeet: MeetingPlatform.zohoMeet,
+      zoom: MeetingPlatform.zoom,
+    };
+    try {
+      await addOrUpdateMeetingLinkMutation.mutateAsync({
+        sessionTitle: sessionTopic,
+        platform: platformMap[editPlatform],
+        meetingLink: editLink,
+      });
+      setEditingIndex(null);
+      setEditPlatform('');
+      setEditLink('');
+    } catch (err) {
+      console.error('Failed to save meeting link:', err);
+    }
+  };
+
+  const handleRemoveMeetingLink = async (sessionTopic: string) => {
+    try {
+      await removeMeetingLinkMutation.mutateAsync(sessionTopic);
+    } catch (err) {
+      console.error('Failed to remove meeting link:', err);
     }
   };
 
   return (
-    <div className="space-y-3 pt-2">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-foreground flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          Schedule {courseName ? `— ${courseName}` : ''}
+        </h3>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowForm(!showForm)}
+          className="gap-1"
+        >
+          {showForm ? <ChevronUp className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          Add Session
+        </Button>
+      </div>
+
+      {/* Add Session Form */}
+      {showForm && (
+        <div className="bg-muted/30 rounded-lg p-4 border border-border space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Date</Label>
+              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs">Time</Label>
+              <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="mt-1" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">Topic</Label>
+            <Input
+              placeholder="Session topic"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Duration (minutes)</Label>
+            <Input
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          {/* Optional meeting link */}
+          <div className="border-t border-border pt-3">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Meeting Link (optional)
+            </Label>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <div>
+                <Label className="text-xs">Platform</Label>
+                <Select value={meetingPlatform} onValueChange={setMeetingPlatform}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="googleMeet">Google Meet</SelectItem>
+                    <SelectItem value="zohoMeet">Zoho Meet</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Meeting URL</Label>
+                <Input
+                  placeholder="https://..."
+                  value={meetingLink}
+                  onChange={(e) => setMeetingLink(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-1">
+            <Button
+              size="sm"
+              onClick={handleAdd}
+              disabled={addSessionMutation.isPending || !date || !time || !topic}
+              className="flex-1"
+            >
+              {addSessionMutation.isPending ? 'Adding...' : 'Add Session'}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Sessions List */}
       {isLoading ? (
-        <div className="space-y-2">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-lg" />
-          ))}
-        </div>
-      ) : sortedSessions.length === 0 ? (
-        <div className="text-center py-6 text-warm-text/40">
-          <Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p className="text-xs">No sessions scheduled yet for this student.</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Loading sessions...</p>
+      ) : sessions.length === 0 ? (
+        <p className="text-sm text-muted-foreground italic">No sessions added yet.</p>
       ) : (
-        <div className="space-y-2">
-          {sortedSessions.map((session) => {
-            const sessionDate = new Date(`${session.date}T${session.time}`);
-            const isPast = sessionDate < new Date();
+        <div className="space-y-3">
+          {sessions.map((session: any, index: number) => {
+            const platformKey = getPlatformKey(session.meetingPlatform);
+            const hasMeetingLink = !!session.meetingLink && !!platformKey;
+            const isEditingThis = editingIndex === index;
+
             return (
-              <div
-                key={session.sessionTitle}
-                className={`p-3 rounded-lg border transition-colors ${
-                  isPast
-                    ? 'border-navy/5 bg-warm-light/20 opacity-60'
-                    : 'border-navy/10 bg-warm-light/30 hover:bg-warm-light/60'
-                }`}
-              >
+              <div key={index} className="bg-card rounded-lg p-3 border border-border">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-navy text-xs mb-1">
-                      {session.sessionTitle}
-                      {isPast && (
-                        <span className="ml-1.5 text-warm-text/40 font-normal">(Past)</span>
-                      )}
-                    </p>
-                    <div className="flex flex-wrap gap-2 text-xs text-warm-text/60 mb-1.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-foreground">{session.topic}</p>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-gold" />
-                        {formatDate(session.date)}
+                        <Calendar className="w-3 h-3" /> {session.date}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-gold" />
-                        {session.time}
+                        <Clock className="w-3 h-3" /> {session.time}
                       </span>
+                      <span>{session.duration} min</span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {session.googleMeetLink && (
+
+                    {/* Meeting link display */}
+                    {hasMeetingLink && !isEditingThis && (
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium border ${PLATFORM_COLORS[platformKey] ?? 'bg-gray-100 text-gray-700 border-gray-200'}`}
+                        >
+                          {PLATFORM_LABELS[platformKey] ?? platformKey}
+                        </span>
                         <a
-                          href={session.googleMeetLink}
+                          href={session.meetingLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors"
+                          className="text-xs text-primary underline truncate max-w-[160px]"
                         >
-                          <Video className="w-3 h-3" />
-                          Meet
+                          {session.meetingLink}
                         </a>
-                      )}
-                      {session.googleCalendarLink && (
-                        <a
-                          href={session.googleCalendarLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-600 hover:bg-green-700 text-white text-xs font-medium transition-colors"
+                        <button
+                          onClick={() => startEditMeetingLink(index, session)}
+                          className="text-muted-foreground hover:text-foreground"
+                          title="Edit meeting link"
                         >
-                          <CalendarPlus className="w-3 h-3" />
-                          Calendar
-                        </a>
-                      )}
-                    </div>
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              className="text-destructive hover:text-destructive/80"
+                              title="Remove meeting link"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove Meeting Link?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will remove the meeting link from this session.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleRemoveMeetingLink(session.topic)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Remove
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+
+                    {/* No meeting link — add button */}
+                    {!hasMeetingLink && !isEditingThis && (
+                      <button
+                        onClick={() => startEditMeetingLink(index, session)}
+                        className="mt-2 text-xs text-primary hover:underline flex items-center gap-1"
+                      >
+                        <Video className="w-3 h-3" /> Add meeting link
+                      </button>
+                    )}
+
+                    {/* Inline edit form */}
+                    {isEditingThis && (
+                      <div className="mt-2 bg-muted/40 rounded p-3 space-y-2 border border-border">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs">Platform</Label>
+                            <Select value={editPlatform} onValueChange={setEditPlatform}>
+                              <SelectTrigger className="mt-1 h-8 text-xs">
+                                <SelectValue placeholder="Platform" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="googleMeet">Google Meet</SelectItem>
+                                <SelectItem value="zohoMeet">Zoho Meet</SelectItem>
+                                <SelectItem value="zoom">Zoom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-xs">Meeting URL</Label>
+                            <Input
+                              placeholder="https://..."
+                              value={editLink}
+                              onChange={(e) => setEditLink(e.target.value)}
+                              className="mt-1 h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => handleSaveMeetingLink(session.topic)}
+                            disabled={
+                              addOrUpdateMeetingLinkMutation.isPending || !editPlatform || !editLink
+                            }
+                          >
+                            {addOrUpdateMeetingLinkMutation.isPending ? 'Saving...' : 'Save'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs"
+                            onClick={() => {
+                              setEditingIndex(null);
+                              setEditPlatform('');
+                              setEditLink('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
-                    onClick={() => handleRemove(session.sessionTitle)}
-                    disabled={removeSession.isPending}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 shrink-0 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Session?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete "{session.topic}". This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(index)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             );
           })}
         </div>
-      )}
-
-      {/* Add Form Toggle */}
-      {!showForm ? (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowForm(true)}
-          className="w-full border-dashed border-navy/30 text-navy/70 hover:border-gold hover:text-gold text-xs"
-        >
-          <Plus className="w-3.5 h-3.5 mr-1" />
-          Add Session
-        </Button>
-      ) : (
-        <form onSubmit={handleAdd} className="space-y-3 p-3 rounded-lg border border-gold/30 bg-gold/5">
-          <div className="space-y-1">
-            <Label className="text-navy text-xs font-medium">Session Title *</Label>
-            <Input
-              value={sessionTitle}
-              onChange={(e) => setSessionTitle(e.target.value)}
-              placeholder="e.g. Introduction to Calculus"
-              className="border-navy/20 focus:ring-gold h-8 text-sm"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <Label className="text-navy text-xs font-medium">Date *</Label>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border-navy/20 focus:ring-gold h-8 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-navy text-xs font-medium">Time *</Label>
-              <Input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="border-navy/20 focus:ring-gold h-8 text-sm"
-              />
-            </div>
-          </div>
-          <div className="space-y-1">
-            <Label className="text-navy text-xs font-medium">Google Meet Link</Label>
-            <Input
-              value={googleMeetLink}
-              onChange={(e) => setGoogleMeetLink(e.target.value)}
-              placeholder="https://meet.google.com/..."
-              className="border-navy/20 focus:ring-gold h-8 text-sm"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-navy text-xs font-medium">Google Calendar Link</Label>
-            <Input
-              value={googleCalendarLink}
-              onChange={(e) => setGoogleCalendarLink(e.target.value)}
-              placeholder="https://calendar.google.com/..."
-              className="border-navy/20 focus:ring-gold h-8 text-sm"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={addSession.isPending}
-              className="bg-navy hover:bg-navy/90 text-cream text-xs h-8"
-            >
-              {addSession.isPending ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 border-2 border-cream/30 border-t-cream rounded-full animate-spin" />
-                  Adding...
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  <Plus className="w-3.5 h-3.5" />
-                  Add
-                </span>
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setShowForm(false);
-                setSessionTitle('');
-                setDate('');
-                setTime('');
-                setGoogleMeetLink('');
-                setGoogleCalendarLink('');
-              }}
-              className="text-xs h-8 text-warm-text/60"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
       )}
     </div>
   );
