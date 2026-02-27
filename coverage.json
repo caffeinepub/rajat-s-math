@@ -1,89 +1,141 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T06:57:37.935Z",
+  "generatedAt": "2026-02-26T07:21:24.955Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 2,
+    "total": 7,
+    "implemented": 5,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Extend the backend session data type (CourseSession or equivalent) to include an optional meeting platform field (variant: #googleMeet, #zohoMeet, #zoom) and an optional meeting link URL string. Provide backend functions to add, update, and delete the meeting link on an existing session.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Establish a consistent global design system across the entire app using a deep navy (#0B1B3E), white, and gold (#C9A84C) color palette. Update CSS custom properties in frontend/src/index.css to reflect these brand colors, ensuring all existing Tailwind utility classes and component tokens map to the new palette. Apply Playfair Display for headings and Inter for body text with a clear font-size hierarchy (Title → Subtitle → Body → Caption). Remove any clutter, random shapes, or distracting decorative elements from shared layout areas.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "In the Admin Dashboard → Booked Students → StudentDetailView (add/edit session form), add a meeting platform selector (Google Meet, Zoho Meet, Zoom) and a meeting link URL input field. When a session already has a meeting link, display it with Edit and Delete (clear) actions alongside the session entry.",
+        "summary": "Redesign the Hero section in frontend/src/components/Hero.tsx with an elegant mathematics-themed background featuring soft, low-opacity math symbols (Σ, √, θ, ∫, π, ∞, and equation fragments) rendered as decorative SVG or CSS elements that do not reduce text readability. Improve the layout balance between the hero text and any accompanying image/visual. Apply a strong heading style to the main title, a clean readable style to the subtitle/description, and ensure call-to-action buttons are modern, consistently sized, and have smooth hover effects with gold accent highlights.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/StudentDetailView.tsx",
-          "frontend/src/components/StudentScheduleTab.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/Hero.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/StudentDetailView.tsx",
-          "frontend/src/components/StudentScheduleTab.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/Hero.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "In the Student Portal (StudentDashboard and/or StudentPortal schedule/sessions tab), for each session that has a meeting link, display a prominent clickable 'Join Class' button that opens the meeting URL in a new tab. Sessions without a meeting link should show no button.",
+        "summary": "Redesign the Header in frontend/src/components/Header.tsx. Remove unnecessary empty boxes or distracting elements. Improve spacing, margins, and alignment. Ensure the sticky nav has a clean background (navy or white with subtle shadow), consistent icon style, and modern nav links with hover effects. Logo and brand name should be visually prominent. Mobile nav should be clean and accessible.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/StudentDashboard.tsx",
-          "frontend/src/components/StudentScheduleTab.tsx",
-          "frontend/src/components/StudentPortal.tsx"
+          "frontend/src/components/Header.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/components/Header.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Redesign all remaining landing page sections — Services (frontend/src/components/Services.tsx), EnrollmentCTA (frontend/src/components/EnrollmentCTA.tsx), and Footer (frontend/src/components/Footer.tsx) — using the premium navy/white/gold design system. Apply clean card layouts with soft box shadows and rounded corners to course/service cards. Ensure sections are visually separated with balanced whitespace. Buttons should match the global modern button style. Footer should be clean and well-structured with proper typographic hierarchy.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Services.tsx",
+          "frontend/src/components/EnrollmentCTA.tsx",
+          "frontend/src/components/Footer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Services.tsx",
+          "frontend/src/components/EnrollmentCTA.tsx",
+          "frontend/src/components/Footer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Redesign the Admin Dashboard (frontend/src/components/AdminDashboard.tsx) and all its child tab components (BookedStudentsSection, AttendanceManager, AdminSupportMessages, AdminEnquiriesTab, CourseMaterialsManager, ClassSessionsManager, DiscountCodeManager, VisitorTrackingView, StudentDetailView) using the premium design system. The sidebar should use a deep navy background with gold active-state indicators. Tab content areas should use white/off-white card backgrounds with soft shadows. Tables, lists, and form elements should have improved spacing, alignment, and visual hierarchy. Buttons and badges must follow the global style.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AdminDashboard.tsx",
+          "frontend/src/components/BookedStudentsSection.tsx",
+          "frontend/src/components/AttendanceManager.tsx",
+          "frontend/src/components/AdminSupportMessages.tsx",
+          "frontend/src/components/AdminEnquiriesTab.tsx",
+          "frontend/src/components/CourseMaterialsManager.tsx",
+          "frontend/src/components/ClassSessionsManager.tsx",
+          "frontend/src/components/DiscountCodeManager.tsx",
+          "frontend/src/components/VisitorTrackingView.tsx",
+          "frontend/src/components/StudentDetailView.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AdminDashboard.tsx",
+          "frontend/src/components/BookedStudentsSection.tsx",
+          "frontend/src/components/AttendanceManager.tsx",
+          "frontend/src/components/AdminSupportMessages.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Redesign the Student Portal (frontend/src/components/StudentPortal.tsx) and all its child views (StudentDashboard, StudentScheduleTab, StudentMaterialsTab, StudentSupportView, StudentAttendanceView, StudentEnquiryPortal, ProfileSetup, QRCheckInView) using the premium design system. Tab navigation should use gold underline/active indicators. Content cards should use clean white backgrounds with soft shadows. Progress bars and attendance stats should use gold accent colors. Meeting link badges (Google Meet, Zoom, Zoho) should remain platform-colored but styled consistently within the card layout.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/StudentPortal.tsx",
           "frontend/src/components/StudentDashboard.tsx",
           "frontend/src/components/StudentScheduleTab.tsx",
-          "frontend/src/components/StudentPortal.tsx"
-        ]
+          "frontend/src/components/StudentMaterialsTab.tsx",
+          "frontend/src/components/StudentSupportView.tsx",
+          "frontend/src/components/StudentAttendanceView.tsx",
+          "frontend/src/components/StudentEnquiryPortal.tsx",
+          "frontend/src/components/ProfileSetup.tsx",
+          "frontend/src/components/QRCheckInView.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Redesign modal and dialog components (BookingFlowManager, BookingForm, UpiPaymentStep, BookingConfirmation, LoginModal, PaymentEnquiryForm, StudentEnquiryForm, CourseOffering) to match the premium design system. Dialog containers should use white backgrounds with navy headers and gold accents. Form fields should have clean borders, proper label hierarchy, and smooth focus states. Confirmation screens should feel premium and celebratory using the palette.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/BookingFlowManager.tsx",
+          "frontend/src/components/BookingForm.tsx",
+          "frontend/src/components/UpiPaymentStep.tsx",
+          "frontend/src/components/BookingConfirmation.tsx",
+          "frontend/src/components/LoginModal.tsx",
+          "frontend/src/components/PaymentEnquiryForm.tsx",
+          "frontend/src/components/StudentEnquiryForm.tsx",
+          "frontend/src/components/CourseOffering.tsx"
+        ],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/public/assets/generated/hero-math-bg.dim_1920x900.png",
     "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
     "frontend/src/components/AdminDashboard.tsx",
-    "frontend/src/components/AdminEnquiriesTab.tsx",
     "frontend/src/components/AdminSupportMessages.tsx",
     "frontend/src/components/AttendanceManager.tsx",
     "frontend/src/components/BookedStudentsSection.tsx",
-    "frontend/src/components/BookingConfirmation.tsx",
-    "frontend/src/components/BookingFlowManager.tsx",
-    "frontend/src/components/BookingForm.tsx",
-    "frontend/src/components/ClassSessionsManager.tsx",
-    "frontend/src/components/CourseMaterialsManager.tsx",
-    "frontend/src/components/CourseOffering.tsx",
-    "frontend/src/components/QRCheckInView.tsx",
-    "frontend/src/components/StudentAttendanceView.tsx",
-    "frontend/src/components/StudentDashboard.tsx",
-    "frontend/src/components/StudentDetailView.tsx",
-    "frontend/src/components/StudentEnquiryPortal.tsx",
-    "frontend/src/components/StudentMaterialsTab.tsx",
-    "frontend/src/components/StudentPortal.tsx",
-    "frontend/src/components/StudentScheduleTab.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/hooks/useBooking.ts",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/types/booking.ts",
-    "frontend/src/utils/pricingCalculator.ts",
+    "frontend/src/components/EnrollmentCTA.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/Hero.tsx",
+    "frontend/src/components/Services.tsx",
+    "frontend/src/index.css",
+    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -1,62 +1,265 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add meeting link (Google Meet / Zoho / Zoom) to sessions with student portal display",
+  "title": "Full Premium UI Redesign — Landing Page, Admin Dashboard & Student Portal",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Add meeting platform selector and URL input to Admin Dashboard session management with edit and delete actions for existing links",
+      "id": "REQ-1",
+      "summary": "Establish a consistent global design system with deep navy (#0B1B3E), white, and gold (#C9A84C) palette, using Playfair Display for headings and Inter for body text",
       "acceptanceCriteria": [
-        "The add-session form includes a dropdown/selector for platform (Google Meet, Zoho Meet, Zoom) and a text input for the meeting URL.",
-        "Platform and link fields are optional; the session can be saved without them.",
-        "Sessions that have a meeting link display the platform name and link alongside an Edit button and a Delete (clear) button.",
-        "Clicking Edit opens an inline form pre-filled with the existing platform and URL.",
-        "Clicking Delete removes the meeting link from the session after confirmation.",
-        "Changes persist to the backend and the session list refreshes after each operation."
+        "CSS variables for navy, white, and gold are defined and used throughout the app",
+        "Playfair Display is used for all major headings; Inter for body copy",
+        "Font sizes follow a clear hierarchy: H1 > H2 > H3 > body > caption",
+        "No random decorative shapes or distracting elements appear in shared layout areas",
+        "Color contrast meets readable thresholds against both light and dark backgrounds"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/StudentDetailView.tsx",
+          "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Add meeting platform selector (dropdown with options: Google Meet, Zoho Meet, Zoom) and meeting link URL input field to the add-session form. Display existing meeting links with Edit and Delete buttons alongside each session entry. Implement inline editing form that pre-fills platform and URL. Add confirmation dialog for delete action. Wire up backend mutation calls for adding, updating, and removing meeting links using the backend functions addOrUpdateMeetingLink and removeMeetingLink."
+          "description": "Update CSS custom properties to define the premium navy (#0B1B3E), white, and gold (#C9A84C) color palette. Map these colors to existing Tailwind utility classes and component tokens (background, foreground, primary, accent, border, etc.). Ensure all color variables support both light and dark modes. Add font-family definitions for Playfair Display (headings) and Inter (body). Define a clear font-size hierarchy using CSS custom properties (--font-size-title, --font-size-subtitle, --font-size-body, --font-size-caption). Remove any clutter or random decorative element styles from global layout definitions."
         },
         {
-          "path": "frontend/src/components/StudentScheduleTab.tsx",
+          "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Update the session add/edit form to include meeting platform selector and URL input fields. Display meeting platform badge and link info for sessions that have them. Add Edit and Delete action buttons next to sessions with meeting links. Implement edit flow with pre-filled form and delete flow with confirmation. Ensure backend mutations refresh the session list after operations complete."
-        },
+          "description": "Update the Tailwind config to extend the theme with the new navy/white/gold color palette using CSS variables. Ensure font families reference Playfair Display for serif and Inter for sans. Verify that all custom colors, shadows, and border radii align with the premium design system requirements."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Redesign the Hero section with elegant mathematics-themed background, improved layout balance, and modern CTA buttons with gold accents",
+      "acceptanceCriteria": [
+        "Hero background shows subtle math symbols/equations at low opacity that do not obscure text",
+        "Main hero title uses Playfair Display in a prominent size with high contrast",
+        "CTA buttons have consistent padding, rounded corners, gold accent color, and smooth hover transitions",
+        "Hero layout is balanced and visually calm with proper whitespace",
+        "Text readability is not compromised by background elements"
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/Hero.tsx",
           "operation": "modify",
-          "description": "Add mutation hooks for meeting link operations: useAddOrUpdateMeetingLink (calls backend.addOrUpdateMeetingLink with sessionTitle, platform enum, and meetingLink string) and useRemoveMeetingLink (calls backend.removeMeetingLink with sessionTitle). Both mutations should invalidate relevant session queries on success to trigger UI refresh."
+          "description": "Redesign the Hero component with a mathematics-themed background. Use the generated image hero-math-bg.dim_1920x900.png from frontend/public/assets/generated/hero-math-bg.dim_1920x900.png as the background, or layer soft, low-opacity SVG/CSS-rendered math symbols (Σ, √, θ, ∫, π, ∞, equation fragments) over a deep navy gradient. Ensure decorative elements do not reduce text readability. Apply Playfair Display to the main title with a prominent font size and high contrast against the background. Style the subtitle/description with Inter in a clean readable size. Redesign CTA buttons to be modern with consistent sizing, rounded corners, gold accent colors from the palette, and smooth hover effects (e.g., scale, brightness). Balance the layout between hero text and any accompanying visual. Use proper whitespace and ensure the section feels visually calm and premium."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Display prominent 'Join Class' button in Student Portal for sessions with meeting links",
+      "summary": "Redesign the Header with clean sticky nav, modern nav links with hover effects, and improved spacing and alignment",
       "acceptanceCriteria": [
-        "Each session card/row in the student portal that has a meeting link shows a 'Join Class' button.",
-        "Clicking 'Join Class' opens the meeting URL in a new browser tab.",
-        "The button is styled prominently and indicates the platform (e.g., a small Google Meet / Zoom / Zoho icon or label) if possible.",
-        "Sessions without a meeting link do not show the button.",
-        "The meeting link updates in real time when the admin adds, edits, or deletes it."
+        "Header has no empty boxes or extraneous visual noise",
+        "Nav links have consistent spacing and smooth hover/active state styling",
+        "Sticky header shows a subtle shadow separating it from page content",
+        "Logo and brand name are clearly visible and properly sized",
+        "Mobile hamburger menu is clean and functional"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/Header.tsx",
+          "operation": "modify",
+          "description": "Redesign the Header component by removing unnecessary empty boxes or distracting elements. Improve spacing, margins, and alignment across all nav items. Use a clean background (navy or white with subtle shadow) for the sticky nav. Apply consistent icon styles and modern nav link hover effects using the gold accent color. Ensure the logo and brand name are visually prominent and properly sized. Refine the mobile hamburger menu to be clean and accessible. Apply the global design system colors and typography throughout."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Redesign all remaining landing page sections (Services, EnrollmentCTA, Footer) with premium navy/white/gold design system and clean card layouts",
+      "acceptanceCriteria": [
+        "Service/course cards use soft shadows, rounded corners, and gold accent highlights",
+        "Sections are clearly separated with generous but balanced vertical spacing",
+        "All buttons on the landing page are consistent in size, style, and hover behavior",
+        "Footer is clean, readable, and well-structured",
+        "No section feels cluttered or visually unbalanced"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Services.tsx",
+          "operation": "modify",
+          "description": "Redesign the Services component using the premium navy/white/gold palette. Apply clean card layouts with soft box shadows and rounded corners to each course/service card. Use gold accent highlights for hover states or active selections. Ensure generous but balanced vertical spacing separates this section from adjacent content. Style all buttons to match the global modern button style (consistent size, rounded corners, gold accents, smooth hover transitions). Remove any visual clutter and ensure the layout feels premium and balanced."
+        },
+        {
+          "path": "frontend/src/components/EnrollmentCTA.tsx",
+          "operation": "modify",
+          "description": "Redesign the EnrollmentCTA component to align with the premium design system. Use navy/white/gold colors, clean card backgrounds with soft shadows if applicable, and modern button styling with gold accents. Ensure proper whitespace separation from surrounding sections. Apply Playfair Display to any major headings and Inter for body copy. Make the CTA visually compelling and consistent with the global style."
+        },
+        {
+          "path": "frontend/src/components/Footer.tsx",
+          "operation": "modify",
+          "description": "Redesign the Footer component using the premium navy/white/gold palette. Ensure the footer is clean, readable, and well-structured with proper typographic hierarchy (Playfair Display for section headings, Inter for links and body text). Use consistent spacing and alignment. Apply subtle separators or backgrounds as needed to distinguish footer sections. Ensure the Caffeine.ai attribution badge fits harmoniously with the overall design."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Redesign the Admin Dashboard and all child tab components with deep navy sidebar, white card backgrounds, improved spacing, and global style consistency",
+      "acceptanceCriteria": [
+        "Admin sidebar uses deep navy background with gold-highlighted active tab",
+        "All tab content areas use white card backgrounds with soft shadows",
+        "Tables and lists have consistent row spacing, borders, and typography hierarchy",
+        "Form inputs and buttons inside tabs match the global modern style",
+        "Status badges and labels use consistent color-coding aligned with the palette"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Redesign the AdminDashboard component using the premium design system. Apply a deep navy background to the sidebar with gold active-state indicators for the selected tab. Ensure tab content areas use white or off-white card backgrounds with soft shadows. Improve spacing, margins, and alignment throughout. Apply Playfair Display to major section headings and Inter for body text. Ensure the layout is clean and premium."
+        },
+        {
+          "path": "frontend/src/components/BookedStudentsSection.tsx",
+          "operation": "modify",
+          "description": "Redesign BookedStudentsSection to match the premium design system. Use white card backgrounds with soft shadows for the student list. Apply consistent row spacing, borders, and typography hierarchy. Style status badges using colors aligned with the navy/gold palette. Ensure buttons and interactive elements use the global modern style with gold accents and smooth hover effects."
+        },
+        {
+          "path": "frontend/src/components/AttendanceManager.tsx",
+          "operation": "modify",
+          "description": "Redesign AttendanceManager with white card backgrounds and soft shadows. Improve spacing and alignment for form elements and attendance records. Use the global button style with gold accents. Apply consistent typography (Playfair Display for headings, Inter for body). Ensure tables or lists have clean borders and balanced row spacing."
+        },
+        {
+          "path": "frontend/src/components/AdminSupportMessages.tsx",
+          "operation": "modify",
+          "description": "Redesign AdminSupportMessages using white card backgrounds with soft shadows. Style expandable message threads with consistent spacing and typography. Apply gold accent highlights for active or hovered items. Ensure form inputs and reply buttons match the global modern style. Use Playfair Display for section headings and Inter for message content."
+        },
+        {
+          "path": "frontend/src/components/AdminEnquiriesTab.tsx",
+          "operation": "modify",
+          "description": "Redesign AdminEnquiriesTab with white card backgrounds and soft shadows. Apply consistent row spacing and borders to the enquiry list. Use status badges with color-coding aligned to the palette (pending, confirmed, rejected). Style buttons (confirm, reject) with the global modern style and gold accents. Ensure typography hierarchy is clear with Playfair Display for headings and Inter for details."
+        },
+        {
+          "path": "frontend/src/components/CourseMaterialsManager.tsx",
+          "operation": "modify",
+          "description": "Redesign CourseMaterialsManager using white card backgrounds with soft shadows. Improve form input styling, dropdown alignment, and button consistency to match the global design system. Apply gold accents to interactive elements. Use Playfair Display for section titles and Inter for form labels and material lists. Ensure spacing and visual hierarchy are balanced."
+        },
+        {
+          "path": "frontend/src/components/ClassSessionsManager.tsx",
+          "operation": "modify",
+          "description": "Redesign ClassSessionsManager with white card backgrounds and soft shadows. Style the session list with consistent row spacing and borders. Apply the global button style with gold accents for add/delete actions. Use Playfair Display for headings and Inter for session details. Ensure meeting link badges are styled consistently within the card layout."
+        },
+        {
+          "path": "frontend/src/components/DiscountCodeManager.tsx",
+          "operation": "modify",
+          "description": "Redesign DiscountCodeManager using white card backgrounds with soft shadows. Style discount code listings with clear typography and consistent spacing. Apply gold accents to buttons (generate, copy, deactivate) and hover states. Use Playfair Display for headings and Inter for code details. Ensure the layout is clean and premium."
+        },
+        {
+          "path": "frontend/src/components/VisitorTrackingView.tsx",
+          "operation": "modify",
+          "description": "Redesign VisitorTrackingView with white card backgrounds and soft shadows. Apply consistent spacing and typography to visitor stats and activity logs. Use Playfair Display for section headings and Inter for data entries. Style any charts or badges with the navy/gold palette. Ensure the layout is clean and visually balanced."
+        },
+        {
+          "path": "frontend/src/components/StudentDetailView.tsx",
+          "operation": "modify",
+          "description": "Redesign StudentDetailView with white card backgrounds and soft shadows. Improve spacing and alignment for session and material management sections. Apply the global button style with gold accents. Use consistent typography (Playfair Display for headings, Inter for details). Ensure meeting link badges are styled consistently within the card layout using platform colors."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Redesign the Student Portal and all child views with gold tab indicators, white card backgrounds, and consistent premium styling",
+      "acceptanceCriteria": [
+        "Student portal tabs have gold underline or gold-fill active state",
+        "All content sections use white card backgrounds with soft shadows and proper spacing",
+        "Attendance progress bar uses gold accent color",
+        "Meeting link badges are styled consistently within card layouts",
+        "Forms and input fields use the global premium styling"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/StudentPortal.tsx",
+          "operation": "modify",
+          "description": "Redesign the StudentPortal component using the premium design system. Apply gold underline or gold-fill active state indicators to tab navigation. Ensure all content areas use white card backgrounds with soft shadows. Improve spacing and alignment. Use Playfair Display for major headings and Inter for body text. Ensure the access code authentication UI is clean and premium."
+        },
+        {
           "path": "frontend/src/components/StudentDashboard.tsx",
           "operation": "modify",
-          "description": "Update session card rendering to conditionally display a 'Join Class' button when a session has a meeting link. The button should open the meeting URL in a new tab (target='_blank' rel='noopener noreferrer'). Style the button prominently using Tailwind classes and include a platform badge/icon (Google Meet, Zoom, Zoho Meet) next to the button text. Sessions without a meeting link should not render the button. Ensure the component refetches session data to reflect real-time admin changes."
+          "description": "Redesign StudentDashboard with white card backgrounds and soft shadows for session and material displays. Apply gold accents to tab active states. Use consistent spacing and typography (Playfair Display for headings, Inter for content). Ensure the layout is clean and premium."
         },
         {
           "path": "frontend/src/components/StudentScheduleTab.tsx",
           "operation": "modify",
-          "description": "Add 'Join Class' button rendering to each session entry that has a meeting link. Display the platform name or icon alongside the button. Ensure the button opens the link in a new tab with proper security attributes (target='_blank' rel='noopener noreferrer'). Hide the button for sessions without meeting links. Style the button prominently to match the design system."
+          "description": "Redesign StudentScheduleTab with white card backgrounds and soft shadows. Style session entries with consistent spacing and borders. Apply platform-colored badges (Google Meet, Zoom, Zoho) within the card layout but ensure they fit the overall design. Use gold accents for add/delete buttons and hover states. Apply Playfair Display for headings and Inter for session details."
         },
         {
-          "path": "frontend/src/components/StudentPortal.tsx",
+          "path": "frontend/src/components/StudentMaterialsTab.tsx",
           "operation": "modify",
-          "description": "Ensure the schedule tab receives and displays meeting link data for each session. Pass session data including meeting platform and link to the StudentScheduleTab component. Verify that real-time updates from admin changes are reflected via query invalidation."
+          "description": "Redesign StudentMaterialsTab using white card backgrounds with soft shadows. Apply consistent spacing and typography to the materials list. Style material type badges (PDF, video, note, link) with colors aligned to the palette. Use the global button style with gold accents for add/delete actions. Ensure Playfair Display for headings and Inter for material details."
+        },
+        {
+          "path": "frontend/src/components/StudentSupportView.tsx",
+          "operation": "modify",
+          "description": "Redesign StudentSupportView with white card backgrounds and soft shadows for message threads. Apply consistent spacing and typography (Playfair Display for headings, Inter for messages). Style the reply form with the global input and button styling using gold accents. Ensure the layout is clean and premium."
+        },
+        {
+          "path": "frontend/src/components/StudentAttendanceView.tsx",
+          "operation": "modify",
+          "description": "Redesign StudentAttendanceView with white card backgrounds and soft shadows. Style attendance records with consistent row spacing and borders. Use a gold accent color for the attendance progress bar. Apply Playfair Display for headings and Inter for attendance data. Ensure the summary section is visually balanced and clear."
+        },
+        {
+          "path": "frontend/src/components/StudentEnquiryPortal.tsx",
+          "operation": "modify",
+          "description": "Redesign StudentEnquiryPortal with white card backgrounds and soft shadows. Style status badges (pending, confirmed, rejected) with colors aligned to the palette. Use the global input and button styling with gold accents. Apply Playfair Display for headings and Inter for enquiry details. Ensure the layout is clean and premium."
+        },
+        {
+          "path": "frontend/src/components/ProfileSetup.tsx",
+          "operation": "modify",
+          "description": "Redesign ProfileSetup modal/form with white card backgrounds and soft shadows. Use the global input and button styling with gold accents. Apply Playfair Display for headings and Inter for form labels. Ensure the onboarding experience feels premium and aligned with the design system."
+        },
+        {
+          "path": "frontend/src/components/QRCheckInView.tsx",
+          "operation": "modify",
+          "description": "Redesign QRCheckInView with white card backgrounds and soft shadows. Style the camera interface and manual token entry form using the global design system. Apply gold accents to buttons and active states. Use Playfair Display for headings and Inter for instructions. Ensure the layout is clean and the confirmation steps are visually clear."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Redesign modal and dialog components with navy headers, white backgrounds, gold accents, and premium form styling",
+      "acceptanceCriteria": [
+        "All dialog/modal headers use navy or navy-gradient backgrounds with white/gold text",
+        "Form inputs have consistent border radius, padding, and focus ring in gold",
+        "Confirmation screens use navy/gold colors with clear success messaging",
+        "Modals do not feel generic — they match the overall premium math education brand"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingFlowManager.tsx",
+          "operation": "modify",
+          "description": "Redesign BookingFlowManager dialog to use the premium design system. Apply a navy or navy-gradient header background with white/gold text for the dialog title. Use white backgrounds for the dialog body. Ensure step transitions (form → payment → confirmation) feel smooth and premium. Apply Playfair Display for dialog titles and Inter for body content."
+        },
+        {
+          "path": "frontend/src/components/BookingForm.tsx",
+          "operation": "modify",
+          "description": "Redesign BookingForm with the global input styling: consistent border radius, padding, clean borders, and gold focus rings. Apply Playfair Display for form headings and Inter for labels and helper text. Ensure buttons match the global modern style with gold accents and smooth hover effects. Remove any generic styling and make the form feel premium."
+        },
+        {
+          "path": "frontend/src/components/UpiPaymentStep.tsx",
+          "operation": "modify",
+          "description": "Redesign UpiPaymentStep with white card backgrounds and navy accents. Style the discount code input and validation with the global form styling (gold focus rings). Ensure the QR code and UPI ID display are clean and premium. Apply gold accents to the copy-to-clipboard button and hover states. Use Playfair Display for headings and Inter for instructions."
+        },
+        {
+          "path": "frontend/src/components/BookingConfirmation.tsx",
+          "operation": "modify",
+          "description": "Redesign BookingConfirmation screen to feel premium and celebratory. Use navy and gold colors for success messaging and visual accents. Apply white card backgrounds with soft shadows. Use Playfair Display for the confirmation heading and Inter for booking details. Ensure the layout is clean, balanced, and visually rewarding."
+        },
+        {
+          "path": "frontend/src/components/LoginModal.tsx",
+          "operation": "modify",
+          "description": "Redesign LoginModal with a navy or navy-gradient header and white body background. Style the Internet Identity prompt and loading state with the global design system. Apply Playfair Display for the modal title and Inter for body text. Ensure buttons use gold accents and smooth hover effects. Make the modal feel premium and aligned with the math education brand."
+        },
+        {
+          "path": "frontend/src/components/PaymentEnquiryForm.tsx",
+          "operation": "modify",
+          "description": "Redesign PaymentEnquiryForm with the global input and button styling (consistent borders, padding, gold focus rings). Apply navy or navy-gradient for the dialog header if applicable. Use white card backgrounds with soft shadows for the form body. Style the QR code display and reference ID with the premium design system. Use Playfair Display for headings and Inter for form labels."
+        },
+        {
+          "path": "frontend/src/components/StudentEnquiryForm.tsx",
+          "operation": "modify",
+          "description": "Redesign StudentEnquiryForm with the global input and button styling (consistent borders, padding, gold focus rings). Apply navy or navy-gradient for the dialog header if applicable. Use white card backgrounds with soft shadows. Style the enquiry ID display and copy button with gold accents. Use Playfair Display for headings and Inter for form labels."
+        },
+        {
+          "path": "frontend/src/components/CourseOffering.tsx",
+          "operation": "modify",
+          "description": "Redesign CourseOffering card with white card backgrounds and soft shadows. Apply gold accents to pricing highlights and enrollment buttons. Use Playfair Display for course titles and Inter for descriptions. Ensure the UPI payment dialog within this component matches the global modal styling (navy header, white body, gold accents). Make the card feel premium and aligned with the design system."
         }
       ]
     }

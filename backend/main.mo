@@ -8,14 +8,14 @@ import Char "mo:core/Char";
 import Float "mo:core/Float";
 import Int "mo:core/Int";
 import Iter "mo:core/Iter";
-import Migration "migration";
+
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import Stripe "stripe/stripe";
 
-(with migration = Migration.run)
+
 actor {
   include MixinStorage();
 

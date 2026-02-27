@@ -1,15 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Allow admins to attach a Google Meet, Zoho Meet, or Zoom meeting link to any session, and display a "Join Class" button in the student portal for sessions that have a link.
+**Goal:** Full premium UI redesign of the entire frontend — landing page, admin dashboard, and student portal — using a consistent deep navy, white, and gold design system without changing any functionality.
 
 **Planned changes:**
-- Extend the session data type to include an optional meeting platform (Google Meet, Zoho Meet, Zoom) and an optional meeting link URL.
-- Add backend functions to set, update, and clear the meeting link on an existing session.
-- In the Admin Dashboard → Booked Students → add/edit session form, add a platform selector dropdown and a meeting link URL input field (both optional).
-- For sessions that already have a meeting link, display the platform name, the link, and Edit/Delete buttons in the admin session list; Edit opens an inline pre-filled form, Delete clears the link after confirmation.
-- In the Student Portal sessions view, show a prominent "Join Class" button on each session that has a meeting link; the button opens the URL in a new tab and indicates the platform via icon or label.
-- Sessions without a meeting link show no button and are otherwise unaffected.
-- Meeting link state in the student portal reflects admin changes in real time.
+- Define global CSS custom properties for deep navy (#0B1B3E), white, and gold (#C9A84C); apply Playfair Display for headings and Inter for body text throughout the app
+- Redesign Hero section with a mathematics-themed background (subtle low-opacity math symbols as SVG/CSS decorations), improved layout balance, and gold-accented CTA buttons
+- Redesign Header with clean sticky nav, no empty boxes, consistent spacing, gold/navy brand colors, and a functional mobile menu
+- Redesign Services, EnrollmentCTA, and Footer sections with premium card layouts (soft shadows, rounded corners, gold accents) and consistent button styles
+- Redesign Admin Dashboard and all child tab components with a deep navy sidebar, gold active-state indicators, white card content areas, and improved table/form styling
+- Redesign Student Portal and all child views with gold underline tab indicators, white content cards, gold-accented progress/attendance bars, and premium form styling
+- Redesign all modal and dialog components (booking flow, login, enquiry forms) with navy headers, gold accents, clean form fields with gold focus rings, and premium confirmation screens
 
-**User-visible outcome:** Admins can add, edit, or remove a meeting link on any session from the admin dashboard, and students will see a clickable "Join Class" button on their session cards whenever a link has been set.
+**User-visible outcome:** The entire app — landing page, admin dashboard, and student portal — presents a cohesive, premium mathematics education brand with deep navy, white, and gold styling, improved typography hierarchy, and polished UI components, while all existing functionality remains fully operational.

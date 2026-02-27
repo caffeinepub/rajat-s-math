@@ -1,138 +1,174 @@
 import React, { useState } from 'react';
-import { useBookingRecords, useMarkAttendance, useGetAttendanceRecords } from '../hooks/useQueries';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ClipboardList, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle, XCircle, Loader2, Search } from 'lucide-react';
+import { useBookingRecords, useGetAttendanceRecords, useMarkAttendance } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { Principal } from '@dfinity/principal';
 
-export default function AttendanceManager() {
-  const { data: bookings = [], isLoading: bookingsLoading } = useBookingRecords();
-  const markAttendanceMutation = useMarkAttendance();
+const AttendanceManager: React.FC = () => {
+  const { data: bookings, isLoading: bookingsLoading } = useBookingRecords();
+  const markAttendance = useMarkAttendance();
+  const [search, setSearch] = useState('');
+  const [marking, setMarking] = useState<string | null>(null);
 
-  const [selectedBookingIndex, setSelectedBookingIndex] = useState<string>('');
-
-  const selectedBooking = selectedBookingIndex !== '' ? bookings[parseInt(selectedBookingIndex)] : null;
-
-  const now = BigInt(Date.now()) * BigInt(1_000_000);
-  const thirtyDaysAgo = now - BigInt(30) * BigInt(24) * BigInt(3600) * BigInt(1_000_000_000);
-
-  const { data: attendanceRecords = [] } = useGetAttendanceRecords(
-    selectedBooking ? (selectedBooking as any).principal ?? null : null,
-    selectedBooking ? `booking-${selectedBookingIndex}` : '',
-    selectedBooking ? (selectedBooking as any).service ?? '' : '',
-    thirtyDaysAgo,
-    now
+  const filtered = (bookings || []).filter((b: any) =>
+    b.name?.toLowerCase().includes(search.toLowerCase()) ||
+    b.phone?.includes(search)
   );
 
-  const handleMarkAttendance = async (isPresent: boolean) => {
-    if (!selectedBooking) return;
+  const handleMark = async (booking: any, isPresent: boolean) => {
+    const key = `${booking.phone}-${booking.date}`;
+    setMarking(key);
     try {
-      await markAttendanceMutation.mutateAsync({
-        student: (selectedBooking as any).principal,
-        bookingId: `booking-${selectedBookingIndex}`,
-        course: (selectedBooking as any).service ?? '',
-        sessionDate: now,
+      await markAttendance.mutateAsync({
+        bookingId: booking.paymentId || booking.phone,
+        course: booking.service,
         isPresent,
-        markedAt: now,
       });
-    } catch (err) {
-      console.error('Failed to mark attendance:', err);
+    } finally {
+      setMarking(null);
     }
   };
 
-  if (bookingsLoading) {
-    return <div className="text-muted-foreground">Loading bookings...</div>;
-  }
-
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-xl border border-border p-4 space-y-4">
-        <h3 className="font-semibold text-foreground flex items-center gap-2">
-          <ClipboardList className="w-4 h-4 text-primary" />
-          Mark Attendance
-        </h3>
-
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <label className="text-sm text-muted-foreground mb-1 block">Select Student</label>
-          <Select value={selectedBookingIndex} onValueChange={setSelectedBookingIndex}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a booking..." />
-            </SelectTrigger>
-            <SelectContent>
-              {bookings.map((booking: any, index: number) => (
-                <SelectItem key={index} value={String(index)}>
-                  {booking.name} — {booking.service}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <h2
+            className="text-xl font-bold"
+            style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+          >
+            Attendance Manager
+          </h2>
+          <p className="text-sm mt-1" style={{ color: 'oklch(0.55 0.03 240)' }}>
+            Mark and track student attendance
+          </p>
         </div>
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'oklch(0.60 0.03 240)' }} />
+          <input
+            type="text"
+            placeholder="Search students..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 pr-4 py-2.5 rounded-lg text-sm w-64"
+            style={{
+              border: '1px solid oklch(0.88 0.015 240)',
+              background: 'white',
+              color: 'var(--navy)',
+              outline: 'none',
+            }}
+            onFocus={(e) => { e.target.style.borderColor = 'var(--gold)'; }}
+            onBlur={(e) => { e.target.style.borderColor = 'oklch(0.88 0.015 240)'; }}
+          />
+        </div>
+      </div>
 
-        {selectedBooking && (
-          <div className="space-y-3">
-            <div className="bg-muted/30 rounded-lg p-3 text-sm space-y-1">
-              <p>
-                <span className="text-muted-foreground">Student: </span>
-                <span className="font-medium">{(selectedBooking as any).name}</span>
-              </p>
-              <p>
-                <span className="text-muted-foreground">Course: </span>
-                <span>{(selectedBooking as any).service}</span>
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={() => handleMarkAttendance(true)}
-                disabled={markAttendanceMutation.isPending}
-                className="gap-1 flex-1"
-              >
-                <CheckCircle className="w-3.5 h-3.5" />
-                Present
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => handleMarkAttendance(false)}
-                disabled={markAttendanceMutation.isPending}
-                className="gap-1 flex-1"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-                Absent
-              </Button>
-            </div>
+      <div
+        className="rounded-xl bg-white overflow-hidden"
+        style={{ boxShadow: 'var(--shadow-md)', border: '1px solid oklch(0.90 0.01 240)' }}
+      >
+        {bookingsLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 size={24} className="animate-spin" style={{ color: 'var(--gold)' }} />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <Calendar size={40} className="mx-auto mb-3" style={{ color: 'oklch(0.75 0.02 240)' }} />
+            <p className="font-medium" style={{ color: 'var(--navy)' }}>No students found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr style={{ background: 'var(--cream)', borderBottom: '1px solid oklch(0.90 0.01 240)' }}>
+                  {['Student', 'Service', 'Date', 'Actions'].map((h) => (
+                    <th
+                      key={h}
+                      className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wider"
+                      style={{ color: 'oklch(0.50 0.03 240)' }}
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((booking: any, i: number) => {
+                  const key = `${booking.phone}-${booking.date}`;
+                  const isMarkingThis = marking === key;
+                  return (
+                    <tr
+                      key={i}
+                      style={{ borderBottom: '1px solid oklch(0.93 0.01 240)' }}
+                    >
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                            style={{ background: 'oklch(0.22 0.07 255 / 0.1)', color: 'var(--navy)' }}
+                          >
+                            {booking.name?.[0]?.toUpperCase() || '?'}
+                          </div>
+                          <div>
+                            <span className="font-medium text-sm block" style={{ color: 'var(--navy)' }}>
+                              {booking.name}
+                            </span>
+                            <span className="text-xs" style={{ color: 'oklch(0.55 0.03 240)' }}>
+                              {booking.date}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-sm" style={{ color: 'oklch(0.45 0.03 240)' }}>
+                        {booking.service}
+                      </td>
+                      <td className="px-5 py-4 text-sm" style={{ color: 'oklch(0.45 0.03 240)' }}>
+                        {booking.date}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleMark(booking, true)}
+                            disabled={isMarkingThis}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
+                            style={{
+                              background: 'oklch(0.55 0.15 145 / 0.1)',
+                              color: 'oklch(0.40 0.15 145)',
+                              border: '1px solid oklch(0.55 0.15 145 / 0.3)',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'oklch(0.55 0.15 145 / 0.2)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'oklch(0.55 0.15 145 / 0.1)'; }}
+                          >
+                            {isMarkingThis ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle size={12} />}
+                            Present
+                          </button>
+                          <button
+                            onClick={() => handleMark(booking, false)}
+                            disabled={isMarkingThis}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
+                            style={{
+                              background: 'oklch(0.55 0.22 25 / 0.1)',
+                              color: 'oklch(0.45 0.20 25)',
+                              border: '1px solid oklch(0.55 0.22 25 / 0.3)',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = 'oklch(0.55 0.22 25 / 0.2)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'oklch(0.55 0.22 25 / 0.1)'; }}
+                          >
+                            <XCircle size={12} />
+                            Absent
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
-
-      {/* Attendance Records */}
-      {attendanceRecords.length > 0 && (
-        <div className="bg-card rounded-xl border border-border p-4 space-y-3">
-          <h3 className="font-semibold text-foreground">Recent Attendance (30 days)</h3>
-          <div className="space-y-2">
-            {attendanceRecords.map((record: any, index: number) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 rounded-lg bg-muted/30"
-              >
-                <span className="text-sm text-foreground">
-                  {new Date(Number(record.sessionDate) / 1_000_000).toLocaleDateString()}
-                </span>
-                <Badge variant={record.isPresent ? 'default' : 'destructive'}>
-                  {record.isPresent ? 'Present' : 'Absent'}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default AttendanceManager;

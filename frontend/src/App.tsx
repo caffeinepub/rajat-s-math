@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useActor } from './hooks/useActor';
-import { Header } from './components/Header';
-import { Hero } from './components/Hero';
-import { Services } from './components/Services';
-import { EnrollmentCTA } from './components/EnrollmentCTA';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import Services from './components/Services';
+import EnrollmentCTA from './components/EnrollmentCTA';
 import { Footer } from './components/Footer';
 import { ProfileSetup } from './components/ProfileSetup';
 import AdminDashboard from './components/AdminDashboard';
@@ -23,8 +23,12 @@ type View =
   | 'admin'
   | 'student-portal'
   | 'student-dashboard'
+  | 'dashboard'
   | 'completed-sessions'
+  | 'sessions'
+  | 'courses'
   | 'enquiry-portal'
+  | 'enquiry'
   | 'enquiry-form'
   | 'qr-checkin';
 
@@ -76,37 +80,61 @@ export default function App() {
   const showProfileSetup =
     isAuthenticated && !profileLoading && profileFetched && userProfile === null;
 
-  const navigateTo = (view: View) => {
-    setCurrentView(view);
+  const navigateTo = (view: string) => {
+    // Map navigation aliases
+    const viewMap: Record<string, View> = {
+      home: 'home',
+      admin: 'admin',
+      'student-portal': 'student-portal',
+      'student-dashboard': 'student-dashboard',
+      dashboard: 'dashboard',
+      'completed-sessions': 'completed-sessions',
+      sessions: 'completed-sessions',
+      courses: 'home',
+      'enquiry-portal': 'enquiry-portal',
+      enquiry: 'enquiry-form',
+      'enquiry-form': 'enquiry-form',
+      'qr-checkin': 'qr-checkin',
+    };
+    const mapped = (viewMap[view] ?? 'home') as View;
+    setCurrentView(mapped);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // If navigating to courses, scroll to services section
+    if (view === 'courses') {
+      setTimeout(() => {
+        document.getElementById('courses')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
   };
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-muted-foreground text-sm">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--cream)' }}>
+        <div className="text-center space-y-4">
+          <div
+            className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin mx-auto"
+            style={{ borderColor: 'var(--gold)', borderTopColor: 'transparent' }}
+          />
+          <p className="text-sm font-medium" style={{ color: 'oklch(0.55 0.03 240)' }}>
+            Loading...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--cream)' }}>
       <Toaster />
       <Header onNavigate={navigateTo} currentView={currentView} />
 
       {showProfileSetup && <ProfileSetup />}
 
-      <main className="flex-1">
+      <main className="flex-1 pt-16 lg:pt-20">
         {currentView === 'home' && (
           <>
-            <Hero
-              onNavigate={navigateTo}
-              isAuthenticated={isAuthenticated}
-              isAdmin={isAdmin}
-            />
+            <Hero onNavigate={navigateTo} />
             <Services />
             <EnrollmentCTA />
           </>
@@ -119,15 +147,15 @@ export default function App() {
         {currentView === 'admin' && isAuthenticated && adminCheckDone && !isAdmin && (
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-2">
-              <p className="text-xl font-semibold text-foreground">Access Denied</p>
-              <p className="text-muted-foreground">You do not have admin privileges.</p>
+              <p className="text-xl font-semibold" style={{ color: 'var(--navy)' }}>Access Denied</p>
+              <p style={{ color: 'oklch(0.55 0.03 240)' }}>You do not have admin privileges.</p>
             </div>
           </div>
         )}
 
         {currentView === 'student-portal' && <StudentPortal />}
 
-        {currentView === 'student-dashboard' && (
+        {(currentView === 'student-dashboard' || currentView === 'dashboard') && (
           <StudentDashboard />
         )}
 
@@ -146,7 +174,7 @@ export default function App() {
         )}
       </main>
 
-      <Footer />
+      <Footer onNavigate={navigateTo} />
     </div>
   );
 }

@@ -1,224 +1,211 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, Menu, X, LayoutDashboard, BookOpen, Calendar, MessageSquare, QrCode } from 'lucide-react';
+import { LoginButton } from './LoginButton';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useQueryClient } from '@tanstack/react-query';
 import { useIsAdmin } from '../hooks/useQueries';
-import { Button } from './ui/button';
-import { LogIn, LogOut, Loader2, GraduationCap, Menu, X, LayoutDashboard, Home, BookOpen, CheckSquare, FileQuestion, QrCode } from 'lucide-react';
-
-type View = 'home' | 'admin' | 'student-portal' | 'completed-sessions' | 'enquiry-form' | 'enquiry-portal' | 'qr-checkin';
 
 interface HeaderProps {
-  onNavigate?: (view: View) => void;
-  currentView?: string;
+  currentView: string;
+  onNavigate: (view: string) => void;
 }
 
-export function Header({ onNavigate, currentView }: HeaderProps) {
-  const { login, clear, loginStatus, identity } = useInternetIdentity();
-  const queryClient = useQueryClient();
-  const { data: isAdmin } = useIsAdmin();
-  const isAuthenticated = !!identity;
-  const isLoggingIn = loginStatus === 'logging-in';
+const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [logoError, setLogoError] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { identity } = useInternetIdentity();
+  const { data: isAdmin } = useIsAdmin();
 
-  const handleLogin = async () => {
-    try {
-      await login();
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.message === 'User is already authenticated') {
-        await clear();
-        setTimeout(() => login(), 300);
-      }
-    }
-  };
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const handleLogout = async () => {
-    await clear();
-    queryClient.clear();
-    onNavigate?.('home');
-  };
-
-  const navLinks: { label: string; view: View; scrollTo?: string; icon?: React.ReactNode }[] = [
-    { label: 'Home', view: 'home', icon: <Home className="w-3.5 h-3.5" /> },
-    { label: 'Courses', view: 'home', scrollTo: 'services', icon: <BookOpen className="w-3.5 h-3.5" /> },
-    { label: 'Sessions', view: 'completed-sessions', icon: <CheckSquare className="w-3.5 h-3.5" /> },
-    { label: 'Enquiry', view: 'enquiry-form', icon: <FileQuestion className="w-3.5 h-3.5" /> },
-    { label: 'Student Portal', view: 'student-portal', icon: <GraduationCap className="w-3.5 h-3.5" /> },
+  const navLinks = [
+    { id: 'home', label: 'Home' },
+    { id: 'courses', label: 'Courses' },
+    { id: 'sessions', label: 'Sessions' },
+    { id: 'enquiry', label: 'Enquiry' },
+    { id: 'student-portal', label: 'Student Portal', icon: GraduationCap },
   ];
 
-  const handleNavClick = (view: View, scrollTo?: string) => {
+  const handleNav = (view: string) => {
+    onNavigate(view);
     setMobileMenuOpen(false);
-    if (scrollTo) {
-      onNavigate?.('home');
-      setTimeout(() => {
-        document.getElementById(scrollTo)?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      onNavigate?.(view);
-    }
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-navy/97 backdrop-blur-sm border-b border-gold/20 shadow-md">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'shadow-md' : ''
+      }`}
+      style={{ background: 'white', borderBottom: '1px solid oklch(0.92 0.01 240)' }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-
-          {/* Logo — always on the far left */}
+        <div className="flex items-center justify-between h-16 lg:h-20">
+          {/* Logo */}
           <button
-            onClick={() => handleNavClick('home')}
-            className="flex items-center gap-2.5 group flex-shrink-0 mr-4"
-            aria-label="Go to home"
+            onClick={() => handleNav('home')}
+            className="flex items-center gap-3 group flex-shrink-0"
           >
-            {!logoError ? (
+            <div
+              className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0"
+              style={{ border: '1px solid oklch(0.90 0.01 240)' }}
+            >
               <img
                 src="/assets/rajat's equation logo.jpg"
-                alt="Rajat's Equation Logo"
-                className="h-11 w-auto object-contain rounded"
-                onError={() => setLogoError(true)}
+                alt="Rajat's Equation"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.style.background = 'var(--navy)';
+                    parent.style.display = 'flex';
+                    parent.style.alignItems = 'center';
+                    parent.style.justifyContent = 'center';
+                    parent.innerHTML = '<span style="color:var(--gold);font-family:Playfair Display,serif;font-weight:700;font-size:18px">R</span>';
+                  }
+                }}
               />
-            ) : (
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-gold flex items-center justify-center flex-shrink-0">
-                  <span className="text-navy font-bold text-lg leading-none" style={{ fontFamily: 'Playfair Display, serif' }}>R</span>
-                </div>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-cream font-bold text-sm tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>Rajat's</span>
-                  <span className="text-gold font-bold text-sm tracking-wide" style={{ fontFamily: 'Playfair Display, serif' }}>Equation</span>
-                </div>
-              </div>
-            )}
+            </div>
+            <div className="hidden sm:block">
+              <span
+                className="text-lg font-bold leading-tight block"
+                style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+              >
+                Rajat's Equation
+              </span>
+              <span className="text-xs font-medium" style={{ color: 'var(--gold)' }}>
+                Mathematics Platform
+              </span>
+            </div>
           </button>
 
-          {/* Desktop Nav — right-aligned */}
-          <nav className="hidden md:flex items-center gap-0.5 ml-auto">
-            {navLinks.map((link) => (
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = currentView === link.id;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => handleNav(link.id)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                  style={{
+                    background: isActive ? 'var(--navy)' : 'transparent',
+                    color: isActive ? 'white' : 'oklch(0.40 0.03 240)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'oklch(0.95 0.01 240)';
+                      e.currentTarget.style.color = 'var(--navy)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.color = 'oklch(0.40 0.03 240)';
+                    }
+                  }}
+                >
+                  {Icon && <Icon size={14} />}
+                  {link.label}
+                </button>
+              );
+            })}
+            {isAdmin && (
               <button
-                key={link.label}
-                onClick={() => handleNavClick(link.view, link.scrollTo)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  currentView === link.view && !link.scrollTo
-                    ? 'text-gold bg-gold/10'
-                    : 'text-cream/70 hover:text-cream hover:bg-cream/10'
-                }`}
+                onClick={() => handleNav('admin')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+                style={{
+                  background: currentView === 'admin' ? 'var(--gold)' : 'transparent',
+                  color: currentView === 'admin' ? 'var(--navy)' : 'oklch(0.40 0.03 240)',
+                }}
+                onMouseEnter={(e) => {
+                  if (currentView !== 'admin') {
+                    e.currentTarget.style.background = 'oklch(0.95 0.01 240)';
+                    e.currentTarget.style.color = 'var(--navy)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (currentView !== 'admin') {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'oklch(0.40 0.03 240)';
+                  }
+                }}
               >
-                {link.icon}
-                {link.label}
-              </button>
-            ))}
-
-            {/* Admin Dashboard link — only for admin */}
-            {isAuthenticated && isAdmin === true && (
-              <button
-                onClick={() => handleNavClick('admin')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition-colors border ml-1 ${
-                  currentView === 'admin'
-                    ? 'text-navy bg-gold border-gold'
-                    : 'text-gold bg-gold/15 border-gold/40 hover:bg-gold/25 hover:border-gold hover:text-gold'
-                }`}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
+                <LayoutDashboard size={14} />
                 Admin
               </button>
             )}
-
-            {/* Auth Button */}
-            <div className="ml-2 pl-2 border-l border-gold/20">
-              {isAuthenticated ? (
-                <Button
-                  onClick={handleLogout}
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-sm border border-red-500"
-                >
-                  <LogOut className="w-4 h-4 mr-1.5" />
-                  Logout
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleLogin}
-                  disabled={isLoggingIn}
-                  size="sm"
-                  className="bg-gold hover:bg-gold/90 text-navy font-semibold border border-gold/60"
-                >
-                  {isLoggingIn ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-                  ) : (
-                    <LogIn className="w-4 h-4 mr-1.5" />
-                  )}
-                  {isLoggingIn ? 'Logging in...' : 'Login'}
-                </Button>
-              )}
-            </div>
           </nav>
 
-          {/* Mobile: Auth Button + Hamburger */}
-          <div className="flex md:hidden items-center gap-2 ml-auto">
-            {isAuthenticated ? (
-              <Button
-                onClick={handleLogout}
-                size="sm"
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-sm border border-red-500 text-xs px-2"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleLogin}
-                disabled={isLoggingIn}
-                size="sm"
-                className="bg-gold hover:bg-gold/90 text-navy font-semibold border border-gold/60 text-xs px-2"
-              >
-                {isLoggingIn ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <LogIn className="w-3.5 h-3.5" />
-                )}
-              </Button>
-            )}
-            <button
-              className="text-cream hover:text-gold transition-colors p-1"
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+          {/* Right side */}
+          <div className="hidden lg:flex items-center gap-3">
+            <LoginButton />
           </div>
+
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 rounded-lg transition-colors"
+            style={{ color: 'oklch(0.40 0.03 240)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'oklch(0.95 0.01 240)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
+      </div>
 
-        {/* Mobile Menu Dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gold/20 py-3 space-y-1">
-            {navLinks.map((link) => (
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden border-t"
+          style={{ background: 'white', borderColor: 'oklch(0.92 0.01 240)' }}
+        >
+          <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = currentView === link.id;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => handleNav(link.id)}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left"
+                  style={{
+                    background: isActive ? 'var(--navy)' : 'transparent',
+                    color: isActive ? 'white' : 'oklch(0.40 0.03 240)',
+                  }}
+                >
+                  {Icon && <Icon size={16} />}
+                  {link.label}
+                </button>
+              );
+            })}
+            {isAdmin && (
               <button
-                key={link.label}
-                onClick={() => handleNavClick(link.view, link.scrollTo)}
-                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  currentView === link.view && !link.scrollTo
-                    ? 'text-gold bg-gold/10'
-                    : 'text-cream/70 hover:text-cream hover:bg-cream/10'
-                }`}
+                onClick={() => handleNav('admin')}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 text-left"
+                style={{
+                  background: currentView === 'admin' ? 'var(--gold)' : 'transparent',
+                  color: currentView === 'admin' ? 'var(--navy)' : 'oklch(0.40 0.03 240)',
+                }}
               >
-                {link.icon}
-                {link.label}
-              </button>
-            ))}
-
-            {isAuthenticated && isAdmin === true && (
-              <button
-                onClick={() => handleNavClick('admin')}
-                className={`flex items-center gap-2 w-full px-3 py-2.5 rounded-md text-sm font-semibold transition-colors ${
-                  currentView === 'admin'
-                    ? 'text-navy bg-gold'
-                    : 'text-gold bg-gold/10 hover:bg-gold/20'
-                }`}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
+                <LayoutDashboard size={16} />
                 Admin Dashboard
               </button>
             )}
+            <div className="pt-3 border-t" style={{ borderColor: 'oklch(0.92 0.01 240)' }}>
+              <LoginButton />
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </header>
   );
-}
+};
+
+export default Header;

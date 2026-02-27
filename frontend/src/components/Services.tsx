@@ -1,218 +1,327 @@
-import { useState } from 'react';
-import { MessageCircle, CreditCard, Users, User, FileText, BookOpen } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { AuthGate } from './AuthGate';
-import { BookingFlowManager } from './BookingFlowManager';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import React, { useState } from 'react';
+import { BookOpen, Users, Clock, Star, ArrowRight, MessageCircle, CreditCard, CheckCircle, Award, Trophy } from 'lucide-react';
+import BookingFlowManager from './BookingFlowManager';
 import PaymentEnquiryForm from './PaymentEnquiryForm';
+import StudentEnquiryForm from './StudentEnquiryForm';
 
-const WA_NUMBER = '919424135055';
-
-function buildWhatsAppLink(courseName: string) {
-  const msg = encodeURIComponent(`Hi, I want to book a demo for ${courseName}`);
-  return `https://wa.me/${WA_NUMBER}?text=${msg}`;
-}
-
-interface Course {
+interface Service {
+  id: string;
   title: string;
-  subtitle?: string;
-  groupPrice: string;
-  oneToOnePrice: string;
+  subtitle: string;
+  description: string;
+  price: string;
+  priceNote: string;
+  features: string[];
+  icon: React.ElementType;
+  highlight?: boolean;
   badge?: string;
 }
 
-const courses: Course[] = [
+const services: Service[] = [
   {
-    title: 'Class 10 Boards Full Prep',
-    subtitle: 'Any Board – Online',
-    groupPrice: '₹250/hour',
-    oneToOnePrice: '₹350/hour',
-    badge: 'Class 10',
+    id: 'jee-mains',
+    title: 'JEE Mains',
+    subtitle: 'Engineering Entrance',
+    description: 'Comprehensive preparation for JEE Mains with focused problem-solving techniques and exam strategies.',
+    price: '₹800',
+    priceNote: 'per session',
+    features: ['Full syllabus coverage', 'Mock tests & analysis', 'Doubt clearing sessions', 'Study materials included'],
+    icon: Star,
+    badge: 'Popular',
+    highlight: true,
   },
   {
-    title: 'Class 12 Boards Full Prep',
-    subtitle: 'Online',
-    groupPrice: '₹300/hour',
-    oneToOnePrice: '₹400/hour',
-    badge: 'Class 12',
+    id: 'jee-advanced',
+    title: 'JEE Advanced',
+    subtitle: 'IIT Preparation',
+    description: 'Advanced-level coaching for IIT aspirants with deep conceptual understanding and complex problem solving.',
+    price: '₹1000',
+    priceNote: 'per session',
+    features: ['Advanced problem sets', 'IIT-level concepts', 'Previous year papers', 'Personalized feedback'],
+    icon: Award,
+    badge: 'Premium',
   },
   {
-    title: 'JEE Foundation',
-    subtitle: 'Online',
-    groupPrice: '₹350/hour',
-    oneToOnePrice: '₹450/hour',
-    badge: 'JEE',
+    id: 'boards',
+    title: 'Board Exams',
+    subtitle: 'Class 10 & 12',
+    description: 'Targeted preparation for CBSE/ICSE board examinations with chapter-wise practice and revision.',
+    price: '₹600',
+    priceNote: 'per session',
+    features: ['Chapter-wise practice', 'NCERT solutions', 'Sample papers', 'Exam tips & tricks'],
+    icon: BookOpen,
   },
   {
-    title: 'JEE Full Course Prep',
-    subtitle: 'Online',
-    groupPrice: '₹400/hour',
-    oneToOnePrice: '₹500/hour',
-    badge: 'JEE',
+    id: 'foundation',
+    title: 'Foundation Course',
+    subtitle: 'Class 8-10',
+    description: 'Build strong mathematical foundations for future competitive exams with conceptual clarity.',
+    price: '₹500',
+    priceNote: 'per session',
+    features: ['Concept building', 'Regular assessments', 'Interactive learning', 'Progress reports'],
+    icon: Users,
   },
   {
-    title: 'IOQM / NMTC / Other Olympiads Prep',
-    subtitle: 'Online',
-    groupPrice: '₹400/hour',
-    oneToOnePrice: '₹500/hour',
-    badge: 'Olympiad',
+    id: 'olympiad',
+    title: 'Math Olympiad',
+    subtitle: 'Competition Prep',
+    description: 'Specialized training for national and international mathematics olympiads and competitions.',
+    price: '₹1200',
+    priceNote: 'per session',
+    features: ['Olympiad strategies', 'Creative problem solving', 'Competition practice', 'Expert guidance'],
+    icon: Trophy,
   },
   {
-    title: 'How to Think in Math',
-    subtitle: 'Full Course – 3 Months',
-    groupPrice: '₹1,999 for 3 months',
-    oneToOnePrice: '₹300/hour',
-    badge: '3-Month Course',
+    id: 'crash-course',
+    title: 'Crash Course',
+    subtitle: 'Intensive Revision',
+    description: 'Intensive short-term revision program for students appearing in upcoming examinations.',
+    price: '₹700',
+    priceNote: 'per session',
+    features: ['Quick revision', 'High-yield topics', 'Formula sheets', 'Last-minute tips'],
+    icon: Clock,
   },
 ];
 
-export function Services() {
+const Services: React.FC = () => {
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<string | undefined>();
-  const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const [paymentEnquiryOpen, setPaymentEnquiryOpen] = useState(false);
+  const [studentEnquiryOpen, setStudentEnquiryOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<string>('');
 
-  const openBooking = (serviceName: string) => {
-    setSelectedService(serviceName);
+  const handleBookSession = (serviceId: string) => {
+    setSelectedService(serviceId);
     setBookingOpen(true);
   };
 
   return (
-    <section id="services" className="scroll-mt-8 py-20 bg-gradient-to-br from-cream to-warm-light">
-      <div className="container mx-auto px-4">
+    <section id="courses" className="py-24 px-4" style={{ background: 'var(--cream)' }}>
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-navy mb-4 font-serif">
-            Courses &amp; Pricing
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
+            style={{
+              background: 'oklch(0.72 0.12 75 / 0.12)',
+              border: '1px solid oklch(0.72 0.12 75 / 0.25)',
+              color: 'oklch(0.55 0.14 75)',
+            }}
+          >
+            <BookOpen size={14} />
+            Our Courses &amp; Pricing
+          </div>
+          <h2
+            className="text-4xl lg:text-5xl font-bold mb-4"
+            style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+          >
+            Choose Your Learning Path
           </h2>
-          <p className="text-lg md:text-xl text-warm-text max-w-2xl mx-auto">
-            All courses are in <strong>Mathematics</strong>. Choose the format that suits you best — group classes or personalised one-to-one sessions.
+          <p className="text-lg max-w-2xl mx-auto" style={{ color: 'oklch(0.45 0.03 240)' }}>
+            Tailored mathematics programs designed to help you achieve your academic goals with expert guidance.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {courses.map((course, index) => (
-            <Card
-              key={index}
-              className="border-2 border-border-warm hover:border-navy transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-white flex flex-col"
-            >
-              <CardHeader className="pb-3">
-                {course.badge && (
-                  <span className="inline-block self-start mb-3 px-3 py-1 rounded-full text-xs font-bold bg-gold/20 text-gold-dark border border-gold/40 tracking-wide uppercase">
-                    {course.badge}
-                  </span>
-                )}
-                <CardTitle className="text-xl font-bold text-navy leading-snug">
-                  {course.title}
-                </CardTitle>
-                {course.subtitle && (
-                  <p className="text-sm text-warm-text mt-1">{course.subtitle}</p>
-                )}
-              </CardHeader>
-
-              <CardContent className="flex flex-col flex-1 gap-4">
-                {/* Pricing */}
-                <div className="rounded-xl overflow-hidden border border-border-warm">
-                  <div className="flex items-center gap-3 px-4 py-3 bg-navy/5 border-b border-border-warm">
-                    <Users className="w-4 h-4 text-navy shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-navy/70 uppercase tracking-wide">Group Class – Online</p>
-                      <p className="text-lg font-bold text-navy">{course.groupPrice}</p>
-                    </div>
+        {/* Service Cards Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {services.map((service) => {
+            const Icon = service.icon;
+            return (
+              <div
+                key={service.id}
+                className="relative rounded-2xl bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  boxShadow: service.highlight ? 'var(--shadow-gold)' : 'var(--shadow-md)',
+                  border: service.highlight ? '2px solid var(--gold)' : '1px solid oklch(0.88 0.015 240)',
+                }}
+              >
+                {/* Badge */}
+                {service.badge && (
+                  <div
+                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold"
+                    style={{
+                      background: service.highlight ? 'var(--gold)' : 'var(--navy)',
+                      color: service.highlight ? 'var(--navy)' : 'white',
+                    }}
+                  >
+                    {service.badge}
                   </div>
-                  <div className="flex items-center gap-3 px-4 py-3 bg-gold/5">
-                    <User className="w-4 h-4 text-gold-dark shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-gold-dark/80 uppercase tracking-wide">One-to-One Class</p>
-                      <p className="text-lg font-bold text-gold-dark">{course.oneToOnePrice}</p>
-                    </div>
+                )}
+
+                <div className="p-8">
+                  {/* Icon */}
+                  <div
+                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-6"
+                    style={{
+                      background: service.highlight ? 'var(--gold)' : 'oklch(0.22 0.07 255 / 0.08)',
+                    }}
+                  >
+                    <Icon
+                      size={24}
+                      style={{ color: service.highlight ? 'var(--navy)' : 'var(--navy)' }}
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3
+                    className="text-xl font-bold mb-1"
+                    style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+                  >
+                    {service.title}
+                  </h3>
+                  <p className="text-sm font-medium mb-3" style={{ color: 'var(--gold)' }}>
+                    {service.subtitle}
+                  </p>
+                  <p className="text-sm leading-relaxed mb-6" style={{ color: 'oklch(0.45 0.03 240)' }}>
+                    {service.description}
+                  </p>
+
+                  {/* Features */}
+                  <ul className="space-y-2 mb-6">
+                    {service.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm" style={{ color: 'oklch(0.40 0.03 240)' }}>
+                        <CheckCircle size={14} style={{ color: 'var(--gold)', flexShrink: 0 }} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Price */}
+                  <div
+                    className="flex items-baseline gap-2 mb-6 pb-6 border-b"
+                    style={{ borderColor: 'oklch(0.92 0.01 240)' }}
+                  >
+                    <span
+                      className="text-3xl font-bold"
+                      style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+                    >
+                      {service.price}
+                    </span>
+                    <span className="text-sm" style={{ color: 'oklch(0.55 0.03 240)' }}>
+                      {service.priceNote}
+                    </span>
+                  </div>
+
+                  {/* Primary CTA */}
+                  <button
+                    onClick={() => handleBookSession(service.id)}
+                    className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 mb-3"
+                    style={{
+                      background: 'var(--navy)',
+                      color: 'white',
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'var(--navy-light)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'var(--navy)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    <BookOpen size={16} />
+                    Book a Session
+                    <ArrowRight size={14} />
+                  </button>
+
+                  {/* Secondary CTAs */}
+                  <div className="flex gap-2">
+                    <a
+                      href="https://wa.me/919424135055"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg text-xs font-semibold transition-all duration-200"
+                      style={{
+                        border: '1px solid oklch(0.88 0.015 240)',
+                        color: 'oklch(0.40 0.03 240)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'oklch(0.95 0.01 240)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <MessageCircle size={12} />
+                      WhatsApp
+                    </a>
+                    <button
+                      onClick={() => setPaymentEnquiryOpen(true)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg text-xs font-semibold transition-all duration-200"
+                      style={{
+                        border: '1px solid var(--gold)',
+                        color: 'oklch(0.55 0.14 75)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'oklch(0.72 0.12 75 / 0.08)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                      }}
+                    >
+                      <CreditCard size={12} />
+                      Pay Now
+                    </button>
                   </div>
                 </div>
-
-                {/* Book a Session — Primary CTA, clearly visible */}
-                <div className="mt-auto pt-2">
-                  <AuthGate onAction={() => openBooking(course.title)}>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3.5 rounded-lg bg-navy hover:bg-navy/90 text-cream font-bold transition-colors shadow-lg text-base border-2 border-navy hover:border-navy/90"
-                    >
-                      <BookOpen className="w-5 h-5" />
-                      Book a Session
-                    </button>
-                  </AuthGate>
-                </div>
-
-                {/* Secondary Action Buttons */}
-                <div className="flex flex-col gap-2">
-                  <AuthGate onAction={() => window.open(buildWhatsAppLink(course.title), '_blank', 'noopener,noreferrer')}>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-[oklch(0.45_0.15_145)] hover:bg-[oklch(0.40_0.15_145)] text-white font-semibold transition-colors shadow-md text-sm"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      📲 Book Demo on WhatsApp
-                    </button>
-                  </AuthGate>
-                  <AuthGate onAction={() => openBooking(course.title)}>
-                    <button
-                      type="button"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-gold hover:bg-gold-dark text-white font-semibold transition-colors shadow-md text-sm"
-                    >
-                      <CreditCard className="w-4 h-4" />
-                      💳 Book &amp; Pay Now
-                    </button>
-                  </AuthGate>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
-        <p className="text-center text-sm text-warm-text mt-10 opacity-70">
-          Secure payments via UPI — Google Pay, PhonePe, Paytm &amp; all UPI apps
-        </p>
-
         {/* Payment Enquiry CTA */}
-        <div className="mt-12 max-w-2xl mx-auto">
-          <div className="rounded-2xl border-2 border-navy/20 bg-white shadow-lg p-8 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="w-14 h-14 rounded-full bg-navy/10 flex items-center justify-center">
-                <FileText className="w-7 h-7 text-navy" />
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-navy font-serif mb-2">Payment Enquiry</h3>
-            <p className="text-warm-text mb-6 text-sm leading-relaxed">
-              Have a question about your fee payment? Submit a payment enquiry with your details and the duration you're paying for — our team will get back to you promptly.
-            </p>
+        <div
+          className="rounded-2xl p-10 text-center"
+          style={{
+            background: 'linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%)',
+            boxShadow: 'var(--shadow-lg)',
+          }}
+        >
+          <h3
+            className="text-3xl font-bold text-white mb-3"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Have a Payment Query?
+          </h3>
+          <p className="text-lg mb-8" style={{ color: 'oklch(0.80 0.02 240)' }}>
+            Submit a payment enquiry and we'll get back to you within 24 hours.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
             <button
-              type="button"
-              onClick={() => setEnquiryOpen(true)}
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-navy text-cream font-semibold hover:bg-navy/90 transition-colors shadow-md"
+              onClick={() => setPaymentEnquiryOpen(true)}
+              className="btn-gold px-8 py-4 rounded-xl text-base"
             >
-              <FileText className="w-4 h-4" />
+              <CreditCard size={18} />
               Submit Payment Enquiry
+            </button>
+            <button
+              onClick={() => setStudentEnquiryOpen(true)}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-base font-semibold transition-all duration-200"
+              style={{
+                border: '2px solid oklch(1 0 0 / 0.3)',
+                color: 'white',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--gold)';
+                e.currentTarget.style.color = 'var(--gold)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'oklch(1 0 0 / 0.3)';
+                e.currentTarget.style.color = 'white';
+              }}
+            >
+              <MessageCircle size={18} />
+              General Enquiry
             </button>
           </div>
         </div>
       </div>
 
-      {/* Booking flow modal */}
-      <BookingFlowManager
-        open={bookingOpen}
-        onClose={() => setBookingOpen(false)}
-        preSelectedService={selectedService}
-      />
-
-      {/* Payment Enquiry Dialog */}
-      <Dialog open={enquiryOpen} onOpenChange={setEnquiryOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-serif text-xl">Payment Enquiry Form</DialogTitle>
-            <DialogDescription>
-              Fill in your details and the payment duration. No login required.
-            </DialogDescription>
-          </DialogHeader>
-          <PaymentEnquiryForm onClose={() => setEnquiryOpen(false)} />
-        </DialogContent>
-      </Dialog>
+      <BookingFlowManager open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      {paymentEnquiryOpen && <PaymentEnquiryForm onClose={() => setPaymentEnquiryOpen(false)} />}
+      {studentEnquiryOpen && <StudentEnquiryForm onBack={() => setStudentEnquiryOpen(false)} />}
     </section>
   );
-}
+};
+
+export default Services;

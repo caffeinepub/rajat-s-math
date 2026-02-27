@@ -1,146 +1,234 @@
-import { useState } from 'react';
-import { CheckCircle2, Award, Users, TrendingUp, ArrowRight } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
-import { AuthGate } from './AuthGate';
-import { BookingFlowManager } from './BookingFlowManager';
+import React, { useState } from 'react';
+import { CheckCircle, BookOpen, MessageCircle, Youtube, ArrowRight, Zap, Shield, Clock } from 'lucide-react';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import BookingFlowManager from './BookingFlowManager';
+import { LoginModal } from './LoginModal';
 
-export function EnrollmentCTA() {
+const EnrollmentCTA: React.FC = () => {
+  const { identity } = useInternetIdentity();
   const [bookingOpen, setBookingOpen] = useState(false);
-
-  const handleWhatsApp = () => {
-    window.open('https://wa.me/919424135055', '_blank', 'noopener,noreferrer');
-  };
-
-  const handleYouTube = () => {
-    window.open('https://www.youtube.com/channel/UCR9lkyJ3JIhlSx3_e06DTEw', '_blank', 'noopener,noreferrer');
-  };
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const isAuthenticated = !!identity;
 
   const benefits = [
     {
-      icon: Award,
-      title: 'Expert Instruction',
-      description: 'Learn from experienced educators dedicated to mathematical excellence'
+      icon: Zap,
+      title: 'Personalized Learning',
+      description: 'Customized study plans tailored to your learning pace and goals.',
     },
     {
-      icon: TrendingUp,
-      title: 'Proven Results',
-      description: 'Track record of success in competitive exams and academic achievement'
+      icon: Shield,
+      title: 'Expert Guidance',
+      description: '10+ years of teaching experience with proven results.',
     },
     {
-      icon: CheckCircle2,
-      title: 'Comprehensive Curriculum',
-      description: 'Complete coverage of all mathematical topics with depth and clarity'
+      icon: Clock,
+      title: 'Flexible Scheduling',
+      description: 'Book sessions at times that work best for your schedule.',
     },
     {
-      icon: Users,
-      title: 'Personalized Approach',
-      description: 'Individual attention and customized learning paths for every student'
-    }
+      icon: CheckCircle,
+      title: 'Guaranteed Progress',
+      description: 'Track your improvement with detailed progress analytics.',
+    },
   ];
 
-  return (
-    <section id="enrollment" className="scroll-mt-8 py-20 bg-gradient-to-br from-[oklch(0.96_0.02_140)] via-[oklch(0.98_0.01_80)] to-[oklch(0.95_0.03_40)]">
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[oklch(0.20_0.05_240)] text-white text-sm font-medium mb-6">
-              <Award className="w-4 h-4" />
-              <span>Transform Your Mathematical Journey</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-[oklch(0.20_0.05_240)] mb-6 font-serif">
-              Join Rajat's Equation Today
-            </h2>
-            <p className="text-lg md:text-xl text-[oklch(0.45_0.05_40)] max-w-3xl mx-auto leading-relaxed">
-              Give your child the gift of mathematical excellence. Our proven teaching methods have helped hundreds of students achieve their academic goals and develop a genuine love for mathematics.
-            </p>
-          </div>
+  const handleBooking = () => {
+    if (!isAuthenticated) {
+      setLoginModalOpen(true);
+    } else {
+      setBookingOpen(true);
+    }
+  };
 
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="border-2 border-[oklch(0.85_0.03_40)] bg-white shadow-md">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[oklch(0.20_0.05_240)] to-[oklch(0.30_0.08_240)] flex items-center justify-center flex-shrink-0">
-                      <benefit.icon className="w-6 h-6 text-white" />
+  return (
+    <section className="py-24 px-4 bg-white">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left: Benefits */}
+          <div>
+            <div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
+              style={{
+                background: 'oklch(0.72 0.12 75 / 0.12)',
+                border: '1px solid oklch(0.72 0.12 75 / 0.25)',
+                color: 'oklch(0.55 0.14 75)',
+              }}
+            >
+              <CheckCircle size={14} />
+              Why Choose Us
+            </div>
+
+            <h2
+              className="text-4xl lg:text-5xl font-bold mb-6"
+              style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+            >
+              Start Your Journey to
+              <span className="block italic" style={{ color: 'var(--gold)' }}>
+                Mathematical Excellence
+              </span>
+            </h2>
+
+            <p className="text-lg leading-relaxed mb-10" style={{ color: 'oklch(0.45 0.03 240)' }}>
+              Join hundreds of students who have transformed their mathematical abilities through our structured, personalized approach to learning.
+            </p>
+
+            <div className="grid sm:grid-cols-2 gap-6">
+              {benefits.map((benefit, i) => {
+                const Icon = benefit.icon;
+                return (
+                  <div
+                    key={i}
+                    className="flex gap-4 p-5 rounded-xl transition-all duration-200 hover:-translate-y-0.5"
+                    style={{
+                      background: 'var(--cream)',
+                      border: '1px solid oklch(0.90 0.015 240)',
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: 'oklch(0.22 0.07 255 / 0.08)' }}
+                    >
+                      <Icon size={18} style={{ color: 'var(--navy)' }} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-[oklch(0.25_0.06_240)] mb-2">
+                      <h4
+                        className="font-semibold mb-1 text-sm"
+                        style={{ fontFamily: "'Playfair Display', serif", color: 'var(--navy)' }}
+                      >
                         {benefit.title}
-                      </h3>
-                      <p className="text-[oklch(0.45_0.05_40)] leading-relaxed">
+                      </h4>
+                      <p className="text-xs leading-relaxed" style={{ color: 'oklch(0.50 0.03 240)' }}>
                         {benefit.description}
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="bg-gradient-to-br from-[oklch(0.20_0.05_240)] to-[oklch(0.30_0.08_240)] rounded-2xl p-8 md:p-12 text-center shadow-2xl">
-            <div className="flex justify-center mb-6">
-              <img
-                src="/assets/generated/trust-badge.dim_128x128.png"
-                alt="Trusted by students and parents"
-                className="w-20 h-20 object-contain"
-              />
+                );
+              })}
             </div>
-            <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 font-serif">
-              Ready to Excel in Mathematics?
-            </h3>
-            <p className="text-lg md:text-xl text-[oklch(0.95_0.02_240)] mb-8 max-w-2xl mx-auto">
-              Enroll now and start your journey towards mathematical mastery. Secure your spot in our comprehensive program designed for success.
-            </p>
-
-            {/* Book & Pay Now — auth gated */}
-            <AuthGate onAction={() => setBookingOpen(true)}>
-              <Button
-                size="lg"
-                className="text-lg px-10 py-7 bg-white text-[oklch(0.20_0.05_240)] hover:bg-[oklch(0.98_0.01_80)] shadow-xl font-bold"
-              >
-                Book &amp; Pay Now
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </AuthGate>
-            <p className="text-sm text-[oklch(0.90_0.02_240)] mt-6">
-              Secure payment via UPI — Google Pay, PhonePe, Paytm &amp; all UPI apps
-            </p>
           </div>
 
-          <div className="mt-12 text-center">
-            <p className="text-[oklch(0.45_0.05_40)] mb-4">
-              Have questions? We're here to help!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {/* WhatsApp — auth gated */}
-              <AuthGate onAction={handleWhatsApp}>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[oklch(0.45_0.15_145)] hover:bg-[oklch(0.40_0.15_145)] text-white rounded-lg transition-colors font-medium shadow-md"
+          {/* Right: CTA Card */}
+          <div>
+            <div
+              className="rounded-3xl overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%)',
+                boxShadow: 'var(--shadow-lg)',
+              }}
+            >
+              {/* Card header */}
+              <div className="p-8 pb-6 border-b" style={{ borderColor: 'oklch(1 0 0 / 0.1)' }}>
+                <h3
+                  className="text-3xl font-bold text-white mb-2"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
+                  Ready to Begin?
+                </h3>
+                <p style={{ color: 'oklch(0.75 0.02 240)' }}>
+                  Take the first step towards mastering mathematics today.
+                </p>
+              </div>
+
+              {/* Card body */}
+              <div className="p-8 space-y-4">
+                {/* What's included */}
+                <div className="space-y-3 mb-8">
+                  {[
+                    'Free initial consultation',
+                    'Customized learning plan',
+                    'Access to study materials',
+                    'Progress tracking dashboard',
+                    'WhatsApp support between sessions',
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'var(--gold)' }}
+                      >
+                        <span className="text-xs font-bold" style={{ color: 'var(--navy)' }}>✓</span>
+                      </div>
+                      <span className="text-sm" style={{ color: 'oklch(0.85 0.02 240)' }}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA Buttons */}
+                <button
+                  onClick={handleBooking}
+                  className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-semibold text-base transition-all duration-200"
+                  style={{
+                    background: 'var(--gold)',
+                    color: 'var(--navy)',
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--gold-dark)';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'var(--gold)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <BookOpen size={18} />
+                  Book Your First Session
+                  <ArrowRight size={16} />
+                </button>
+
+                <a
+                  href="https://wa.me/919424135055"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-semibold text-base transition-all duration-200"
+                  style={{
+                    border: '2px solid oklch(1 0 0 / 0.2)',
+                    color: 'white',
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--gold)';
+                    e.currentTarget.style.color = 'var(--gold)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'oklch(1 0 0 / 0.2)';
+                    e.currentTarget.style.color = 'white';
+                  }}
+                >
+                  <MessageCircle size={18} />
                   Chat on WhatsApp
-                </button>
-              </AuthGate>
-              {/* YouTube — auth gated */}
-              <AuthGate onAction={handleYouTube}>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[oklch(0.50_0.20_25)] hover:bg-[oklch(0.45_0.20_25)] text-white rounded-lg transition-colors font-medium shadow-md"
+                </a>
+
+                <a
+                  href="https://youtube.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-medium text-sm transition-all duration-200"
+                  style={{
+                    color: 'oklch(0.65 0.02 240)',
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'oklch(0.65 0.02 240)';
+                  }}
                 >
-                  Watch Our Videos
-                </button>
-              </AuthGate>
+                  <Youtube size={16} />
+                  Watch Free Lessons on YouTube
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Booking flow modal */}
-      <BookingFlowManager
-        open={bookingOpen}
-        onClose={() => setBookingOpen(false)}
-      />
+      <BookingFlowManager open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      <LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
     </section>
   );
-}
+};
+
+export default EnrollmentCTA;

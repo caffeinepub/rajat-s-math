@@ -1,24 +1,52 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project includes an admin dashboard with booked students management and a student portal. Adding a meeting link feature to sessions.",
-  "architectural_notes": [],
+  "summary": "Premium education platform (math-themed) with Admin Dashboard, Student Portal, and public-facing landing/home page. Full visual redesign in progress: deep navy/white/gold palette, math-themed hero background with subtle symbols (Σ, √, θ), strong typographic hierarchy, modern buttons with hover effects, clean card layouts, soft shadows, and balanced whitespace throughout.",
+  "architectural_notes": [
+    "Design system: deep navy/white/gold color palette with math-themed visual elements (Σ, √, θ symbols) as background accents",
+    "Consistent visual style applied globally across landing page, Admin Dashboard, and Student Portal"
+  ],
   "known_issues": [],
   "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Mathematics-themed hero background with deep navy gradient, subtle low-opacity gold math symbols (Σ √ θ ∫ π ∞) and equation fragments scattered across the canvas (hero-math-bg.dim_1920x900.png)",
   "existing_features": [
     {
-      "id": "feature-in-the-admin-dashboard-booked-students-studentdetailview-add-edit-session-form-add-a-meeting-platform-selector-google-meet-zoho-meet-zoom-and-a-meeting-link-url-input-field-when-a-session-already-has-a-meeting-link-display-it-with-edit-and-delete-clear-actions-alongside-the-session-entry",
-      "title": "In the Admin Dashboard → Booked Students → StudentDetailView (add/edit session form), add a meeting platform selector (Google Meet, Zoho Meet, Zoom) and a meeting link URL input field. When a session already has a meeting link, display it with Edit and Delete (clear) actions alongside the session entry.",
+      "id": "feature-establish-a-consistent-global-design-system-across-the-entire-app-using-a-deep-navy-0b1b3e-white-and-gold-c9a84c-color-palette-update-css-custom-properties-in-frontend-src-index-css-to-reflect-these-brand-colors-ensuring-all-existing-tailwind-utility-classes-and-component-tokens-map-to-the-new-palette-apply-playfair-display-for-headings-and-inter-for-body-text-with-a-clear-font-size-hierarchy-title-subtitle-body-caption-remove-any-clutter-random-shapes-or-distracting-decorative-elements-from-shared-layout-areas",
+      "title": "Establish a consistent global design system across the entire app using a deep navy (#0B1B3E), white, and gold (#C9A84C) color palette. Update CSS custom properties in frontend/src/index.css to reflect these brand colors, ensuring all existing Tailwind utility classes and component tokens map to the new palette. Apply Playfair Display for headings and Inter for body text with a clear font-size hierarchy (Title → Subtitle → Body → Caption). Remove any clutter, random shapes, or distracting decorative elements from shared layout areas.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-hero-section-in-frontend-src-components-hero-tsx-with-an-elegant-mathematics-themed-background-featuring-soft-low-opacity-math-symbols-and-equation-fragments-rendered-as-decorative-svg-or-css-elements-that-do-not-reduce-text-readability-improve-the-layout-balance-between-the-hero-text-and-any-accompanying-image-visual-apply-a-strong-heading-style-to-the-main-title-a-clean-readable-style-to-the-subtitle-description-and-ensure-call-to-action-buttons-are-modern-consistently-sized-and-have-smooth-hover-effects-with-gold-accent-highlights",
+      "title": "Redesign the Hero section in frontend/src/components/Hero.tsx with an elegant mathematics-themed background featuring soft, low-opacity math symbols (Σ, √, θ, ∫, π, ∞, and equation fragments) rendered as decorative SVG or CSS elements that do not reduce text readability. Improve the layout balance between the hero text and any accompanying image/visual. Apply a strong heading style to the main title, a clean readable style to the subtitle/description, and ensure call-to-action buttons are modern, consistently sized, and have smooth hover effects with gold accent highlights.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-in-the-student-portal-studentdashboard-and-or-studentportal-schedule-sessions-tab-for-each-session-that-has-a-meeting-link-display-a-prominent-clickable-join-class-button-that-opens-the-meeting-url-in-a-new-tab-sessions-without-a-meeting-link-should-show-no-button",
-      "title": "In the Student Portal (StudentDashboard and/or StudentPortal schedule/sessions tab), for each session that has a meeting link, display a prominent clickable 'Join Class' button that opens the meeting URL in a new tab. Sessions without a meeting link should show no button.",
+      "id": "feature-redesign-the-header-in-frontend-src-components-header-tsx-remove-unnecessary-empty-boxes-or-distracting-elements-improve-spacing-margins-and-alignment-ensure-the-sticky-nav-has-a-clean-background-navy-or-white-with-subtle-shadow-consistent-icon-style-and-modern-nav-links-with-hover-effects-logo-and-brand-name-should-be-visually-prominent-mobile-nav-should-be-clean-and-accessible",
+      "title": "Redesign the Header in frontend/src/components/Header.tsx. Remove unnecessary empty boxes or distracting elements. Improve spacing, margins, and alignment. Ensure the sticky nav has a clean background (navy or white with subtle shadow), consistent icon style, and modern nav links with hover effects. Logo and brand name should be visually prominent. Mobile nav should be clean and accessible.",
       "reqIds": [
         "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-all-remaining-landing-page-sections-services-frontend-src-components-services-tsx-enrollmentcta-frontend-src-components-enrollmentcta-tsx-and-footer-frontend-src-components-footer-tsx-using-the-premium-navy-white-gold-design-system-apply-clean-card-layouts-with-soft-box-shadows-and-rounded-corners-to-course-service-cards-ensure-sections-are-visually-separated-with-balanced-whitespace-buttons-should-match-the-global-modern-button-style-footer-should-be-clean-and-well-structured-with-proper-typographic-hierarchy",
+      "title": "Redesign all remaining landing page sections — Services (frontend/src/components/Services.tsx), EnrollmentCTA (frontend/src/components/EnrollmentCTA.tsx), and Footer (frontend/src/components/Footer.tsx) — using the premium navy/white/gold design system. Apply clean card layouts with soft box shadows and rounded corners to course/service cards. Ensure sections are visually separated with balanced whitespace. Buttons should match the global modern button style. Footer should be clean and well-structured with proper typographic hierarchy.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-admin-dashboard-frontend-src-components-admindashboard-tsx-and-all-its-child-tab-components-bookedstudentssection-attendancemanager-adminsupportmessages-adminenquiriestab-coursematerialsmanager-classsessionsmanager-discountcodemanager-visitortrackingview-studentdetailview-using-the-premium-design-system-the-sidebar-should-use-a-deep-navy-background-with-gold-active-state-indicators-tab-content-areas-should-use-white-off-white-card-backgrounds-with-soft-shadows-tables-lists-and-form-elements-should-have-improved-spacing-alignment-and-visual-hierarchy-buttons-and-badges-must-follow-the-global-style",
+      "title": "Redesign the Admin Dashboard (frontend/src/components/AdminDashboard.tsx) and all its child tab components (BookedStudentsSection, AttendanceManager, AdminSupportMessages, AdminEnquiriesTab, CourseMaterialsManager, ClassSessionsManager, DiscountCodeManager, VisitorTrackingView, StudentDetailView) using the premium design system. The sidebar should use a deep navy background with gold active-state indicators. Tab content areas should use white/off-white card backgrounds with soft shadows. Tables, lists, and form elements should have improved spacing, alignment, and visual hierarchy. Buttons and badges must follow the global style.",
+      "reqIds": [
+        "REQ-5"
       ],
       "version": 1
     }
@@ -26,21 +54,23 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Admin Dashboard -> Booked Students: Add meeting platform selector (Google Meet, Zoho Meet, Zoom) and meeting link field when adding/editing a session, with ability to add/edit/delete the meeting link after session creation",
+      "summary": "Full premium UI redesign across landing page, Admin Dashboard, and Student Portal with deep navy/white/gold palette, math-themed hero background, improved typography hierarchy, modern buttons, and clean card layouts",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-2",
-      "summary": "Student portal: Display meeting link as a clickable 'Join Class' button that opens the meeting link directly",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Extend the backend session data type (CourseSession or equivalent) to include an optional meeting platform field (variant: #googleMeet, #zohoMeet, #zoom) and an optional meeting link URL string. Provide backend functions to add, update, and delete the meeting link on an existing session.",
+      "id": "AR-7",
+      "summary": "Redesign the Student Portal (frontend/src/components/StudentPortal.tsx) and all its child views (StudentDashboard, StudentScheduleTab, StudentMaterialsTab, StudentSupportView, StudentAttendanceView, StudentEnquiryPortal, ProfileSetup, QRCheckInView) using the premium design system. Tab navigation should use gold underline/active indicators. Content cards should use clean white backgrounds with soft shadows. Progress bars and attendance stats should use gold accent colors. Meeting link badges (Google Meet, Zoom, Zoho) should remain platform-colored but styled consistently within the card layout.",
       "reqIds": [
-        "REQ-1"
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Redesign modal and dialog components (BookingFlowManager, BookingForm, UpiPaymentStep, BookingConfirmation, LoginModal, PaymentEnquiryForm, StudentEnquiryForm, CourseOffering) to match the premium design system. Dialog containers should use white backgrounds with navy headers and gold accents. Form fields should have clean borders, proper label hierarchy, and smooth focus states. Confirmation screens should feel premium and celebratory using the palette.",
+      "reqIds": [
+        "REQ-7"
       ],
       "status": "pending"
     }

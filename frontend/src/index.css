@@ -1,93 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    /* Navy primary */
-    --navy: oklch(0.22 0.06 250);
-    --navy-foreground: oklch(0.97 0.01 90);
+    /* Premium Navy/White/Gold Palette */
+    --background: oklch(0.99 0.002 240);
+    --foreground: oklch(0.15 0.04 240);
 
-    /* Gold accent */
-    --gold: oklch(0.78 0.12 75);
-    --gold-foreground: oklch(0.22 0.06 250);
-
-    /* Warm cream tones */
-    --cream: oklch(0.97 0.02 90);
-    --warm-light: oklch(0.96 0.015 80);
-    --warm-text: oklch(0.40 0.03 60);
-    --border-warm: oklch(0.88 0.02 80);
-
-    /* Status colors */
-    --status-pending: oklch(0.72 0.14 75);
-    --status-confirmed: oklch(0.55 0.14 155);
-    --status-rejected: oklch(0.52 0.18 25);
-
-    /* Shadcn/ui tokens mapped to our palette */
-    --background: oklch(0.96 0.015 80);
-    --foreground: oklch(0.22 0.06 250);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.22 0.06 250);
+    --card-foreground: oklch(0.15 0.04 240);
+
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.22 0.06 250);
-    --primary: oklch(0.22 0.06 250);
-    --primary-foreground: oklch(0.97 0.01 90);
-    --secondary: oklch(0.94 0.02 80);
-    --secondary-foreground: oklch(0.22 0.06 250);
-    --muted: oklch(0.94 0.02 80);
-    --muted-foreground: oklch(0.55 0.03 60);
-    --accent: oklch(0.78 0.12 75);
-    --accent-foreground: oklch(0.22 0.06 250);
-    --destructive: oklch(0.52 0.18 25);
-    --destructive-foreground: oklch(0.97 0.01 90);
-    --border: oklch(0.88 0.02 80);
-    --input: oklch(0.88 0.02 80);
-    --ring: oklch(0.22 0.06 250);
+    --popover-foreground: oklch(0.15 0.04 240);
+
+    /* Deep Navy as primary */
+    --primary: oklch(0.22 0.07 255);
+    --primary-foreground: oklch(0.98 0.005 60);
+
+    /* Gold as accent/secondary */
+    --secondary: oklch(0.72 0.12 75);
+    --secondary-foreground: oklch(0.15 0.04 240);
+
+    --muted: oklch(0.95 0.01 240);
+    --muted-foreground: oklch(0.50 0.03 240);
+
+    --accent: oklch(0.72 0.12 75);
+    --accent-foreground: oklch(0.15 0.04 240);
+
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(0.98 0.005 60);
+
+    --border: oklch(0.88 0.015 240);
+    --input: oklch(0.88 0.015 240);
+    --ring: oklch(0.72 0.12 75);
+
     --radius: 0.5rem;
 
-    /* Chart colors */
-    --chart-1: oklch(0.22 0.06 250);
-    --chart-2: oklch(0.78 0.12 75);
-    --chart-3: oklch(0.55 0.14 155);
-    --chart-4: oklch(0.72 0.14 75);
-    --chart-5: oklch(0.52 0.18 25);
+    /* Custom design tokens */
+    --navy: oklch(0.22 0.07 255);
+    --navy-light: oklch(0.28 0.07 255);
+    --navy-dark: oklch(0.16 0.06 255);
+    --gold: oklch(0.72 0.12 75);
+    --gold-light: oklch(0.82 0.10 75);
+    --gold-dark: oklch(0.60 0.14 75);
+    --cream: oklch(0.97 0.015 80);
+    --cream-dark: oklch(0.93 0.02 80);
+
+    /* Status colors */
+    --status-pending: oklch(0.72 0.12 75);
+    --status-confirmed: oklch(0.55 0.15 145);
+    --status-rejected: oklch(0.55 0.22 25);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px oklch(0.22 0.07 255 / 0.08), 0 1px 2px oklch(0.22 0.07 255 / 0.06);
+    --shadow-md: 0 4px 12px oklch(0.22 0.07 255 / 0.10), 0 2px 6px oklch(0.22 0.07 255 / 0.08);
+    --shadow-lg: 0 10px 30px oklch(0.22 0.07 255 / 0.12), 0 4px 12px oklch(0.22 0.07 255 / 0.08);
+    --shadow-gold: 0 4px 20px oklch(0.72 0.12 75 / 0.25);
   }
 
   .dark {
-    --navy: oklch(0.85 0.04 250);
-    --navy-foreground: oklch(0.15 0.04 250);
-    --gold: oklch(0.78 0.12 75);
-    --gold-foreground: oklch(0.15 0.04 250);
-    --cream: oklch(0.20 0.02 250);
-    --warm-light: oklch(0.18 0.02 250);
-    --warm-text: oklch(0.75 0.02 80);
-    --border-warm: oklch(0.30 0.02 250);
+    --background: oklch(0.12 0.04 255);
+    --foreground: oklch(0.95 0.01 60);
 
-    --status-pending: oklch(0.78 0.14 75);
-    --status-confirmed: oklch(0.65 0.14 155);
-    --status-rejected: oklch(0.62 0.18 25);
+    --card: oklch(0.18 0.05 255);
+    --card-foreground: oklch(0.95 0.01 60);
 
-    --background: oklch(0.18 0.02 250);
-    --foreground: oklch(0.92 0.01 90);
-    --card: oklch(0.22 0.03 250);
-    --card-foreground: oklch(0.92 0.01 90);
-    --popover: oklch(0.22 0.03 250);
-    --popover-foreground: oklch(0.92 0.01 90);
-    --primary: oklch(0.78 0.12 75);
-    --primary-foreground: oklch(0.15 0.04 250);
-    --secondary: oklch(0.28 0.03 250);
-    --secondary-foreground: oklch(0.92 0.01 90);
-    --muted: oklch(0.28 0.03 250);
-    --muted-foreground: oklch(0.65 0.02 80);
-    --accent: oklch(0.78 0.12 75);
-    --accent-foreground: oklch(0.15 0.04 250);
-    --destructive: oklch(0.62 0.18 25);
-    --destructive-foreground: oklch(0.97 0.01 90);
-    --border: oklch(0.30 0.02 250);
-    --input: oklch(0.30 0.02 250);
-    --ring: oklch(0.78 0.12 75);
+    --popover: oklch(0.18 0.05 255);
+    --popover-foreground: oklch(0.95 0.01 60);
+
+    --primary: oklch(0.72 0.12 75);
+    --primary-foreground: oklch(0.15 0.04 240);
+
+    --secondary: oklch(0.28 0.06 255);
+    --secondary-foreground: oklch(0.95 0.01 60);
+
+    --muted: oklch(0.22 0.05 255);
+    --muted-foreground: oklch(0.65 0.03 240);
+
+    --accent: oklch(0.72 0.12 75);
+    --accent-foreground: oklch(0.15 0.04 240);
+
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(0.98 0.005 60);
+
+    --border: oklch(0.28 0.05 255);
+    --input: oklch(0.28 0.05 255);
+    --ring: oklch(0.72 0.12 75);
   }
 }
 
@@ -95,54 +96,164 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
   }
-  .font-serif {
+}
+
+@layer components {
+  /* Premium button styles */
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200;
+    background-color: var(--gold);
+    color: var(--navy);
+    box-shadow: var(--shadow-gold);
+  }
+  .btn-gold:hover {
+    background-color: var(--gold-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px oklch(0.72 0.12 75 / 0.35);
+  }
+  .btn-gold:active {
+    transform: translateY(0);
+  }
+
+  .btn-navy {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200;
+    background-color: var(--navy);
+    color: oklch(0.98 0.005 60);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-navy:hover {
+    background-color: var(--navy-light);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .btn-outline-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-200;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+  }
+  .btn-outline-gold:hover {
+    background-color: var(--gold);
+    color: var(--navy);
+  }
+
+  /* Premium card */
+  .card-premium {
+    @apply rounded-xl bg-white;
+    box-shadow: var(--shadow-md);
+    border: 1px solid oklch(0.88 0.015 240);
+  }
+
+  /* Premium input */
+  .input-premium {
+    @apply w-full px-4 py-3 rounded-lg border text-sm transition-all duration-200;
+    border-color: oklch(0.88 0.015 240);
+    background: white;
+    color: var(--navy);
+  }
+  .input-premium:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px oklch(0.72 0.12 75 / 0.15);
+  }
+
+  /* Section spacing */
+  .section-padding {
+    @apply py-20 px-4;
+  }
+
+  /* Gold underline for headings */
+  .heading-underline {
+    @apply relative inline-block;
+  }
+  .heading-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-16 h-1 rounded-full;
+    background-color: var(--gold);
+  }
+
+  /* Navy gradient */
+  .bg-navy-gradient {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-light) 100%);
+  }
+
+  /* Gold gradient */
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 100%);
+  }
+
+  /* Math symbol decoration */
+  .math-symbol {
     font-family: 'Playfair Display', serif;
+    color: oklch(0.72 0.12 75 / 0.15);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Status badges */
+  .badge-pending {
+    background-color: oklch(0.72 0.12 75 / 0.15);
+    color: oklch(0.55 0.14 75);
+    @apply px-3 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge-confirmed {
+    background-color: oklch(0.55 0.15 145 / 0.15);
+    color: oklch(0.40 0.15 145);
+    @apply px-3 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge-rejected {
+    background-color: oklch(0.55 0.22 25 / 0.15);
+    color: oklch(0.45 0.20 25);
+    @apply px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  /* Sidebar nav item */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer;
+    color: oklch(0.75 0.04 240);
+  }
+  .sidebar-item:hover {
+    background-color: oklch(1 0 0 / 0.08);
+    color: white;
+  }
+  .sidebar-item.active {
+    background-color: var(--gold);
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  /* Tab active gold */
+  .tab-gold[data-state="active"] {
+    border-bottom: 2px solid var(--gold);
+    color: var(--gold);
   }
 }
 
-/* Force opaque backgrounds on all Radix UI overlay components */
-[data-radix-popper-content-wrapper],
-[data-radix-select-content],
-[data-radix-dropdown-menu-content],
-[data-radix-context-menu-content],
-[data-radix-menubar-content],
-[data-radix-navigation-menu-content],
-[data-radix-popover-content],
-[data-radix-hover-card-content],
-[data-radix-tooltip-content] {
-  background-color: white !important;
-  opacity: 1 !important;
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-
-.dark [data-radix-popper-content-wrapper],
-.dark [data-radix-select-content],
-.dark [data-radix-dropdown-menu-content],
-.dark [data-radix-context-menu-content],
-.dark [data-radix-menubar-content],
-.dark [data-radix-navigation-menu-content],
-.dark [data-radix-popover-content],
-.dark [data-radix-hover-card-content],
-.dark [data-radix-tooltip-content] {
-  background-color: oklch(0.22 0.03 250) !important;
-  opacity: 1 !important;
+::-webkit-scrollbar-track {
+  background: oklch(0.95 0.01 240);
 }
-
-[role="listbox"],
-[role="menu"],
-[role="dialog"] {
-  background-color: white;
-  opacity: 1 !important;
+::-webkit-scrollbar-thumb {
+  background: oklch(0.72 0.12 75 / 0.5);
+  border-radius: 3px;
 }
-
-.dark [role="listbox"],
-.dark [role="menu"],
-.dark [role="dialog"] {
-  background-color: oklch(0.22 0.03 250) !important;
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.72 0.12 75 / 0.8);
 }
